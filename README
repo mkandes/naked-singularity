@@ -1,0 +1,33 @@
+README
+
+    naked-singularity
+
+DESCRIPTION
+
+    A repository of definition files for bootstrapping Singularity
+    containers around target applications that you would like to run on
+    a target high-performance computing system.
+
+USAGE
+
+STATUS
+
+    A work in progress. 
+
+CONTRIBUTE
+
+    If you would like to contribute one of your own Singularity 
+    definition files for a target application and system, please 
+    submit a pull request.
+
+AUTHOR
+
+    Marty Kandes, Ph.D.
+    Computational & Data Science Research Specialist
+    User Services Group
+    San Diego Supercomputer Center
+    University of California, San Diego
+
+LAST UPDATED
+
+    Friday, July 7th, 2017

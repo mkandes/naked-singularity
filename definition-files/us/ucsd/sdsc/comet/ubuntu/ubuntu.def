@@ -1,0 +1,57 @@
+Bootstrap: debootstrap
+MirrorURL: http://us.archive.ubuntu.com/ubuntu
+OSVersion: xenial
+
+%labels
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+    OPERATING_SYSTEM_NAME ubuntu
+    OPERATING_SYSTEM_VERSION 16.04
+    APPLICATION_NAME none
+    APPLICATION_VERSION none
+    SYSTEM_NAME comet
+    SYSTEM_SINGULARITY_VERSION 2.2
+    VERSION 0.0.1
+
+%setup
+
+%environment
+
+%post -c /bin/bash
+
+    declare -r MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+    declare -r OSVERSION='xenial'
+
+    apt-get -y install ubuntu-minimal
+    apt-get -y install ubuntu-standard 
+    apt-get -y install ubuntu-server
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} restricted"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} multiverse"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates restricted"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates multiverse"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports restricted"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports multiverse"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security restricted"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security multiverse"
+
+    apt-get -y update && apt-get -y upgrade
+
+    mkdir /cvmfs /oasis /projects /scratch
+
+%files
+
+%runscript
+
+%test
