@@ -6,14 +6,14 @@ OSVersion: xenial
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
-    OPERATING_SYSTEM_NAME ubuntu
-    OPERATING_SYSTEM_VERSION 16.04
     APPLICATION_NAME none
     APPLICATION_VERSION none
+    APPLICATION_URL none
     SYSTEM_NAME comet
     SYSTEM_SINGULARITY_VERSION 2.2
-    VERSION 0.0.2
-    LAST_UPDATED 20170710
+    SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
+    VERSION 0.0.3
+    LAST_UPDATED 20170714
 
 %setup
 

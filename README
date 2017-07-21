@@ -5,8 +5,8 @@ README
 DESCRIPTION
 
     A repository of definition files for bootstrapping Singularity
-    containers around target applications that you would like to run on
-    a target high-performance computing system.
+    containers around applications that you would like to run on a 
+    high-performance computing system.
 
 USAGE
 
@@ -30,4 +30,4 @@ AUTHOR
 
 LAST UPDATED
 
-    Friday, July 7th, 2017
+    Friday, July 21st, 2017
