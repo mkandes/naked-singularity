@@ -12,8 +12,8 @@ OSVersion: xenial
     SYSTEM_NAME comet
     SYSTEM_SINGULARITY_VERSION 2.2
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
-    VERSION 0.0.3
-    LAST_UPDATED 20170714
+    VERSION 0.0.4
+    LAST_UPDATED 20170721
 
 %setup
 
