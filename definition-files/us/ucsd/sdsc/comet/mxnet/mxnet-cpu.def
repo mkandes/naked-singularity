@@ -6,14 +6,14 @@ OSVersion: xenial
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
-    APPLICATION_NAME none
-    APPLICATION_VERSION none
-    APPLICATION_URL none
+    APPLICATION_NAME mxnet-cpu
+    APPLICATION_VERSION unknown
+    APPLICATION_URL http://mxnet.io/
     SYSTEM_NAME comet
     SYSTEM_SINGULARITY_VERSION 2.3.1
-    SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
-    VERSION 0.0.5
-    LAST_UPDATED 20170811
+    SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html 
+    VERSION 0.0.1
+    LAST_UPDATED 20170814
 
 %setup
 
@@ -49,6 +49,28 @@ OSVersion: xenial
     apt-get -y update && apt-get -y upgrade
 
     mkdir /cvmfs /oasis /projects /scratch
+
+    cd /opt
+
+    apt-get install -y build-essential
+    apt-get install -y libopenblas-dev
+    apt-get install -y liblapack-dev
+    apt-get install -y libopencv-dev
+
+    git clone --recursive https://github.com/dmlc/mxnet
+    cd mxnet
+    make -j $(nproc) USE_OPENCV=1 USE_BLAS=openblas
+
+    apt-get install -y python-dev
+    apt-get install -y python-setuptools
+    apt-get install -y python-numpy
+    apt-get install -y python-pip
+
+    cd python
+    pip install --upgrade pip
+    pip install -e ./
+
+    apt-get install graphviz
 
 %files
 

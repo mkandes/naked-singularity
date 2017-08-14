@@ -6,13 +6,14 @@ OSVersion: xenial
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
-    APPLICATION_NAME deepbench
-    APPLICATION_VERSION unknown
-    APPLICATION_URL https://github.com/baidu-research/DeepBench
+    APPLICATION_NAME cuda
+    APPLICATION_VERSION 8.0.44
+    APPLICATION_URL https://developer.nvidia.com/cuda-zone
+    DEVICE_DRIVER_VERSION 367.48
     SYSTEM_NAME comet
     SYSTEM_SINGULARITY_VERSION 2.3.1
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html 
-    VERSION 0.0.2
+    VERSION 0.0.1
     LAST_UPDATED 20170811
 
 %setup
@@ -54,31 +55,31 @@ OSVersion: xenial
     declare -r CUDA_REPO_URL="${NVIDIA_ROOT_URL}/cuda/repos/ubuntu1604/x86_64"
     declare -r ML_REPO_URL="${NVIDIA_ROOT_URL}/machine-learning/repos/ubuntu1604/x86_64/"
 
-    apt-get -y install x11-common 
-    apt-get -y install xserver-xorg-core 
-    apt-get -y install cmake 
-    apt-get -y install make 
+    apt-get -y install x11-common
+    apt-get -y install xserver-xorg-core
+    apt-get -y install cmake
+    apt-get -y install make
     apt-get -y install dkms
-    apt-get -y install linux-libc-dev 
-    apt-get -y install libc6-dev 
-    apt-get -y install lib32gcc1 
-    apt-get -y install libc6-i386 
+    apt-get -y install linux-libc-dev
+    apt-get -y install libc6-dev
+    apt-get -y install lib32gcc1
+    apt-get -y install libc6-i386
     apt-get -y install libgl1
-    apt-get -y install libwayland-client0 
-    apt-get -y install libwayland-server0 
+    apt-get -y install libwayland-client0
+    apt-get -y install libwayland-server0
     apt-get -y install pkg-config
-    apt-get -y install screen-resolution-extra 
-    apt-get -y install libvdpau1 
+    apt-get -y install screen-resolution-extra
+    apt-get -y install libvdpau1
     apt-get -y install libatk1.0-0
-    apt-get -y install libcairo-gobject2 
-    apt-get -y install libcairo2 
+    apt-get -y install libcairo-gobject2
+    apt-get -y install libcairo2
     apt-get -y install libfontconfig1
-    apt-get -y install libgdk-pixbuf2.0-0 
-    apt-get -y install libgtk-3-0 
-    apt-get -y install libgtk2.0-0 
+    apt-get -y install libgdk-pixbuf2.0-0
+    apt-get -y install libgtk-3-0
+    apt-get -y install libgtk2.0-0
     apt-get -y install libjansson4
     apt-get -y install freeglut3-dev
-    apt-get -y install libx11-dev 
+    apt-get -y install libx11-dev
     apt-get -y install libxmu-dev
     apt-get -y install libxi-dev
     apt-get -y install libglu1-mesa
@@ -179,30 +180,7 @@ OSVersion: xenial
     dpkg -i libcudnn5-dev_5.1.10-1+cuda8.0_amd64.deb 
 
     dpkg -i libnccl1_1.2.3-1+cuda8.0_amd64.deb
-    dpkg -i libnccl-dev_1.2.3-1+cuda8.0_amd64.deb
-
-    apt-get -y install bison 
-    apt-get -y install libibverbs-dev 
-    apt-get -y install libibmad-dev 
-    apt-get -y install libibumad-dev
-    apt-get -y install librdmacm-dev 
-    apt-get -y install libmlx5-dev 
-    apt-get -y install libmlx4-dev
-    apt-get -y install gfortran
-
-    wget http://mvapich.cse.ohio-state.edu/download/mvapich/mv2/mvapich2-2.1.tar.gz
-    tar -xzf mvapich2-2.1.tar.gz
-    cd mvapich2-2.1
-    ./configure --prefix=/usr/local
-    make -j4
-    make install
-
-    cd /opt
-
-    git clone https://github.com/baidu-research/DeepBench.git
-    cd DeepBench/code
-    sed -i 's/-lmpi_cxx//' osu_allreduce/Makefile
-    make CUDA_PATH='/usr/local/cuda-8.0' CUDNN_PATH='/usr/lib/x86_64-linux-gnu/' NCCL_PATH='/usr/lib/x86_64-linux-gnu/' MPI_PATH='/usr/local/bin/' ARCH='sm_60'
+    dpkg -i libnccl-dev_1.2.3-1+cuda8.0_amd64.deb 
 
 %files
 
@@ -211,6 +189,6 @@ OSVersion: xenial
 %test
 
     export PATH="/usr/local/cuda-8.0/bin${PATH:+:${PATH}}"
-    export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda-8.0/lib64:/usr/lib/x86_64-linux-gnu/:/usr/local/lib/"
+    export LD_LIBRARY_PATH="/usr/local/cuda-8.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+    nvcc --version
 
-    time -p /opt/DeepBench/code/bin/gemm_bench train float

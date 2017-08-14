@@ -10,10 +10,10 @@ OSVersion: xenial
     APPLICATION_VERSION 1.2
     APPLICATION_URL https://www.tensorflow.org/
     SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.2
+    SYSTEM_SINGULARITY_VERSION 2.3.1
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
-    VERSION 0.0.3
-    LAST_UPDATED 20170721
+    VERSION 0.0.4
+    LAST_UPDATED 20170811
 
 %setup
 
@@ -21,40 +21,40 @@ OSVersion: xenial
 
 %post -c /bin/bash
 
-    declare -r MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
-    declare -r OSVERSION='xenial'
+    export LC_ALL=C
 
-    apt-get -y install ubuntu-minimal
-    apt-get -y install ubuntu-standard 
+    apt-get -y install ubuntu-standard
     apt-get -y install ubuntu-server
 
-    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} restricted"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} main"
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} universe"
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} restricted"
 
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates main"
-    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates restricted"
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates universe"
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates restricted"
 
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports main"
-    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports restricted"
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports universe"
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports restricted"
 
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security main"
-    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security restricted"
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security universe"
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security restricted"
 
     apt-get -y update && apt-get -y upgrade
 
     mkdir /cvmfs /oasis /projects /scratch
 
-    echo "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
-    curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
+    echo "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8" | tee /etc/apt/sources.list.d/bazel.list
+    curl https://bazel.build/bazel-release.pub.gpg | apt-key add -
 
     apt-get -y update
+    apt-get -y install openjdk-8-jdk
     apt-get -y install bazel
     apt-get -y install expect
     apt-get -y install python-numpy 
@@ -98,8 +98,6 @@ OSVersion: xenial
 
     bazel build --config=opt //tensorflow/tools/pip_package:build_pip_package
     bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
-
-    export LC_ALL=C
 
     pip install /tmp/tensorflow_pkg/tensorflow-1.2.1-cp27-cp27mu-linux_x86_64.whl
     
