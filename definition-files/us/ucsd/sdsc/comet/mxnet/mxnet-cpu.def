@@ -12,8 +12,8 @@ OSVersion: xenial
     SYSTEM_NAME comet
     SYSTEM_SINGULARITY_VERSION 2.3.1
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html 
-    VERSION 0.0.1
-    LAST_UPDATED 20170814
+    VERSION 0.0.2
+    LAST_UPDATED 20170828
 
 %setup
 
@@ -65,6 +65,8 @@ OSVersion: xenial
     apt-get install -y python-setuptools
     apt-get install -y python-numpy
     apt-get install -y python-pip
+    apt-get install -y python-tk
+    apt-get install -y python-matplotlib
 
     cd python
     pip install --upgrade pip
