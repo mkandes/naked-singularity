@@ -4,9 +4,11 @@ README
 
 DESCRIPTION
 
-    A repository of definition files for bootstrapping Singularity
-    application containers you would like to run on high-performance 
-    computing systems.
+    A repository of definition files for bootstrapping Singularity*
+    containers around the software applications, frameworks, and 
+    libraries you need to run on high-performance computing systems.
+
+    * http://singularity.lbl.gov/
 
 USAGE
 
@@ -30,4 +32,4 @@ AUTHOR
 
 LAST UPDATED
 
-    Monday, August 28th, 2017
+    Thursday, September 7th, 2017

@@ -12,8 +12,8 @@ OSVersion: xenial
     SYSTEM_NAME comet
     SYSTEM_SINGULARITY_VERSION 2.3.1
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html 
-    VERSION 0.0.2
-    LAST_UPDATED 20170828
+    VERSION 0.0.3
+    LAST_UPDATED 20170907
 
 %setup
 
@@ -52,21 +52,22 @@ OSVersion: xenial
 
     cd /opt
 
-    apt-get install -y build-essential
-    apt-get install -y libopenblas-dev
-    apt-get install -y liblapack-dev
-    apt-get install -y libopencv-dev
+    apt-get -y install build-essential
+    apt-get -y install libopenblas-dev
+    apt-get -y install liblapack-dev
+    apt-get -y install libopencv-dev
 
     git clone --recursive https://github.com/dmlc/mxnet
     cd mxnet
     make -j $(nproc) USE_OPENCV=1 USE_BLAS=openblas
 
-    apt-get install -y python-dev
-    apt-get install -y python-setuptools
-    apt-get install -y python-numpy
-    apt-get install -y python-pip
-    apt-get install -y python-tk
-    apt-get install -y python-matplotlib
+    apt-get -y install python-dev
+    apt-get -y install python-setuptools
+    apt-get -y install python-numpy
+    apt-get -y install python-pip
+    apt-get -y install python-opencv
+    apt-get -y install python-tk
+    apt-get -y install python-matplotlib
 
     cd python
     pip install --upgrade pip
