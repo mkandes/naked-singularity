@@ -1,0 +1,178 @@
+Bootstrap: debootstrap
+MirrorURL: http://us.archive.ubuntu.com/ubuntu
+OSVersion: xenial
+
+%labels
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+    APPLICATION_NAME neon
+    APPLICATION_VERSION 2.0.0+41e746a 
+    APPLICATION_URL http://neon.nervanasys.com/index.html/index.html
+    SYSTEM_NAME comet
+    SYSTEM_SINGULARITY_VERSION 2.3.1
+    SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
+    VERSION 0.0.1
+    LAST_UPDATED 20170830
+
+%setup
+
+%environment
+
+%post -c /bin/bash
+
+    export LC_ALL=C
+
+    apt-get -y install ubuntu-standard
+    apt-get -y install ubuntu-server
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} restricted"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates restricted"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports restricted"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security restricted"
+
+    apt-get -y update && apt-get -y upgrade && apt-get -y dist-upgrade && apt-get -y autoremove
+
+    mkdir /cvmfs /oasis /projects /scratch
+
+    cd /opt
+
+    apt-get -y install build-essential
+    apt-get -y install clang 
+    apt-get -y install cmake 
+    apt-get -y install g++
+    apt-get -y install git
+    apt-get -y install pkg-config
+    apt-get -y install wget
+
+    apt-get -y install qt5-default 
+    apt-get -y install libvtk6-dev
+
+    apt-get -y install zlib1g-dev 
+    apt-get -y install libjpeg-dev
+    apt-get -y install libwebp-dev 
+    apt-get -y install libpng-dev 
+    apt-get -y install libtiff5-dev
+    apt-get -y install libjasper-dev
+    apt-get -y install libopenexr-dev 
+    apt-get -y install libgdal-dev
+
+    apt-get -y install libdc1394-22-dev 
+    apt-get -y install libavcodec-dev 
+    apt-get -y install libavdevice-dev
+    apt-get -y install libavformat-dev
+    apt-get -y install libavfilter-dev
+    apt-get -y install libavresample-dev
+    apt-get -y install libavutil-dev
+    apt-get -y install libswscale-dev
+    apt-get -y install libtheora-dev 
+    apt-get -y install libvorbis-dev
+    apt-get -y install libxvidcore-dev
+    apt-get -y install libv4l-dev
+    apt-get -y install v4l-utils
+    apt-get -y isntall libgstreamer0.10-dev 
+    apt-get -y install libgstreamer-plugins-base0.10-dev
+    apt-get -y install x264
+    apt-get -y install libx264-dev
+    apt-get -y install libxine2-dev
+    apt-get -y install libfaac-dev
+    apt-get -y install libmp3lame-dev
+    apt-get -y install libopencore-amrnb-dev
+    apt-get -y install libopencore-amrwb-dev
+    apt-get -y install libsox-dev 
+    apt-get -y install ffmpeg
+
+    apt-get -y install gfortran
+    apt-get -y install libtbb-dev
+    apt-get -y install libeigen3-dev
+    apt-get -y install libatlas-base-dev
+
+    apt-get -y install python-dev
+    apt-get -y install python-pip
+    apt-get -y install python-tk 
+    apt-get -y install python-numpy
+    apt-get -y install python-virtualenv
+    apt-get -y install python3-dev
+    apt-get -y install python3-pip
+    apt-get -y install python3-tk
+    apt-get -y install python3-numpy
+    apt-get -y install python3-virtualenv
+
+    apt-get -y install ant
+    apt-get -y install default-jdk
+
+    apt-get -y install doxygen
+
+    apt-get -y install libprotobuf-dev
+    apt-get -y install protobuf-compiler
+    apt-get -y install libgoogle-glog-dev
+    apt-get -y install libgflags-dev
+    apt-get -y install libgphoto2-dev
+    apt-get -y install libhdf5-dev
+    apt-get -y install libyaml-dev
+
+    wget https://github.com/opencv/opencv/archive/3.3.0.tar.gz -O opencv-3.3.0.tar.gz
+    wget https://github.com/opencv/opencv_contrib/archive/3.3.0.tar.gz -O opencv_contrib-3.3.0.tar.gz
+    
+    tar -xzf opencv-3.3.0.tar.gz
+    tar -xzf opencv_contrib-3.3.0.tar.gz
+
+    cd opencv-3.3.0
+    mkdir build
+    cd build
+    cmake -D CMAKE_BUILD_TYPE=RELEASE \
+          -D CMAKE_INSTALL_PREFIX=/usr/local \
+          -D BUILD_EXAMPLES=ON \
+          -D BUILD_PERF_TESTS=OFF \
+          -D BUILD_TBB=ON \
+          -D BUILD_TESTS=OFF \
+          -D BUILD_TIFF=ON \
+          -D ENABLE_AVX=ON \
+          -D ENABLE_PRECOMPILED_HEADERS=OFF \
+          -D FORCE_VTK=ON \
+          -D INSTALL_C_EXAMPLES=ON \
+          -D INSTALL_PYTHON_EXAMPLES=ON \
+          -D OPENCV_EXTRA_MODULES_PATH=/opt/opencv_contrib-3.3.0/modules \
+          -D WITH_CUDA=OFF \
+          -D WITH_EIGEN=OFF \
+          -D WITH_GDAL=ON \
+          -D WITH_IPP=OFF \
+          -D WITH_OPENCL=OFF \
+          -D WITH_OPENGL=ON \
+          -D WITH_QT=ON \
+          -D WITH_TBB=ON \
+          -D WITH_V4L=ON \
+          -D WITH_VTK=ON \
+          -D WITH_XINE=ON ..
+    make
+    make install
+    ldconfig
+
+    cd /opt
+
+    git clone https://github.com/NervanaSystems/neon.git
+    cd neon
+    make sysinstall
+
+%files
+
+%runscript
+
+%test
+
+    python /opt/neon/examples/mnist_mlp.py

@@ -12,8 +12,8 @@ OSVersion: xenial
     SYSTEM_NAME comet
     SYSTEM_SINGULARITY_VERSION 2.3.1
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
-    VERSION 0.0.1
-    LAST_UPDATED 20170814
+    VERSION 0.0.2
+    LAST_UPDATED 20170831
 
 %setup
 
@@ -180,6 +180,9 @@ OSVersion: xenial
 
     dpkg -i libnccl1_1.2.3-1+cuda8.0_amd64.deb
     dpkg -i libnccl-dev_1.2.3-1+cuda8.0_amd64.deb
+
+    export PATH="/usr/local/cuda-8.0/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="/usr/local/cuda-8.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
 
     #echo "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8" | tee /etc/apt/sources.list.d/bazel.list
     #curl https://bazel.build/bazel-release.pub.gpg | apt-key add -

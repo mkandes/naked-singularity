@@ -1,0 +1,119 @@
+Bootstrap: debootstrap
+MirrorURL: http://us.archive.ubuntu.com/ubuntu
+OSVersion: xenial
+
+%labels
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+    APPLICATION_NAME keras
+    APPLICATION_VERSION 2
+    APPLICATION_URL https://keras.io/
+    SYSTEM_NAME comet
+    SYSTEM_SINGULARITY_VERSION 2.3.1
+    SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
+    VERSION 0.0.1
+    LAST_UPDATED 20170831
+
+%setup
+
+%environment
+
+%post -c /bin/bash
+
+    export LC_ALL=C
+
+    apt-get -y install ubuntu-standard
+    apt-get -y install ubuntu-server
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} restricted"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates restricted"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports restricted"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security restricted"
+
+    apt-get -y update && apt-get -y upgrade
+
+    mkdir /cvmfs /oasis /projects /scratch
+ 
+    cd /opt
+
+    echo "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8" | tee /etc/apt/sources.list.d/bazel.list
+    curl https://bazel.build/bazel-release.pub.gpg | apt-key add -
+
+    apt-get -y update
+    apt-get -y install openjdk-8-jdk
+    apt-get -y install bazel
+    apt-get -y install expect
+    apt-get -y install python-dev
+    apt-get -y install python3-dev
+    apt-get -y install python3-numpy
+    apt-get -y install python3-pip 
+    apt-get -y install python3-wheel
+
+    git clone https://github.com/tensorflow/tensorflow 
+    cd /opt/tensorflow
+    git checkout r1.2
+
+    echo '#!/usr/bin/expect -f' > configure.exp
+    echo 'spawn ./configure' >> configure.exp
+    echo 'expect "Please specify the location of python. \[Default is /usr/bin/python\]: "' >> configure.exp
+    echo 'send "/usr/bin/python3\r"' >> configure.exp
+    echo 'expect "Please input the desired Python library path to use.  Default is \[/usr/local/lib/python3.5/dist-packages\]\r"' >> configure.exp
+    echo 'send "/usr/local/lib/python3.5/dist-packages\r"' >> configure.exp
+    echo 'expect "Do you wish to build TensorFlow with MKL support? \[y/N\] "' >> configure.exp
+    echo 'send "N\r"' >> configure.exp
+    echo 'expect "Please specify optimization flags to use during compilation when bazel option \"--config=opt\" is specified \[Default is -march=native\]: "' >> configure.exp
+    echo 'send " -march=native\r"' >> configure.exp
+    echo 'expect "Do you wish to use jemalloc as the malloc implementation? \[Y/n\] "' >> configure.exp
+    echo 'send "Y\r"' >> configure.exp
+    echo 'expect "Do you wish to build TensorFlow with Google Cloud Platform support? \[y/N\] "' >> configure.exp
+    echo 'send "N\r"' >> configure.exp
+    echo 'expect "Do you wish to build TensorFlow with Hadoop File System support? \[y/N\] "' >> configure.exp
+    echo 'send "N\r"' >> configure.exp
+    echo 'expect "Do you wish to build TensorFlow with the XLA just-in-time compiler (experimental)? \[y/N\] "' >> configure.exp
+    echo 'send "N\r"' >> configure.exp
+    echo 'expect "Do you wish to build TensorFlow with VERBS support? \[y/N\] "' >> configure.exp
+    echo 'send "N\r"' >> configure.exp
+    echo 'expect "Do you wish to build TensorFlow with OpenCL support? \[y/N\] "' >> configure.exp
+    echo 'send "N\r"' >> configure.exp
+    echo 'expect "Do you wish to build TensorFlow with CUDA support? \[y/N\] "' >> configure.exp
+    echo 'send "N\r"' >> configure.exp
+    echo 'expect "> "' >> configure.exp
+
+    chmod +x configure.exp
+    ./configure.exp
+
+    bazel build --config=opt //tensorflow/tools/pip_package:build_pip_package
+    bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
+    pip3 install /tmp/tensorflow_pkg/tensorflow-1.2.1-cp35-cp35m-linux_x86_64.whl
+
+    cd /opt
+
+    git clone https://github.com/fchollet/keras.git
+    cd /opt/keras
+    git checkout keras-2
+    python3 setup.py install
+    pip3 install keras
+
+%files
+
+%runscript
+
+%test
+
+    time -p python3 /opt/tensorflow/tensorflow/examples/tutorials/mnist/mnist_deep.py
