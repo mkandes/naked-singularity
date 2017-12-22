@@ -7,13 +7,13 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
     APPLICATION_NAME tensorflow
-    APPLICATION_VERSION 1.2
+    APPLICATION_VERSION 1.4
     APPLICATION_URL https://www.tensorflow.org/
     SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.3.1
+    SYSTEM_SINGULARITY_VERSION 2.3.2
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
-    VERSION 0.0.2
-    LAST_UPDATED 20170831
+    VERSION 0.0.3
+    LAST_UPDATED 20171221
 
 %setup
 
@@ -128,11 +128,11 @@ OSVersion: xenial
     wget --wait=10 "${CUDA_REPO_URL}/cuda-runtime-8-0_8.0.44-1_amd64.deb"
     wget --wait=10 "${CUDA_REPO_URL}/cuda-demo-suite-8-0_8.0.44-1_amd64.deb"
 
-    wget --wait=10 "${ML_REPO_URL}/libcudnn5_5.1.10-1+cuda8.0_amd64.deb"
-    wget --wait=10 "${ML_REPO_URL}/libcudnn5-dev_5.1.10-1+cuda8.0_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libcudnn6_6.0.21-1+cuda8.0_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libcudnn6-dev_6.0.21-1+cuda8.0_amd64.deb"
 
-    wget --wait=10 "${ML_REPO_URL}/libnccl1_1.2.3-1+cuda8.0_amd64.deb"
-    wget --wait=10 "${ML_REPO_URL}/libnccl-dev_1.2.3-1+cuda8.0_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libnccl2_2.1.2-1+cuda8.0_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libnccl-dev_2.1.2-1+cuda8.0_amd64.deb"
 
     dpkg -i nvidia-367_367.48-0ubuntu1_amd64.deb
     dpkg -i nvidia-367-dev_367.48-0ubuntu1_amd64.deb
@@ -175,11 +175,11 @@ OSVersion: xenial
     dpkg -i cuda-runtime-8-0_8.0.44-1_amd64.deb
     dpkg -i cuda-demo-suite-8-0_8.0.44-1_amd64.deb
 
-    dpkg -i libcudnn5_5.1.10-1+cuda8.0_amd64.deb
-    dpkg -i libcudnn5-dev_5.1.10-1+cuda8.0_amd64.deb
+    dpkg -i libcudnn6_6.0.21-1+cuda8.0_amd64.deb
+    dpkg -i libcudnn6-dev_6.0.21-1+cuda8.0_amd64.deb
 
-    dpkg -i libnccl1_1.2.3-1+cuda8.0_amd64.deb
-    dpkg -i libnccl-dev_1.2.3-1+cuda8.0_amd64.deb
+    dpkg -i libnccl2_2.1.2-1+cuda8.0_amd64.deb
+    dpkg -i libnccl-dev_2.1.2-1+cuda8.0_amd64.deb
 
     export PATH="/usr/local/cuda-8.0/bin${PATH:+:${PATH}}"
     export LD_LIBRARY_PATH="/usr/local/cuda-8.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
@@ -198,12 +198,12 @@ OSVersion: xenial
     apt-get -y install libcupti-dev
     apt-get -y install zlib1g-dev
 
-    wget https://github.com/bazelbuild/bazel/releases/download/0.5.2/bazel_0.5.2-linux-x86_64.deb
-    dpkg -i bazel_0.5.2-linux-x86_64.deb
+    wget https://github.com/bazelbuild/bazel/releases/download/0.8.1/bazel_0.8.1-linux-x86_64.deb
+    dpkg -i bazel_0.8.1-linux-x86_64.deb
 
     git clone https://github.com/tensorflow/tensorflow 
     cd tensorflow
-    git checkout r1.2
+    git checkout r1.4
 
     echo '#!/usr/bin/expect -f' > configure.exp
     echo 'spawn ./configure' >> configure.exp
@@ -211,50 +211,53 @@ OSVersion: xenial
     echo 'send "/usr/bin/python\r"' >> configure.exp
     echo 'expect "Please input the desired Python library path to use.  Default is \[/usr/local/lib/python2.7/dist-packages\]\r"' >> configure.exp
     echo 'send "/usr/local/lib/python2.7/dist-packages\r"' >> configure.exp
-    echo 'expect "Do you wish to build TensorFlow with MKL support? \[y/N\] "' >> configure.exp
-    echo 'send "N\r"' >> configure.exp
-    echo 'expect "Please specify optimization flags to use during compilation when bazel option \"--config=opt\" is specified \[Default is -march=native\]: "' >> configure.exp
-    echo 'send " -march=native\r"' >> configure.exp
-    echo 'expect "Do you wish to use jemalloc as the malloc implementation? \[Y/n\] "' >> configure.exp
+    echo 'expect "Do you wish to build TensorFlow with jemalloc as malloc support? \[Y/n\]: "' >> configure.exp
     echo 'send "Y\r"' >> configure.exp
-    echo 'expect "Do you wish to build TensorFlow with Google Cloud Platform support? \[y/N\] "' >> configure.exp
+    echo 'expect "Do you wish to build TensorFlow with Google Cloud Platform support? \[Y/n\]: "' >> configure.exp
     echo 'send "N\r"' >> configure.exp
-    echo 'expect "Do you wish to build TensorFlow with Hadoop File System support? \[y/N\] "' >> configure.exp
+    echo 'expect "Do you wish to build TensorFlow with Hadoop File System support? \[Y/n\]: "' >> configure.exp
     echo 'send "N\r"' >> configure.exp
-    echo 'expect "Do you wish to build TensorFlow with the XLA just-in-time compiler (experimental)? \[y/N\] "' >> configure.exp
+    echo 'expect "Do you wish to build TensorFlow with Amazon S3 File System support? \[Y/n\]: "' >> configure.exp
     echo 'send "N\r"' >> configure.exp
-    echo 'expect "Do you wish to build TensorFlow with VERBS support? \[y/N\] "' >> configure.exp
+    echo 'expect "Do you wish to build TensorFlow with XLA JIT support? \[y/N\]: "' >> configure.exp
     echo 'send "N\r"' >> configure.exp
-    echo 'expect "Do you wish to build TensorFlow with OpenCL support? \[y/N\] "' >> configure.exp
+    echo 'expect "Do you wish to build TensorFlow with GDR support? \[y/N\]: "' >> configure.exp
     echo 'send "N\r"' >> configure.exp
-    echo 'expect "Do you wish to build TensorFlow with CUDA support? \[y/N\] "' >> configure.exp
+    echo 'expect "Do you wish to build TensorFlow with VERBS support? \[y/N\]: "' >> configure.exp
+    echo 'send "N\r"' >> configure.exp
+    echo 'expect "Do you wish to build TensorFlow with OpenCL support? \[y/N\]: "' >> configure.exp
+    echo 'send "N\r"' >> configure.exp
+    echo 'expect "Do you wish to build TensorFlow with CUDA support? \[y/N\]: "' >> configure.exp
     echo 'send "Y\r"' >> configure.exp
-    echo 'expect "Do you want to use clang as CUDA compiler? \[y/N\] "' >> configure.exp
-    echo 'send "N\r"' >> configure.exp
-    echo 'expect "Please specify the CUDA SDK version you want to use, e.g. 7.0. \[Leave empty to use system default\]: "' >> configure.exp
+    echo 'expect "Please specify the CUDA SDK version you want to use, e.g. 7.0. \[Leave empty to default to CUDA 8.0\]: "' >> configure.exp
     echo 'send "8.0\r"' >> configure.exp
     echo 'expect "Please specify the location where CUDA 8.0 toolkit is installed. Refer to README.md for more details. \[Default is /usr/local/cuda\]: "' >> configure.exp
     echo 'send "/usr/local/cuda\r"' >> configure.exp
-    echo 'expect "Please specify which gcc should be used by nvcc as the host compiler. \[Default is /usr/bin/gcc\]: "' >> configure.exp
-    echo 'send "/usr/bin/gcc\r"' >> configure.exp
-    echo 'expect "Please specify the cuDNN version you want to use. \[Leave empty to use system default\]: "' >> configure.exp
-    echo 'send "5.1.10\r"' >> configure.exp
-    echo 'expect "Please specify the location where cuDNN 5.1.10 library is installed. Refer to README.md for more details. \[Default is /usr/local/cuda\]: "' >> configure.exp
+    echo 'expect "Please specify the cuDNN version you want to use. \[Leave empty to default to cuDNN 6.0\]: "' >> configure.exp
+    echo 'send "6.0.21\r"' >> configure.exp
+    echo 'expect "Please specify the location where cuDNN 6.0.21 library is installed. Refer to README.md for more details. \[Default is /usr/local/cuda\]: "' >> configure.exp
     echo 'send "/usr/lib/x86_64-linux-gnu\r"' >> configure.exp
     echo 'expect "Please specify a list of comma-separated Cuda compute capabilities you want to build with.\r"' >> configure.exp
     echo 'expect "You can find the compute capability of your device at: https://developer.nvidia.com/cuda-gpus.\r"' >> configure.exp
-    echo 'expect "Please note that each additional compute capability significantly increases your build time and binary size.\r"' >> configure.exp
-    echo 'expect "\[Default is: \"3.5,5.2\"\]: "' >> configure.exp
+    echo 'expect "Please note that each additional compute capability significantly increases your build time and binary size. \[Default is: 3.5,5.2\]"' >> configure.exp
     echo 'send "3.7,6.0\r"' >> configure.exp
+    echo 'expect "Do you want to use clang as CUDA compiler? \[y/N\]: "' >> configure.exp
+    echo 'send "N\r"' >> configure.exp
+    echo 'expect "Please specify which gcc should be used by nvcc as the host compiler. \[Default is /usr/bin/gcc\]: "' >> configure.exp
+    echo 'send "/usr/bin/gcc\r"' >> configure.exp
+    echo 'expect "Do you wish to build TensorFlow with MPI support? \[y/N\]: "' >> configure.exp
+    echo 'send "N\r"' >> configure.exp
+    echo 'expect ": "' >> configure.exp
+    echo 'send " -march=native\r"' >> configure.exp
     echo 'expect "> "' >> configure.exp
 
     chmod +x configure.exp
     ./configure.exp
 
     bazel build --config=opt --config=cuda //tensorflow/tools/pip_package:build_pip_package
-    bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/tensorflow_pkg
+    bazel-bin/tensorflow/tools/pip_package/build_pip_package /opt/tensorflow_pkg
 
-    pip install /tmp/tensorflow_pkg/tensorflow-1.2.1-cp27-cp27mu-linux_x86_64.whl
+    pip install /opt/tensorflow_pkg/tensorflow-1.4.1-cp27-cp27mu-linux_x86_64.whl
     
 %files
 

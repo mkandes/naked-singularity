@@ -10,10 +10,10 @@ OSVersion: xenial
     APPLICATION_VERSION unknown
     APPLICATION_URL http://mxnet.io/
     SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.3.1
+    SYSTEM_SINGULARITY_VERSION 2.3.2
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html 
-    VERSION 0.0.3
-    LAST_UPDATED 20170907
+    VERSION 0.0.4
+    LAST_UPDATED 20171105
 
 %setup
 
@@ -59,21 +59,20 @@ OSVersion: xenial
 
     git clone --recursive https://github.com/dmlc/mxnet
     cd mxnet
-    make -j $(nproc) USE_OPENCV=1 USE_BLAS=openblas
+    make USE_OPENCV=1 USE_BLAS=openblas USE_DIST_KVSTORE=1
 
-    apt-get -y install python-dev
-    apt-get -y install python-setuptools
-    apt-get -y install python-numpy
-    apt-get -y install python-pip
-    apt-get -y install python-opencv
-    apt-get -y install python-tk
-    apt-get -y install python-matplotlib
+    apt-get -y install python3-dev
+    apt-get -y install python3-setuptools
+    apt-get -y install python3-numpy
+    apt-get -y install python3-pip
+    apt-get -y install python3-tk
+    apt-get -y install python3-matplotlib
 
     cd python
-    pip install --upgrade pip
-    pip install -e ./
+    pip3 install --upgrade pip3
+    pip3 install -e ./
 
-    apt-get install graphviz
+    apt-get -y install graphviz
 
 %files
 
