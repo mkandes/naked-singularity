@@ -12,8 +12,8 @@ OSVersion: xenial
     SYSTEM_NAME comet
     SYSTEM_SINGULARITY_VERSION 2.3.2
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
-    VERSION 0.0.3
-    LAST_UPDATED 20171221
+    VERSION 0.0.4
+    LAST_UPDATED 20171222
 
 %setup
 
@@ -191,10 +191,11 @@ OSVersion: xenial
     apt-get -y install openjdk-8-jdk
     #apt-get -y install bazel
     apt-get -y install expect
-    apt-get -y install python-numpy 
-    apt-get -y install python-dev 
-    apt-get -y install python-pip 
-    apt-get -y install python-wheel
+    apt-get -y install python-dev
+    apt-get -y install python3-numpy 
+    apt-get -y install python3-dev 
+    apt-get -y install python3-pip 
+    apt-get -y install python3-wheel
     apt-get -y install libcupti-dev
     apt-get -y install zlib1g-dev
 
@@ -208,9 +209,9 @@ OSVersion: xenial
     echo '#!/usr/bin/expect -f' > configure.exp
     echo 'spawn ./configure' >> configure.exp
     echo 'expect "Please specify the location of python. \[Default is /usr/bin/python\]: "' >> configure.exp
-    echo 'send "/usr/bin/python\r"' >> configure.exp
+    echo 'send "/usr/bin/python3\r"' >> configure.exp
     echo 'expect "Please input the desired Python library path to use.  Default is \[/usr/local/lib/python2.7/dist-packages\]\r"' >> configure.exp
-    echo 'send "/usr/local/lib/python2.7/dist-packages\r"' >> configure.exp
+    echo 'send "/usr/local/lib/python3.5/dist-packages\r"' >> configure.exp
     echo 'expect "Do you wish to build TensorFlow with jemalloc as malloc support? \[Y/n\]: "' >> configure.exp
     echo 'send "Y\r"' >> configure.exp
     echo 'expect "Do you wish to build TensorFlow with Google Cloud Platform support? \[Y/n\]: "' >> configure.exp
@@ -257,7 +258,7 @@ OSVersion: xenial
     bazel build --config=opt --config=cuda //tensorflow/tools/pip_package:build_pip_package
     bazel-bin/tensorflow/tools/pip_package/build_pip_package /opt/tensorflow_pkg
 
-    pip install /opt/tensorflow_pkg/tensorflow-1.4.1-cp27-cp27mu-linux_x86_64.whl
+    pip3 install /opt/tensorflow_pkg/tensorflow-1.4.1-cp35-cp35m-linux_x86_64.whl
     
 %files
 
@@ -265,4 +266,4 @@ OSVersion: xenial
 
 %test
 
-    time -p python /opt/tensorflow/tensorflow/examples/tutorials/mnist/mnist_deep.py
+    time -p python3 /opt/tensorflow/tensorflow/examples/tutorials/mnist/mnist_deep.py
