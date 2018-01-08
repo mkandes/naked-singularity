@@ -12,8 +12,8 @@ OSVersion: xenial
     SYSTEM_NAME comet
     SYSTEM_SINGULARITY_VERSION 2.3.2
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
-    VERSION 0.0.5
-    LAST_UPDATED 20171220
+    VERSION 0.0.6
+    LAST_UPDATED 20180108
 
 %setup
 
@@ -108,6 +108,8 @@ OSVersion: xenial
     bazel-bin/tensorflow/tools/pip_package/build_pip_package /opt/tensorflow_pkg
 
     pip install /opt/tensorflow_pkg/tensorflow-1.4.1-cp27-cp27mu-linux_x86_64.whl
+
+    apt-get -y install python-scipy
     
 %files
 
