@@ -10,8 +10,6 @@ DESCRIPTION
 
     * http://singularity.lbl.gov/
 
-USAGE
-
 STATUS
 
     A work in progress. 
@@ -29,6 +27,10 @@ AUTHOR
     HPC User Services Group, San Diego Supercomputer Center
     University of California, San Diego
 
+VERSION
+
+    0.1.2
+
 LAST UPDATED
 
-    Thursday, December 20th, 2017
+    Wednesday, February 14th, 2018

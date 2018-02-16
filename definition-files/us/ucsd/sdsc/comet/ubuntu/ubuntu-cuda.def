@@ -11,10 +11,9 @@ OSVersion: xenial
     APPLICATION_URL https://developer.nvidia.com/cuda-zone
     DEVICE_DRIVER_VERSION 367.48
     SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.3.1
+    SYSTEM_SINGULARITY_VERSION 2.3.2
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html 
-    VERSION 0.0.2
-    LAST_UPDATED 20170831
+    LAST_UPDATED 20180214
 
 %setup
 
@@ -49,12 +48,24 @@ OSVersion: xenial
 
     apt-get -y update && apt-get -y upgrade
 
+    # Install common packages from 'main'
+    apt-get -y install autoconf
+    apt-get -y install automake
+    apt-get -y install build-essential
+    apt-get -y install libtool
+    apt-get -y install pkg-config
+    apt-get -y install gfortran
+    apt-get -y install zip
+
+    # Make filesystem mount points
     mkdir /cvmfs /oasis /projects /scratch
 
+    # Location of NVIDIA repositories
     declare -r NVIDIA_ROOT_URL='http://developer.download.nvidia.com/compute'
     declare -r CUDA_REPO_URL="${NVIDIA_ROOT_URL}/cuda/repos/ubuntu1604/x86_64"
     declare -r ML_REPO_URL="${NVIDIA_ROOT_URL}/machine-learning/repos/ubuntu1604/x86_64/"
 
+    # Install NVIDIA package dependencies
     apt-get -y install x11-common
     apt-get -y install xserver-xorg-core
     apt-get -y install cmake
@@ -88,6 +99,7 @@ OSVersion: xenial
 
     cd /opt
 
+    # Download NVIDIA drivers, libraries, and packages
     wget --wait=10 "${CUDA_REPO_URL}/nvidia-367_367.48-0ubuntu1_amd64.deb" 
     wget --wait=10 "${CUDA_REPO_URL}/nvidia-367-dev_367.48-0ubuntu1_amd64.deb"
     wget --wait=10 "${CUDA_REPO_URL}/nvidia-modprobe_367.48-0ubuntu1_amd64.deb"
@@ -129,12 +141,13 @@ OSVersion: xenial
     wget --wait=10 "${CUDA_REPO_URL}/cuda-runtime-8-0_8.0.44-1_amd64.deb"
     wget --wait=10 "${CUDA_REPO_URL}/cuda-demo-suite-8-0_8.0.44-1_amd64.deb"
 
-    wget --wait=10 "${ML_REPO_URL}/libcudnn5_5.1.10-1+cuda8.0_amd64.deb"
-    wget --wait=10 "${ML_REPO_URL}/libcudnn5-dev_5.1.10-1+cuda8.0_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libcudnn6_6.0.21-1+cuda8.0_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libcudnn6-dev_6.0.21-1+cuda8.0_amd64.deb"
 
-    wget --wait=10 "${ML_REPO_URL}/libnccl1_1.2.3-1+cuda8.0_amd64.deb"
-    wget --wait=10 "${ML_REPO_URL}/libnccl-dev_1.2.3-1+cuda8.0_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libnccl2_2.1.2-1+cuda8.0_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libnccl-dev_2.1.2-1+cuda8.0_amd64.deb"
 
+    # Install NVIDIA drivers, libraries, and packages
     dpkg -i nvidia-367_367.48-0ubuntu1_amd64.deb
     dpkg -i nvidia-367-dev_367.48-0ubuntu1_amd64.deb
     dpkg -i nvidia-modprobe_367.48-0ubuntu1_amd64.deb
@@ -176,14 +189,20 @@ OSVersion: xenial
     dpkg -i cuda-runtime-8-0_8.0.44-1_amd64.deb
     dpkg -i cuda-demo-suite-8-0_8.0.44-1_amd64.deb
 
-    dpkg -i libcudnn5_5.1.10-1+cuda8.0_amd64.deb
-    dpkg -i libcudnn5-dev_5.1.10-1+cuda8.0_amd64.deb 
+    dpkg -i libcudnn6_6.0.21-1+cuda8.0_amd64.deb
+    dpkg -i libcudnn6-dev_6.0.21-1+cuda8.0_amd64.deb
 
-    dpkg -i libnccl1_1.2.3-1+cuda8.0_amd64.deb
-    dpkg -i libnccl-dev_1.2.3-1+cuda8.0_amd64.deb 
+    dpkg -i libnccl2_2.1.2-1+cuda8.0_amd64.deb
+    dpkg -i libnccl-dev_2.1.2-1+cuda8.0_amd64.deb
 
+    rm *.deb
+
+    # Set paths to CUDA binaries and libraries
     export PATH="/usr/local/cuda-8.0/bin${PATH:+:${PATH}}"
     export LD_LIBRARY_PATH="/usr/local/cuda-8.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+
+    # Update database for mlocate
+    updatedb
 
 %files
 
@@ -191,6 +210,7 @@ OSVersion: xenial
 
 %test
 
+    # Test if nvcc was installed properly
     export PATH="/usr/local/cuda-8.0/bin${PATH:+:${PATH}}"
     export LD_LIBRARY_PATH="/usr/local/cuda-8.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
     nvcc --version

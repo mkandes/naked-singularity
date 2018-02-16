@@ -10,10 +10,9 @@ OSVersion: xenial
     APPLICATION_VERSION none
     APPLICATION_URL none
     SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.3.1
+    SYSTEM_SINGULARITY_VERSION 2.3.2
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
-    VERSION 0.0.5
-    LAST_UPDATED 20170811
+    LAST_UPDATED 20180213
 
 %setup
 
@@ -48,7 +47,23 @@ OSVersion: xenial
 
     apt-get -y update && apt-get -y upgrade
 
+    # Install common packages from 'main'
+    apt-get -y install autoconf
+    apt-get -y install automake
+    apt-get -y install build-essential
+    apt-get -y install libtool
+    apt-get -y install pkg-config
+    apt-get -y install gfortran
+    apt-get -y install zip
+
+    # Make filesystem mount points
     mkdir /cvmfs /oasis /projects /scratch
+
+    # Build and install from souce in /opt
+    cd /opt
+
+    # Update database for mlocate
+    updatedb 
 
 %files
 
