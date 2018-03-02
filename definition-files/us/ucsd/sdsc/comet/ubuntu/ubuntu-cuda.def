@@ -12,7 +12,7 @@ OSVersion: xenial
     SYSTEM_NAME comet
     SYSTEM_SINGULARITY_VERSION 2.3.2
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
-    LAST_UPDATED 20180226
+    LAST_UPDATED 20180302
 
 %setup
 
@@ -20,11 +20,14 @@ OSVersion: xenial
 
 %post -c /bin/bash
 
+    # Set system locale
     export LC_ALL=C
 
+    # Install system metapackages
     apt-get -y install ubuntu-standard
     apt-get -y install ubuntu-server
 
+    # Add repositories
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} main"
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} universe"
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} multiverse"
@@ -45,6 +48,7 @@ OSVersion: xenial
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security multiverse"
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security restricted"
 
+    # Upgrade all packages to their latest versions
     apt-get -y update && apt-get -y upgrade
 
     # Install common packages from 'main'
@@ -62,19 +66,11 @@ OSVersion: xenial
     # Make filesystem mount points
     mkdir /cvmfs /oasis /projects /scratch
 
-    # Build and install additional software packages in /opt
-    cd /opt
+    # Use /tmp to store temporary files within the container during the
+    # bootstraping process
+    cd /tmp
 
-    # Install Miniconda -- a free minimal installer for conda
-    #
-    # Miniconda is a small, bootstrap version of Anaconda that includes
-    # only conda, Python, the packages they depend on and a small number
-    # of other useful packages, including pip, zlib and a few others.
-    # Use the 'conda install' command to install more than 720
-    # additional conda packages from the Anaconda repository.
-    #
-    # https://conda.io/docs/index.html
-
+    # Install miniconda2
     wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
     chmod +x Miniconda2-latest-Linux-x86_64.sh
 
@@ -104,9 +100,7 @@ OSVersion: xenial
     chmod +x install-miniconda2.exp
     ./install-miniconda2.exp
 
-    rm Miniconda2-latest-Linux-x86_64.sh
-    rm install-miniconda2.exp
-
+    # Install miniconda3
     wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
     chmod +x Miniconda3-latest-Linux-x86_64.sh
 
@@ -135,9 +129,6 @@ OSVersion: xenial
 
     chmod +x install-miniconda3.exp
     ./install-miniconda3.exp
-
-    rm Miniconda3-latest-Linux-x86_64.sh
-    rm install-miniconda3.exp
 
     # Location of NVIDIA repositories
     declare -r NVIDIA_ROOT_URL='http://developer.download.nvidia.com/compute'
@@ -272,11 +263,14 @@ OSVersion: xenial
     dpkg -i libnccl2_2.1.2-1+cuda8.0_amd64.deb
     dpkg -i libnccl-dev_2.1.2-1+cuda8.0_amd64.deb
 
-    rm *.deb
-
     # Set paths to CUDA binaries and libraries
     export PATH="/usr/local/cuda-8.0/bin${PATH:+:${PATH}}"
     export LD_LIBRARY_PATH="/usr/local/cuda-8.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+
+    # Set container environment variables
+    cd /.singularity.d/env
+    echo 'export PATH="/usr/local/cuda-8.0/bin${PATH:+:${PATH}}"' >> 90-environment.sh
+    echo 'export LD_LIBRARY_PATH="/usr/local/cuda-8.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"' >> 90-environment.sh
 
     # Update database for mlocate
     updatedb
@@ -287,8 +281,5 @@ OSVersion: xenial
 
 %test
 
-    # Test if nvcc was installed properly
-    export PATH="/usr/local/cuda-8.0/bin${PATH:+:${PATH}}"
-    export LD_LIBRARY_PATH="/usr/local/cuda-8.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
     nvcc --version
 
