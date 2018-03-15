@@ -1,0 +1,283 @@
+Bootstrap: debootstrap
+MirrorURL: http://us.archive.ubuntu.com/ubuntu
+OSVersion: xenial
+
+%labels
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+    APPLICATION_NAME meep
+    APPLICATION_VERSION 1.4.3
+    APPLICATION_URL https://www.open-mpi.org/
+    SYSTEM_NAME comet
+    SYSTEM_SINGULARITY_VERSION 2.3.2
+    SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
+    LAST_UPDATED 20180315
+
+%setup
+
+%environment
+
+%post -c /bin/bash
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Install system metapackages
+    apt-get -y install ubuntu-standard
+    apt-get -y install ubuntu-server
+
+    # Add repositories
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} restricted"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates restricted"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports restricted"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security restricted"
+
+    # Upgrade all packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    # Install common packages from 'main'
+    apt-get -y install autoconf
+    apt-get -y install automake
+    apt-get -y install build-essential
+    apt-get -y install libtool
+    apt-get -y install pkg-config
+    apt-get -y install gfortran
+    apt-get -y install zip
+
+    # Install expect to automate responses for interactive build questions
+    apt-get -y install expect
+
+    # Make filesystem mount points
+    mkdir /cvmfs /oasis /projects /scratch
+
+    # Use /tmp to store temporary files within the container during the
+    # bootstraping process
+    cd /tmp
+
+    # Install basic drivers for user space access to Ethernet, RDMA,
+    # and Infiniband. See https://community.mellanox.com/docs/DOC-2431
+    apt-get -y install dkms
+    apt-get -y install infiniband-diags
+    apt-get -y install libibverbs-dev
+    apt-get -y install ibacm
+    apt-get -y install librdmacm-dev
+    apt-get -y install libmlx4-dev
+    apt-get -y install libmlx5-dev
+    apt-get -y install mstflint
+    apt-get -y install libibcm-dev
+    apt-get -y install libibmad-dev
+    apt-get -y install libibumad-dev
+    apt-get -y install opensm
+    apt-get -y install srptools
+
+    # Install additional tools
+    apt-get -y install ibutils
+    apt-get -y install ibverbs-utils
+    apt-get -y install rdmacm-utils
+    apt-get -y install perftest
+    apt-get -y install numactl
+    apt-get -y install libnuma-dev
+
+    # Install libnl
+    apt-get -y install libnl-3-200
+    apt-get -y install libnl-route-3-200
+    apt-get -y install libnl-route-3-dev
+    apt-get -y install libnl-utils
+
+    # Download, build, and install openmpi
+    wget https://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.4.tar.gz
+    tar -xzvf openmpi-1.8.4.tar.gz
+    cd openmpi-1.8.4
+    ./configure --prefix=/opt/openmpi-1.8.4
+     make all install
+
+    export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
+
+    # Install MEEP dependencies
+    apt-get -y install libopenblas-base
+    apt-get -y install libopenblas-dev
+    apt-get -y install libgmp-dev
+    apt-get -y install libgsl-dev
+    apt-get -y install libpng16-dev
+    apt-get -y install swig
+    apt-get -y install guile-2.0-dev
+    apt-get -y install python-dev
+    apt-get -y intaall python-pip
+    apt-get -y install python-pkgconfig
+    apt-get -y install python-numpy
+    apt-get -y install python-scipy
+    apt-get -y install cython
+
+    cd /opt
+
+    wget https://github.com/stevengj/harminv/archive/v1.4.1.tar.gz
+    tar -xzvf v1.4.1.tar.gz
+    cd harminv-1.4.1
+    sh autogen.sh --prefix='/opt/harminv-1.4.1' --enable-shared
+    make
+    make install
+
+    export PATH="/opt/harminv-1.4.1/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/harminv-1.4.1/lib:${LD_LIBRARY_PATH}"
+
+    cd ../
+
+    wget https://github.com/stevengj/libctl/archive/v4.0.0.tar.gz
+    tar -xzvf v4.0.0.tar.gz
+    cd libctl-4.0.0
+    sh autogen.sh --prefix='/opt/libctl-4.0.0' --enable-shared
+    make
+    make install 
+
+    export PATH="/opt/libctl-4.0.0/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/libctl-4.0.0/lib:${LD_LIBRARY_PATH}"
+
+    cd ../
+
+    wget http://zlib.net/zlib-1.2.11.tar.gz
+    tar -xzvf zlib-1.2.11.tar.gz
+    cd zlib-1.2.11
+    ./configure --prefix='/opt/zlib-1.2.11'
+    make
+    make install
+
+    export LD_LIBRARY_PATH="/opt/zlib-1.2.11/lib:${LD_LIBRARY_PATH}"
+
+    cd ../
+
+    wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.1/src/hdf5-1.10.1.tar.gz
+    tar -xzvf hdf5-1.10.1.tar.gz
+    cd hdf5-1.10.1
+    ./configure CC=mpicc CXX=mpic++ --enable-parallel --enable-fortran --enable-shared --with-zlib='/opt/zlib-1.2.11'
+    make
+    make install
+
+    export PATH="/opt/hdf5-1.10.1/hdf5/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/hdf5-1.10.1/hdf5/lib:${LD_LIBRARY_PATH}"
+
+    cd ../
+
+    wget https://github.com/stevengj/h5utils/releases/download/1.13/h5utils-1.13.tar.gz
+    tar -xzvf h5utils-1.13.tar.gz
+    cd h5utils-1.13
+    ./configure CC='mpicc' CPPFLAGS='-I/opt/hdf5-1.10.1/hdf5/include' LDFLAGS='-L/opt/hdf5-1.10.1/hdf5/lib' --prefix='/opt/h5utils-1.13'
+    make
+    make install
+
+    export PATH="/opt/h5utils-1.13/bin:${PATH}"
+
+    cd ../
+
+    wget http://www.fftw.org/fftw-3.3.7.tar.gz
+    tar -xzvf fftw-3.3.7.tar.gz
+    cd fftw-3.3.7
+    ./configure CC='mpicc' CFLAGS='-fPIC' --prefix='/opt/fftw-3.3.7' --enable-avx2 --enable-threads --enable-openmp --enable-mpi
+    make
+    make install
+
+    export PATH="/opt/fftw-3.3.7/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/fftw-3.3.7/lib:{LD_LIBRARY_PATH}"
+
+    cd ../
+
+    wget https://github.com/stevengj/mpb/archive/v1.6.1.tar.gz
+    tar -xzvf v1.6.1.tar.gz
+    cd mpb-1.6.1
+    sh autogen.sh CC='mpicc' CXX='mpic++' CPPFLAGS='-I/opt/hdf5-1.10.1/hdf5/include -I/opt/libctl-4.0.0/include -I/opt/fftw-3.3.7/include' LDFLAGS='-L/opt/hdf5-1.10.1/hdf5/lib -L/opt/libctl-4.0.0/lib -L/opt/fftw-3.3.7/lib' --prefix='/opt/mpb-1.6.1' --with-libctl='/opt/libctl-4.0.0' --enable-shared --with-openmp
+    make
+    make install
+    make distclean
+    sh autogen.sh CC='mpicc' CXX='mpic++' CPPFLAGS='-I/opt/hdf5-1.10.1/hdf5/include -I/opt/libctl-4.0.0/include -I/opt/fftw-3.3.7/include' LDFLAGS='-L/opt/hdf5-1.10.1/hdf5/lib -L/opt/libctl-4.0.0/lib -L/opt/fftw-3.3.7/lib' --prefix='/opt/mpb-1.6.1' --with-libctl='/opt/libctl-4.0.0' --enable-shared --with-mpi
+    make
+    make install
+
+    #cd /opt/mpb-1.6.1/include
+    #ln -s mpb_mpi.h mpb.h
+
+    #cd /opt/mpb-1.6.1/lib
+    #ln -s libmpb_mpi.so.1.0.0 libmpb.so.1
+    #ln -s libmpb_mpi.so.1.0.0 libmpb.so
+    #ln -s libmpb_mpi.la libmpb.la
+    #ln -s libmpb_mpi.a libmpb.a
+
+    export PATH="/opt/mpb-1.6.1/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/mpb-1.6.1/lib:${LD_LIBRARY_PATH}"
+
+    cd /opt
+
+    wget https://bitbucket.org/mpi4py/mpi4py/downloads/mpi4py-3.0.0.tar.gz
+    tar -xzvf mpi4py-3.0.0.tar.gz
+    cd mpi4py-3.0.0
+    python setup.py build
+    python setup.py install
+
+    cd ../ 
+
+    wget https://github.com/h5py/h5py/archive/2.7.1.tar.gz
+    tar -xzvf 2.7.1.tar.gz
+    cd h5py-2.7.1
+    export CC='mpicc'
+    python setup.py configure --hdf5='/opt/hdf5-1.10.1/hdf5' --hdf5-version='1.10.1' --mpi
+    python setup.py build
+    python setup.py install
+
+    cd ../
+
+    wget https://github.com/stevengj/meep/archive/v1.4.3.tar.gz
+    tar -xzvf v1.4.3.tar.gz
+    cd meep-1.4.3
+    sh autogen.sh CC='mpicc' CXX='mpic++' CPPFLAGS='-I/opt/harminv-1.4.1/include -I/opt/hdf5-1.10.1/hdf5/include -I/opt/libctl-4.0.0/include -I/opt/fftw-3.3.7/include -I/opt/mpb-1.6.1/include' LDFLAGS='-L/opt/harminv-1.4.1/lib -L/opt/hdf5-1.10.1/hdf5/lib -L/opt/libctl-4.0.0/lib -L/opt/fftw-3.3.7/lib -L/opt/mpb-1.6.1/lib' --prefix='/opt/meep-1.4.3' --with-libctl='/opt/libctl-4.0.0' --enable-shared --with-mpi
+    make
+    make install
+
+    #export PATH="/opt/meep-1.4.3/bin:${PATH}"
+    #export LD_LIBRARY_PATH="/opt/meep-1.4.3/lib:${LD_LIBRARY_PATH}"
+
+    # Set container environment variables
+    cd /.singularity.d/env
+    echo 'export PATH="/opt/openmpi-1.8.4/bin:${PATH}"' >> 90-environment.sh
+    echo 'export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"' >> 90-environment.sh
+    echo 'export PATH="/opt/harminv-1.4.1/bin:${PATH}"' >> 90-environment.sh
+    echo 'export LD_LIBRARY_PATH="/opt/harminv-1.4.1/lib:${LD_LIBRARY_PATH}"' >> 90-environment.sh
+    echo 'export PATH="/opt/libctl-4.0.0/bin:${PATH}"' >> 90-environment.sh
+    echo 'export LD_LIBRARY_PATH="/opt/libctl-4.0.0/lib:${LD_LIBRARY_PATH}"' >> 90-environment.sh
+    echo 'export LD_LIBRARY_PATH="/opt/zlib-1.2.11/lib:${LD_LIBRARY_PATH}"' >> 90-environment.sh
+    echo 'export PATH="/opt/hdf5-1.10.1/hdf5/bin:${PATH}"' >> 90-environment.sh
+    echo 'export LD_LIBRARY_PATH="/opt/hdf5-1.10.1/hdf5/lib:${LD_LIBRARY_PATH}"' >> 90-environment.sh
+    echo 'export PATH="/opt/h5utils-1.13/bin:${PATH}"' >> 90-environment.sh
+    echo 'export PATH="/opt/fftw-3.3.7/bin:${PATH}"' >> 90-environment.sh
+    echo 'export LD_LIBRARY_PATH="/opt/fftw-3.3.7/lib:{LD_LIBRARY_PATH}"' >> 90-environment.sh
+    echo 'export PATH="/opt/mpb-1.6.1/bin:${PATH}"' >> 90-environment.sh
+    echo 'export LD_LIBRARY_PATH="/opt/mpb-1.6.1/lib:${LD_LIBRARY_PATH}"' >> 90-environment.sh
+    echo 'export PATH="/opt/meep-1.4.3/bin:${PATH}"' >> 90-environment.sh
+    echo 'export LD_LIBRARY_PATH="/opt/meep-1.4.3/lib:${LD_LIBRARY_PATH}"' >> 90-environment.sh
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
+    
+    # Test MEEP (and MPB) with an example calculation
+    time -p meep /opt/meep-1.4.3/examples/parallel-wvgs-force.ctl
+    time -p mpirun -np 2 meep /opt/meep-1.4.3/examples/parallel-wvgs-force.ctl
