@@ -160,17 +160,21 @@ OSVersion: xenial
     apt-get -y install libnl-route-3-dev
     apt-get -y install libnl-utils
 
-    # Download, build, and install openmpi
+    # Download, build, and install OpenMPI
     wget https://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.4.tar.gz
     tar -xzvf openmpi-1.8.4.tar.gz
     cd openmpi-1.8.4
-    ./configure --prefix=/opt/openmpi
+    ./configure --prefix=/opt/openmpi-1.8.4
      make all install
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
 
     # Set container environment variables
     cd /.singularity.d/env
-    echo 'export PATH="/opt/openmpi/bin:${PATH}"' >> 90-environment.sh
-    echo 'export LD_LIBRARY_PATH="/opt/openmpi/lib:${LD_LIBRARY_PATH}"' >> 90-environment.sh
+    echo 'export PATH="/opt/openmpi-1.8.4/bin:${PATH}"' >> 90-environment.sh
+    echo 'export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"' >> 90-environment.sh
 
     # Update database for mlocate
     updatedb
