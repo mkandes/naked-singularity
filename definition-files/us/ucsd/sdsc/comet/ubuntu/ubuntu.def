@@ -12,7 +12,7 @@ OSVersion: xenial
     SYSTEM_NAME comet
     SYSTEM_SINGULARITY_VERSION 2.3.2
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
-    LAST_UPDATED 20180302
+    LAST_UPDATED 20180320
 
 %setup
 
@@ -73,63 +73,13 @@ OSVersion: xenial
     # Install miniconda2
     wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
     chmod +x Miniconda2-latest-Linux-x86_64.sh
-
-    echo '#!/usr/bin/expect -f' > install-miniconda2.exp
-    echo 'spawn ./Miniconda2-latest-Linux-x86_64.sh' >> install-miniconda2.exp
-    echo 'expect "Please, press ENTER to continue\r' >> install-miniconda2.exp
-    echo '>>> "' >> install-miniconda2.exp
-    echo 'send "\r   "' >> install-miniconda2.exp
-    echo 'expect "Do you accept the license terms? \[yes|no\]\r' >> install-miniconda2.exp
-    echo '\[no\] >>> "' >> install-miniconda2.exp
-    echo 'send "yes\r"' >> install-miniconda2.exp
-    echo 'expect "Miniconda2 will now be installed into this location:\r' >> install-miniconda2.exp
-    echo '/root/miniconda2\r' >> install-miniconda2.exp
-    echo '\r' >> install-miniconda2.exp
-    echo '  - Press ENTER to confirm the location\r' >> install-miniconda2.exp
-    echo '  - Press CTRL-C to abort the installation\r' >> install-miniconda2.exp
-    echo '  - Or specify a different location below\r' >> install-miniconda2.exp
-    echo '\r' >> install-miniconda2.exp
-    echo '\[/root/miniconda2\] >>> "' >> install-miniconda2.exp
-    echo 'send "/opt/miniconda2\r"' >> install-miniconda2.exp
-    echo 'expect "Do you wish the installer to prepend the Miniconda2 install location\r' >> install-miniconda2.exp
-    echo 'to PATH in your /root/.bashrc ? \[yes|no\]\r' >> install-miniconda2.exp
-    echo '\[no\] >>> "' >> install-miniconda2.exp
-    echo 'send "no\r"' >> install-miniconda2.exp
-    echo 'expect "Thank you for installing Miniconda2!\r"' >> install-miniconda2.exp
-
-    chmod +x install-miniconda2.exp
-    ./install-miniconda2.exp
+    ./Miniconda2-latest-Linux-x86_64.sh -b -p /opt/miniconda2
 
     # Install miniconda3
     wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
     chmod +x Miniconda3-latest-Linux-x86_64.sh
+    ./Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda3
     
-    echo '#!/usr/bin/expect -f' > install-miniconda3.exp
-    echo 'spawn ./Miniconda3-latest-Linux-x86_64.sh' >> install-miniconda3.exp
-    echo 'expect "Please, press ENTER to continue\r' >> install-miniconda3.exp
-    echo '>>> "' >> install-miniconda3.exp
-    echo 'send "\r   "' >> install-miniconda3.exp
-    echo 'expect "Do you accept the license terms? \[yes|no\]\r' >> install-miniconda3.exp
-    echo '\[no\] >>> "' >> install-miniconda3.exp
-    echo 'send "yes\r"' >> install-miniconda3.exp
-    echo 'expect "Miniconda3 will now be installed into this location:\r' >> install-miniconda3.exp
-    echo '/root/miniconda3\r' >> install-miniconda3.exp
-    echo '\r' >> install-miniconda3.exp
-    echo '  - Press ENTER to confirm the location\r' >> install-miniconda3.exp
-    echo '  - Press CTRL-C to abort the installation\r' >> install-miniconda3.exp
-    echo '  - Or specify a different location below\r' >> install-miniconda3.exp
-    echo '\r' >> install-miniconda3.exp
-    echo '\[/root/miniconda3\] >>> "' >> install-miniconda3.exp
-    echo 'send "/opt/miniconda3\r"' >> install-miniconda3.exp
-    echo 'expect "Do you wish the installer to prepend the Miniconda3 install location\r' >> install-miniconda3.exp
-    echo 'to PATH in your /root/.bashrc ? \[yes|no\]\r' >> install-miniconda3.exp
-    echo '\[no\] >>> "' >> install-miniconda3.exp
-    echo 'send "no\r"' >> install-miniconda3.exp
-    echo 'expect "Thank you for installing Miniconda2!\r"' >> install-miniconda3.exp
-
-    chmod +x install-miniconda3.exp
-    ./install-miniconda3.exp
-
     # Set container environment variables
     cd /.singularity.d/env
 

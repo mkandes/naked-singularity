@@ -256,7 +256,7 @@ OSVersion: xenial
     echo 'send "N\r"' >> install-tensorflow-python.exp
     echo 'expect "Do you wish to build TensorFlow with VERBS support? \[y/N\]: "' >> install-tensorflow-python.exp
     echo 'send "N\r"' >> install-tensorflow-python.exp
-    echo 'expect "Do you wish to build TensorFlow with OpenCL support? \[y/N\]: "' >> install-tensorflow-python.exp
+    echo 'expect "Do you wish to build TensorFlow with OpenCL SYCL support? \[y/N\]: "' >> install-tensorflow-python.exp
     echo 'send "N\r"' >> install-tensorflow-python.exp
     echo 'expect "Do you wish to build TensorFlow with CUDA support? \[y/N\]: "' >> install-tensorflow-python.exp
     echo 'send "Y\r"' >> install-tensorflow-python.exp
@@ -323,7 +323,7 @@ OSVersion: xenial
     echo 'send "N\r"' >> install-tensorflow-python3.exp
     echo 'expect "Do you wish to build TensorFlow with VERBS support? \[y/N\]: "' >> install-tensorflow-python3.exp
     echo 'send "N\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Do you wish to build TensorFlow with OpenCL support? \[y/N\]: "' >> install-tensorflow-python3.exp
+    echo 'expect "Do you wish to build TensorFlow with OpenCL SYCL support? \[y/N\]: "' >> install-tensorflow-python3.exp
     echo 'send "N\r"' >> install-tensorflow-python3.exp
     echo 'expect "Do you wish to build TensorFlow with CUDA support? \[y/N\]: "' >> install-tensorflow-python3.exp
     echo 'send "Y\r"' >> install-tensorflow-python3.exp
