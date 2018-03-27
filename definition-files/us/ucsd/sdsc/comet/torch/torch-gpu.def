@@ -6,14 +6,13 @@ OSVersion: xenial
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
-    APPLICATION_NAME torch
-    APPLICATION_VERSION 7
+    APPLICATION_NAME torch7-nv
+    APPLICATION_VERSION 0.10.7
     APPLICATION_URL http://torch.ch/
     SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.3.1
-    SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html 
-    VERSION 0.0.2
-    LAST_UPDATED 20170831
+    SYSTEM_SINGULARITY_VERSION 2.3.2
+    SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
+    LAST_UPDATED 20180327
 
 %setup
 
@@ -21,11 +20,14 @@ OSVersion: xenial
 
 %post -c /bin/bash
 
+    # Set system locale
     export LC_ALL=C
 
+    # Install system metapackages
     apt-get -y install ubuntu-standard
     apt-get -y install ubuntu-server
 
+    # Add repositories
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} main"
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} universe"
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} multiverse"
@@ -46,14 +48,44 @@ OSVersion: xenial
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security multiverse"
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security restricted"
 
+    # Upgrade all packages to their latest versions
     apt-get -y update && apt-get -y upgrade
 
+    # Install common packages from 'main'
+    apt-get -y install autoconf
+    apt-get -y install automake
+    apt-get -y install build-essential
+    apt-get -y install libtool
+    apt-get -y install pkg-config
+    apt-get -y install gfortran
+    apt-get -y install zip
+
+    # Install expect to automate responses for interactive build questions
+    apt-get -y install expect
+
+    # Make filesystem mount points
     mkdir /cvmfs /oasis /projects /scratch
 
+    # Use /tmp to store temporary files within the container during the
+    # bootstraping process
+    cd /tmp
+
+    # Install miniconda2
+    wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
+    chmod +x Miniconda2-latest-Linux-x86_64.sh
+    ./Miniconda2-latest-Linux-x86_64.sh -b -p /opt/miniconda2
+
+    # Install miniconda3
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    chmod +x Miniconda3-latest-Linux-x86_64.sh
+    ./Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda3
+
+    # Location of NVIDIA repositories
     declare -r NVIDIA_ROOT_URL='http://developer.download.nvidia.com/compute'
     declare -r CUDA_REPO_URL="${NVIDIA_ROOT_URL}/cuda/repos/ubuntu1604/x86_64"
     declare -r ML_REPO_URL="${NVIDIA_ROOT_URL}/machine-learning/repos/ubuntu1604/x86_64/"
 
+    # Install NVIDIA package dependencies
     apt-get -y install x11-common
     apt-get -y install xserver-xorg-core
     apt-get -y install cmake
@@ -85,8 +117,7 @@ OSVersion: xenial
     apt-get -y install libglu1-mesa-dev
     apt-get -y install default-jre
 
-    cd /opt
-
+    # Download NVIDIA drivers, libraries, and packages
     wget --wait=10 "${CUDA_REPO_URL}/nvidia-367_367.48-0ubuntu1_amd64.deb" 
     wget --wait=10 "${CUDA_REPO_URL}/nvidia-367-dev_367.48-0ubuntu1_amd64.deb"
     wget --wait=10 "${CUDA_REPO_URL}/nvidia-modprobe_367.48-0ubuntu1_amd64.deb"
@@ -128,12 +159,15 @@ OSVersion: xenial
     wget --wait=10 "${CUDA_REPO_URL}/cuda-runtime-8-0_8.0.44-1_amd64.deb"
     wget --wait=10 "${CUDA_REPO_URL}/cuda-demo-suite-8-0_8.0.44-1_amd64.deb"
 
-    wget --wait=10 "${ML_REPO_URL}/libcudnn5_5.1.10-1+cuda8.0_amd64.deb"
-    wget --wait=10 "${ML_REPO_URL}/libcudnn5-dev_5.1.10-1+cuda8.0_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libcudnn6_6.0.21-1+cuda8.0_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libcudnn6-dev_6.0.21-1+cuda8.0_amd64.deb"
 
-    wget --wait=10 "${ML_REPO_URL}/libnccl1_1.2.3-1+cuda8.0_amd64.deb"
-    wget --wait=10 "${ML_REPO_URL}/libnccl-dev_1.2.3-1+cuda8.0_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libnccl2_2.1.2-1+cuda8.0_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libnccl-dev_2.1.2-1+cuda8.0_amd64.deb"
 
+    wget --wait=10 "${ML_REPO_URL}/torch7-nv_0.10.7-1ubuntu16.04+cuda8.0_amd64.deb"
+
+    # Install NVIDIA drivers, libraries, and packages
     dpkg -i nvidia-367_367.48-0ubuntu1_amd64.deb
     dpkg -i nvidia-367-dev_367.48-0ubuntu1_amd64.deb
     dpkg -i nvidia-modprobe_367.48-0ubuntu1_amd64.deb
@@ -175,29 +209,25 @@ OSVersion: xenial
     dpkg -i cuda-runtime-8-0_8.0.44-1_amd64.deb
     dpkg -i cuda-demo-suite-8-0_8.0.44-1_amd64.deb
 
-    dpkg -i libcudnn5_5.1.10-1+cuda8.0_amd64.deb
-    dpkg -i libcudnn5-dev_5.1.10-1+cuda8.0_amd64.deb 
+    dpkg -i libcudnn6_6.0.21-1+cuda8.0_amd64.deb
+    dpkg -i libcudnn6-dev_6.0.21-1+cuda8.0_amd64.deb
 
-    dpkg -i libnccl1_1.2.3-1+cuda8.0_amd64.deb
-    dpkg -i libnccl-dev_1.2.3-1+cuda8.0_amd64.deb
+    dpkg -i libnccl2_2.1.2-1+cuda8.0_amd64.deb
+    dpkg -i libnccl-dev_2.1.2-1+cuda8.0_amd64.deb
 
+    dpkg -i torch7-nv_0.10.7-1ubuntu16.04+cuda8.0_amd64.deb
+
+    # Set paths to CUDA binaries and libraries
     export PATH="/usr/local/cuda-8.0/bin${PATH:+:${PATH}}"
     export LD_LIBRARY_PATH="/usr/local/cuda-8.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
 
-    git clone https://github.com/torch/distro.git torch --recursive
-    cd torch
-    sed -i 's/sudo//g' install-deps
-    bash install-deps
-    ./install.sh
+    # Set container environment variables
+    cd /.singularity.d/env
+    echo 'export PATH="/usr/local/cuda-8.0/bin${PATH:+:${PATH}}"' >> 90-environment.sh
+    echo 'export LD_LIBRARY_PATH="/usr/local/cuda-8.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"' >> 90-environment.sh
 
-    . /opt/torch/install/bin/torch-activate
-
-    apt-get install -y libhdf5-dev
-    apt-get install -y hdf5-tools
-    apt-get install -y libmatio2
-
-    luarocks install hdf5
-    luarocks install matio
+    # Update database for mlocate
+    updatedb
 
 %files
 
@@ -205,5 +235,8 @@ OSVersion: xenial
 
 %test
 
-    . /opt/torch/install/bin/torch-activate
-    which th
+    export PATH="/usr/local/cuda-8.0/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="/usr/local/cuda-8.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+
+    nvcc --version
+

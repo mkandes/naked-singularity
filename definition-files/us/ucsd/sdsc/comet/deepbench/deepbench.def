@@ -10,10 +10,9 @@ OSVersion: xenial
     APPLICATION_VERSION unknown
     APPLICATION_URL https://github.com/baidu-research/DeepBench
     SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.3.1
-    SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html 
-    VERSION 0.0.3
-    LAST_UPDATED 20170831
+    SYSTEM_SINGULARITY_VERSION 2.3.2
+    SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
+    LAST_UPDATED 20180327
 
 %setup
 
@@ -21,11 +20,14 @@ OSVersion: xenial
 
 %post -c /bin/bash
 
+    # Set system locale
     export LC_ALL=C
 
+    # Install system metapackages
     apt-get -y install ubuntu-standard
     apt-get -y install ubuntu-server
 
+    # Add repositories
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} main"
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} universe"
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} multiverse"
@@ -46,47 +48,76 @@ OSVersion: xenial
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security multiverse"
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security restricted"
 
+    # Upgrade all packages to their latest versions
     apt-get -y update && apt-get -y upgrade
 
+    # Install common packages from 'main'
+    apt-get -y install autoconf
+    apt-get -y install automake
+    apt-get -y install build-essential
+    apt-get -y install libtool
+    apt-get -y install pkg-config
+    apt-get -y install gfortran
+    apt-get -y install zip
+
+    # Install expect to automate responses for interactive build questions
+    apt-get -y install expect
+
+    # Make filesystem mount points
     mkdir /cvmfs /oasis /projects /scratch
 
+    # Use /tmp to store temporary files within the container during the
+    # bootstraping process
+    cd /tmp
+
+    # Install miniconda2
+    wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
+    chmod +x Miniconda2-latest-Linux-x86_64.sh
+    ./Miniconda2-latest-Linux-x86_64.sh -b -p /opt/miniconda2
+
+    # Install miniconda3
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    chmod +x Miniconda3-latest-Linux-x86_64.sh
+    ./Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda3
+
+    # Location of NVIDIA repositories
     declare -r NVIDIA_ROOT_URL='http://developer.download.nvidia.com/compute'
     declare -r CUDA_REPO_URL="${NVIDIA_ROOT_URL}/cuda/repos/ubuntu1604/x86_64"
     declare -r ML_REPO_URL="${NVIDIA_ROOT_URL}/machine-learning/repos/ubuntu1604/x86_64/"
 
-    apt-get -y install x11-common 
-    apt-get -y install xserver-xorg-core 
-    apt-get -y install cmake 
-    apt-get -y install make 
+    # Install NVIDIA package dependencies
+    apt-get -y install x11-common
+    apt-get -y install xserver-xorg-core
+    apt-get -y install cmake
+    apt-get -y install make
     apt-get -y install dkms
-    apt-get -y install linux-libc-dev 
-    apt-get -y install libc6-dev 
-    apt-get -y install lib32gcc1 
-    apt-get -y install libc6-i386 
+    apt-get -y install linux-libc-dev
+    apt-get -y install libc6-dev
+    apt-get -y install lib32gcc1
+    apt-get -y install libc6-i386
     apt-get -y install libgl1
-    apt-get -y install libwayland-client0 
-    apt-get -y install libwayland-server0 
+    apt-get -y install libwayland-client0
+    apt-get -y install libwayland-server0
     apt-get -y install pkg-config
-    apt-get -y install screen-resolution-extra 
-    apt-get -y install libvdpau1 
+    apt-get -y install screen-resolution-extra
+    apt-get -y install libvdpau1
     apt-get -y install libatk1.0-0
-    apt-get -y install libcairo-gobject2 
-    apt-get -y install libcairo2 
+    apt-get -y install libcairo-gobject2
+    apt-get -y install libcairo2
     apt-get -y install libfontconfig1
-    apt-get -y install libgdk-pixbuf2.0-0 
-    apt-get -y install libgtk-3-0 
-    apt-get -y install libgtk2.0-0 
+    apt-get -y install libgdk-pixbuf2.0-0
+    apt-get -y install libgtk-3-0
+    apt-get -y install libgtk2.0-0
     apt-get -y install libjansson4
     apt-get -y install freeglut3-dev
-    apt-get -y install libx11-dev 
+    apt-get -y install libx11-dev
     apt-get -y install libxmu-dev
     apt-get -y install libxi-dev
     apt-get -y install libglu1-mesa
     apt-get -y install libglu1-mesa-dev
     apt-get -y install default-jre
 
-    cd /opt
-
+    # Download NVIDIA drivers, libraries, and packages
     wget --wait=10 "${CUDA_REPO_URL}/nvidia-367_367.48-0ubuntu1_amd64.deb" 
     wget --wait=10 "${CUDA_REPO_URL}/nvidia-367-dev_367.48-0ubuntu1_amd64.deb"
     wget --wait=10 "${CUDA_REPO_URL}/nvidia-modprobe_367.48-0ubuntu1_amd64.deb"
@@ -128,12 +159,13 @@ OSVersion: xenial
     wget --wait=10 "${CUDA_REPO_URL}/cuda-runtime-8-0_8.0.44-1_amd64.deb"
     wget --wait=10 "${CUDA_REPO_URL}/cuda-demo-suite-8-0_8.0.44-1_amd64.deb"
 
-    wget --wait=10 "${ML_REPO_URL}/libcudnn5_5.1.10-1+cuda8.0_amd64.deb"
-    wget --wait=10 "${ML_REPO_URL}/libcudnn5-dev_5.1.10-1+cuda8.0_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libcudnn6_6.0.21-1+cuda8.0_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libcudnn6-dev_6.0.21-1+cuda8.0_amd64.deb"
 
-    wget --wait=10 "${ML_REPO_URL}/libnccl1_1.2.3-1+cuda8.0_amd64.deb"
-    wget --wait=10 "${ML_REPO_URL}/libnccl-dev_1.2.3-1+cuda8.0_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libnccl2_2.1.2-1+cuda8.0_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libnccl-dev_2.1.2-1+cuda8.0_amd64.deb"
 
+    # Install NVIDIA drivers, libraries, and packages
     dpkg -i nvidia-367_367.48-0ubuntu1_amd64.deb
     dpkg -i nvidia-367-dev_367.48-0ubuntu1_amd64.deb
     dpkg -i nvidia-modprobe_367.48-0ubuntu1_amd64.deb
@@ -175,37 +207,100 @@ OSVersion: xenial
     dpkg -i cuda-runtime-8-0_8.0.44-1_amd64.deb
     dpkg -i cuda-demo-suite-8-0_8.0.44-1_amd64.deb
 
-    dpkg -i libcudnn5_5.1.10-1+cuda8.0_amd64.deb
-    dpkg -i libcudnn5-dev_5.1.10-1+cuda8.0_amd64.deb 
+    dpkg -i libcudnn6_6.0.21-1+cuda8.0_amd64.deb
+    dpkg -i libcudnn6-dev_6.0.21-1+cuda8.0_amd64.deb
 
-    dpkg -i libnccl1_1.2.3-1+cuda8.0_amd64.deb
-    dpkg -i libnccl-dev_1.2.3-1+cuda8.0_amd64.deb
+    dpkg -i libnccl2_2.1.2-1+cuda8.0_amd64.deb
+    dpkg -i libnccl-dev_2.1.2-1+cuda8.0_amd64.deb
 
+    # Set paths to CUDA binaries and libraries
     export PATH="/usr/local/cuda-8.0/bin${PATH:+:${PATH}}"
     export LD_LIBRARY_PATH="/usr/local/cuda-8.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+    export LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}"
 
-    apt-get -y install bison 
-    apt-get -y install libibverbs-dev 
-    apt-get -y install libibmad-dev 
-    apt-get -y install libibumad-dev
-    apt-get -y install librdmacm-dev 
-    apt-get -y install libmlx5-dev 
+    # Install basic drivers for user space access to Ethernet, RDMA,
+    # and Infiniband. See https://community.mellanox.com/docs/DOC-2431
+    apt-get -y install dkms
+    apt-get -y install infiniband-diags
+    apt-get -y install libibverbs-dev
+    apt-get -y install ibacm
+    apt-get -y install librdmacm-dev
     apt-get -y install libmlx4-dev
-    apt-get -y install gfortran
+    apt-get -y install libmlx5-dev
+    apt-get -y install mstflint
+    apt-get -y install libibcm-dev
+    apt-get -y install libibmad-dev
+    apt-get -y install libibumad-dev
+    apt-get -y install opensm
+    apt-get -y install srptools
 
-    wget http://mvapich.cse.ohio-state.edu/download/mvapich/mv2/mvapich2-2.1.tar.gz
-    tar -xzf mvapich2-2.1.tar.gz
-    cd mvapich2-2.1
-    ./configure --prefix=/usr/local
-    make -j4
-    make install
+    # Install additional tools
+    apt-get -y install ibutils
+    apt-get -y install ibverbs-utils
+    apt-get -y install rdmacm-utils
+    apt-get -y install perftest
+    apt-get -y install numactl
+    apt-get -y install libnuma-dev
+
+    # Install libnl
+    apt-get -y install libnl-3-200
+    apt-get -y install libnl-route-3-200
+    apt-get -y install libnl-route-3-dev
+    apt-get -y install libnl-utils
+
+    # Download, build, and install CUDA-aware OpenMPI
+    wget https://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.4.tar.gz
+    tar -xzvf openmpi-1.8.4.tar.gz
+    cd openmpi-1.8.4
+    ./configure --prefix=/opt/openmpi-1.8.4 --with-cuda
+     make all install
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
 
     cd /opt
 
-    git clone https://github.com/baidu-research/DeepBench.git
+    # Donwload, build, and install NCCL tests
+    git clone https://github.com/NVIDIA/nccl-tests.git
+    cd nccl-tests
+    make MPI=1 \
+         MPI_HOME='/opt/openmpi-1.8.4' \
+         CUDA_HOME='/usr/local/cuda-8.0' \
+         NCCL_HOME='/usr/lib/x86_64-linux-gnu'
+
+    # Download, build, and install DeepBench
+    cd /opt
+    git clone https://github.com/baidu-research/DeepBench
     cd DeepBench/code
-    sed -i 's/-lmpi_cxx//' osu_allreduce/Makefile
-    make CUDA_PATH='/usr/local/cuda-8.0' CUDNN_PATH='/usr/lib/x86_64-linux-gnu/' NCCL_PATH='/usr/lib/x86_64-linux-gnu/' MPI_PATH='/usr/local/bin/' ARCH='sm_60'
+    git clone https://github.com/baidu-research/baidu-allreduce
+    cd baidu-allreduce
+    make MPI_ROOT='/opt/openmpi-1.8.4' CUDA_ROOT='/usr/local/cuda-8.0'
+    cd ../
+    make BAIDU_ALLREDUCE_PATH='/opt/DeepBench/code/baidu-allreduce' \
+         CUDA_PATH='/usr/local/cuda-8.0' \
+         CUDNN_PATH='/usr/lib/x86_64-linux-gnu' \
+         NCCL_PATH='/usr/lib/x86_64-linux-gnu' \
+         MPI_PATH='/opt/openmpi-1.8.4' \
+         MPI_INCLUDE_PATH='/opt/openmpi-1.8.4/include' \
+         ARCH='sm_30,sm_32,sm_35,sm_50,sm_52,sm_60,sm_61,sm_62'
+
+    # Set path to baidu-allreduce and Deepbench binaries
+    export PATH="/opt/DeepBench/code/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/DeepBench/code/baidu-allreduce:${LD_LIBRARY_PATH}"
+
+    # Set container environment variables
+    cd /.singularity.d/env
+    echo 'export PATH="/usr/local/cuda-8.0/bin${PATH:+:${PATH}}"' >> 90-environment.sh
+    echo 'export LD_LIBRARY_PATH="/usr/local/cuda-8.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"' >> 90-environment.sh
+    echo 'export LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}"' >> 90-environment.sh
+    echo 'export PATH="/opt/openmpi-1.8.4/bin:${PATH}"' >> 90-environment.sh
+    echo 'export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"' >> 90-environment.sh
+    echo 'export PATH="/opt/DeepBench/code/bin:${PATH}"' >> 90-environment.sh
+    echo 'export LD_LIBRARY_PATH="/opt/DeepBench/code/baidu-allreduce:${LD_LIBRARY_PATH}"' >> 90-environment.sh
+
+    # Update database for mlocate
+    updatedb
 
 %files
 
@@ -213,7 +308,13 @@ OSVersion: xenial
 
 %test
 
+    # Test DeepBench with 32-bit GEMM training benchmark
     export PATH="/usr/local/cuda-8.0/bin${PATH:+:${PATH}}"
-    export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda-8.0/lib64:/usr/lib/x86_64-linux-gnu/:/usr/local/lib/"
+    export LD_LIBRARY_PATH="/usr/local/cuda-8.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+    export LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}"
+    export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/DeepBench/code/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/DeepBench/code/baidu-allreduce:${LD_LIBRARY_PATH}"
 
-    time -p /opt/DeepBench/code/bin/gemm_bench train float
+    time -p gemm_bench train float
