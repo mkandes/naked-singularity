@@ -55,6 +55,7 @@ OSVersion: xenial
     apt-get -y install autoconf
     apt-get -y install automake
     apt-get -y install build-essential
+    apt-get -y install cmake
     apt-get -y install libtool
     apt-get -y install pkg-config
     apt-get -y install gfortran

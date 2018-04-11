@@ -7,13 +7,12 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
     APPLICATION_NAME neon
-    APPLICATION_VERSION 2.0.0+41e746a 
-    APPLICATION_URL http://neon.nervanasys.com/index.html/index.html
+    APPLICATION_VERSION 2.6.0
+    APPLICATION_URL https://ai.intel.com/neon/
     SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.3.1
+    SYSTEM_SINGULARITY_VERSION 2.3.2
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
-    VERSION 0.0.1
-    LAST_UPDATED 20170830
+    LAST_UPDATED 20180410
 
 %setup
 
@@ -21,11 +20,14 @@ OSVersion: xenial
 
 %post -c /bin/bash
 
+    # Set system locale
     export LC_ALL=C
 
+    # Install system metapackages
     apt-get -y install ubuntu-standard
     apt-get -y install ubuntu-server
 
+    # Add repositories
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} main"
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} universe"
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} multiverse"
@@ -46,128 +48,147 @@ OSVersion: xenial
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security multiverse"
     add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security restricted"
 
-    apt-get -y update && apt-get -y upgrade && apt-get -y dist-upgrade && apt-get -y autoremove
+    # Upgrade all packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
 
+    # Install common packages from 'main'
+    apt-get -y install autoconf
+    apt-get -y install automake
+    apt-get -y install build-essential
+    apt-get -y install cmake
+    apt-get -y install libtool
+    apt-get -y install pkg-config
+    apt-get -y install gfortran
+    apt-get -y install zip
+
+    # Install expect to automate responses for interactive build questions
+    apt-get -y install expect
+
+    # Make filesystem mount points
     mkdir /cvmfs /oasis /projects /scratch
 
-    cd /opt
+    # Use /tmp to store temporary files within the container during the
+    # bootstraping process
+    cd /tmp
 
-    apt-get -y install build-essential
-    apt-get -y install clang 
-    apt-get -y install cmake 
-    apt-get -y install g++
-    apt-get -y install git
-    apt-get -y install pkg-config
-    apt-get -y install wget
+    # Install miniconda2
+    wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
+    chmod +x Miniconda2-latest-Linux-x86_64.sh
+    ./Miniconda2-latest-Linux-x86_64.sh -b -p /opt/miniconda2
 
-    apt-get -y install qt5-default 
-    apt-get -y install libvtk6-dev
+    # Install miniconda3
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    chmod +x Miniconda3-latest-Linux-x86_64.sh
+    ./Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda3
 
-    apt-get -y install zlib1g-dev 
-    apt-get -y install libjpeg-dev
-    apt-get -y install libwebp-dev 
-    apt-get -y install libpng-dev 
-    apt-get -y install libtiff5-dev
-    apt-get -y install libjasper-dev
-    apt-get -y install libopenexr-dev 
-    apt-get -y install libgdal-dev
-
-    apt-get -y install libdc1394-22-dev 
-    apt-get -y install libavcodec-dev 
-    apt-get -y install libavdevice-dev
-    apt-get -y install libavformat-dev
-    apt-get -y install libavfilter-dev
-    apt-get -y install libavresample-dev
-    apt-get -y install libavutil-dev
-    apt-get -y install libswscale-dev
-    apt-get -y install libtheora-dev 
-    apt-get -y install libvorbis-dev
-    apt-get -y install libxvidcore-dev
-    apt-get -y install libv4l-dev
-    apt-get -y install v4l-utils
-    apt-get -y isntall libgstreamer0.10-dev 
-    apt-get -y install libgstreamer-plugins-base0.10-dev
-    apt-get -y install x264
-    apt-get -y install libx264-dev
-    apt-get -y install libxine2-dev
-    apt-get -y install libfaac-dev
-    apt-get -y install libmp3lame-dev
-    apt-get -y install libopencore-amrnb-dev
-    apt-get -y install libopencore-amrwb-dev
-    apt-get -y install libsox-dev 
+    # Install aeon and neon dependencies
+    apt-get -y install clang
+    apt-get -y install libcurl4-openssl-dev
+    apt-get -y install libopencv-dev
+    apt-get -y install libsox-dev
+    apt-get -y install libboost-filesystem-dev
+    apt-get -y install libboost-system-dev
+    apt-get -y install libssl-dev
     apt-get -y install ffmpeg
 
-    apt-get -y install gfortran
-    apt-get -y install libtbb-dev
-    apt-get -y install libeigen3-dev
-    apt-get -y install libatlas-base-dev
-
+    # Install aeon and neon python dependencies
     apt-get -y install python-dev
     apt-get -y install python-pip
-    apt-get -y install python-tk 
-    apt-get -y install python-numpy
     apt-get -y install python-virtualenv
-    apt-get -y install python3-dev
-    apt-get -y install python3-pip
-    apt-get -y install python3-tk
-    apt-get -y install python3-numpy
-    apt-get -y install python3-virtualenv
+    apt-get -y install python-numpy
+    apt-get -y install python-h5py
+    apt-get -y install python-yaml
+    apt-get -y install python-opencv
+    apt-get -y install python-future
+    apt-get -y install python-configargparse
 
-    apt-get -y install ant
-    apt-get -y install default-jdk
-
-    apt-get -y install doxygen
-
-    apt-get -y install libprotobuf-dev
-    apt-get -y install protobuf-compiler
-    apt-get -y install libgoogle-glog-dev
-    apt-get -y install libgflags-dev
-    apt-get -y install libgphoto2-dev
-    apt-get -y install libhdf5-dev
-    apt-get -y install libyaml-dev
-
-    wget https://github.com/opencv/opencv/archive/3.3.0.tar.gz -O opencv-3.3.0.tar.gz
-    wget https://github.com/opencv/opencv_contrib/archive/3.3.0.tar.gz -O opencv_contrib-3.3.0.tar.gz
-    
-    tar -xzf opencv-3.3.0.tar.gz
-    tar -xzf opencv_contrib-3.3.0.tar.gz
-
-    cd opencv-3.3.0
-    mkdir build
-    cd build
-    cmake -D CMAKE_BUILD_TYPE=RELEASE \
-          -D CMAKE_INSTALL_PREFIX=/usr/local \
-          -D BUILD_EXAMPLES=ON \
-          -D BUILD_PERF_TESTS=OFF \
-          -D BUILD_TBB=ON \
-          -D BUILD_TESTS=OFF \
-          -D BUILD_TIFF=ON \
-          -D ENABLE_AVX=ON \
-          -D ENABLE_PRECOMPILED_HEADERS=OFF \
-          -D FORCE_VTK=ON \
-          -D INSTALL_C_EXAMPLES=ON \
-          -D INSTALL_PYTHON_EXAMPLES=ON \
-          -D OPENCV_EXTRA_MODULES_PATH=/opt/opencv_contrib-3.3.0/modules \
-          -D WITH_CUDA=OFF \
-          -D WITH_EIGEN=OFF \
-          -D WITH_GDAL=ON \
-          -D WITH_IPP=OFF \
-          -D WITH_OPENCL=OFF \
-          -D WITH_OPENGL=ON \
-          -D WITH_QT=ON \
-          -D WITH_TBB=ON \
-          -D WITH_V4L=ON \
-          -D WITH_VTK=ON \
-          -D WITH_XINE=ON ..
-    make
-    make install
-    ldconfig
+    pip install -y --upgrade setuptools
 
     cd /opt
 
+    # Download, build, and install aeon for python
+    git clone https://github.com/NervanaSystems/aeon.git
+    mkdir -p /opt/aeon/build
+    cd /opt/aeon/build
+    cmake .. \
+      -DCMAKE_BUILD_TYPE='Release' \
+      -DPYTHON_EXECUTABLE='/usr/bin/python' \
+      -DPYTHON_LIBRARIES='/usr/lib/python2.7' \
+      -DPYTHON_INCLUDE_DIRS='/usr/include/python2.7' \
+      -DENABLE_AEON_SERVICE='OFF' \
+      -DENABLE_AEON_CLIENT='ON' \
+      -DENABLE_OPENFABRICS_CONNECTOR='OFF'
+    pip install .
+
+    cd /opt
+
+    # Download, build, and install neon for python
     git clone https://github.com/NervanaSystems/neon.git
-    cd neon
-    make sysinstall
+    cd /opt/neon
+    git checkout latest
+    make neon_install
+
+    # Install aeon and neon python3 dependencies
+    apt-get -y install python3-dev
+    apt-get -y install python3-pip
+    apt-get -y install python3-virtualenv
+    apt-get -y install python3-numpy
+    apt-get -y install python3-h5py
+    apt-get -y install python3-yaml
+    apt-get -y install python3-opencv
+    apt-get -y install python3-future
+    apt-get -y install python3-configargparse
+
+    pip3 install -y --upgrade setuptools
+
+    # Download, build, and install aeon for python3
+    cd /opt/aeon/build
+    cmake .. \
+      -DCMAKE_BUILD_TYPE='Release' \
+      -DPYTHON_EXECUTABLE='/usr/bin/python' \
+      -DPYTHON_LIBRARIES='/usr/lib/python3.5' \
+      -DPYTHON_INCLUDE_DIRS='/usr/include/python3.5' \
+      -DENABLE_AEON_SERVICE='OFF' \
+      -DENABLE_AEON_CLIENT='ON' \
+      -DENABLE_OPENFABRICS_CONNECTOR='OFF'
+    pip3 install .
+
+    # Download, build, and install neon for python3
+    cd /opt/neon
+    sed -i 's/@python setup.py install/@python3 setup.py install/' Makefile
+    make neon_install
+
+    # Install common python packages for data science and machine 
+    # learning applications
+    apt-get -y install python-scipy
+    apt-get -y install python-pandas
+    apt-get -y install python-matplotlib
+    apt-get -y install ipython
+    apt-get -y install ipython-notebook
+    apt-get -y install python-sympy
+    apt-get -y install python-nose
+    apt-get -y install python-sklearn
+    apt-get -y install python-mlpy
+    apt-get -y install python-nltk
+    apt-get -y install python-statsmodels
+
+    # Install common python3 packages for data science and machine 
+    # learning applications
+    apt-get -y install python3-scipy
+    apt-get -y install python3-pandas
+    apt-get -y install python3-matplotlib
+    apt-get -y install ipython3
+    apt-get -y install ipython3-notebook
+    apt-get -y install python3-sympy
+    apt-get -y install python3-nose
+    apt-get -y install python3-sklearn
+    apt-get -y install python3-nltk
+
+    # Set container environment variables
+    cd /.singularity.d/env
+
+    # Update database for mlocate
+    updatedb
 
 %files
 
@@ -175,4 +196,5 @@ OSVersion: xenial
 
 %test
 
+    cd /tmp 
     python /opt/neon/examples/mnist_mlp.py
