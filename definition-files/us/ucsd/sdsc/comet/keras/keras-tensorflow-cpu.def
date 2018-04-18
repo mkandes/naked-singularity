@@ -12,7 +12,7 @@ OSVersion: xenial
     SYSTEM_NAME comet
     SYSTEM_SINGULARITY_VERSION 2.3.2
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
-    LAST_UPDATED 20180404
+    LAST_UPDATED 20180418
 
 %setup
 
@@ -203,6 +203,10 @@ OSVersion: xenial
     apt-get -y install libopencv-dev
     apt-get -y install python-opencv
 
+    # Install common python packages for the biological and biomedical sciences
+    apt-get -y install python-biopython
+    apt-get -y install python-biopython-sql
+
     # Install common python3 packages for data science and machine learning applications
     apt-get -y install python3-scipy
     apt-get -y install python3-pandas
@@ -214,15 +218,20 @@ OSVersion: xenial
     apt-get -y install python3-sklearn
     apt-get -y install python3-nltk
 
+    # Install common python3 packages for the biological and biomedical sciences
+    apt-get -y install python3-biopython
+    apt-get -y install python3-biopython-sql
+
     # Install Keras dependencies for python(2) and python3
     apt-get -y install python-yaml
     apt-get -y install python3-yaml
+
+    cd /opt
  
     # Download, build, and install Keras
-    cd /opt
     wget https://github.com/keras-team/keras/archive/2.1.5.tar.gz
     tar -xzvf 2.1.5.tar.gz
-    cd keras-2.1.5
+    cd /opt/keras-2.1.5
     python setup.py install
     python3 setup.py install
 
