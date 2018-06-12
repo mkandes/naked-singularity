@@ -4,19 +4,27 @@ OSVersion: xenial
 
 %labels
 
-    AUTHOR_NAME Marty Kandes
-    AUTHOR_EMAIL mkandes@sdsc.edu
     APPLICATION_NAME mvapich2
     APPLICATION_VERSION 2.1
     APPLICATION_URL http://mvapich.cse.ohio-state.edu/
+
     SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.3.2
+    SYSTEM_SINGULARITY_VERSION 2.5.1
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
-    LAST_UPDATED 20180320
+
+    SINGULARITY_IMAGE_SIZE 2048
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20180523
 
 %setup
 
 %environment
+
+    # Set system locale
+    export LC_ALL=C
 
 %post -c /bin/bash
 

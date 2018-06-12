@@ -4,19 +4,27 @@ OSVersion: xenial
 
 %labels
 
-    AUTHOR_NAME Marty Kandes
-    AUTHOR_EMAIL mkandes@sdsc.edu
     APPLICATION_NAME meep
     APPLICATION_VERSION 1.4.3
     APPLICATION_URL https://www.open-mpi.org/
+
     SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.3.2
+    SYSTEM_SINGULARITY_VERSION 2.5.1
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
-    LAST_UPDATED 20180315
+
+    SINGULARITY_IMAGE_SIZE 4092
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20180530
 
 %setup
 
 %environment
+
+    # Set system locale
+    export LC_ALL=C
 
 %post -c /bin/bash
 
@@ -247,9 +255,6 @@ OSVersion: xenial
     make
     make install
 
-    #export PATH="/opt/meep-1.4.3/bin:${PATH}"
-    #export LD_LIBRARY_PATH="/opt/meep-1.4.3/lib:${LD_LIBRARY_PATH}"
-
     # Set container environment variables
     cd /.singularity.d/env
     echo 'export PATH="/opt/openmpi-1.8.4/bin:${PATH}"' >> 90-environment.sh
@@ -279,5 +284,23 @@ OSVersion: xenial
 %test
     
     # Test MEEP (and MPB) with an example calculation
+
+    export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/harminv-1.4.1/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/harminv-1.4.1/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/libctl-4.0.0/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/libctl-4.0.0/lib:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="/opt/zlib-1.2.11/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/hdf5-1.10.1/hdf5/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/hdf5-1.10.1/hdf5/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/h5utils-1.13/bin:${PATH}"
+    export PATH="/opt/fftw-3.3.7/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/fftw-3.3.7/lib:{LD_LIBRARY_PATH}"
+    export PATH="/opt/mpb-1.6.1/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/mpb-1.6.1/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/meep-1.4.3/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/meep-1.4.3/lib:${LD_LIBRARY_PATH}"
+
     time -p meep /opt/meep-1.4.3/examples/parallel-wvgs-force.ctl
     time -p mpirun -np 2 meep /opt/meep-1.4.3/examples/parallel-wvgs-force.ctl

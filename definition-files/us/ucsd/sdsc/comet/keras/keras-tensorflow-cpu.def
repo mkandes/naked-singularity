@@ -4,19 +4,27 @@ OSVersion: xenial
 
 %labels
 
-    AUTHOR_NAME Marty Kandes
-    AUTHOR_EMAIL mkandes@sdsc.edu
     APPLICATION_NAME keras + tensorflow
     APPLICATION_VERSION 2.1.5 + 1.7
     APPLICATION_URL https://keras.io/
+
     SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.3.2
+    SYSTEM_SINGULARITY_VERSION 2.5.1
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
-    LAST_UPDATED 20180418
+
+    SINGULARITY_IMAGE_SIZE 16384
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20180524
 
 %setup
 
 %environment
+
+    # Set system locale
+    export LC_ALL=C
 
 %post -c /bin/bash
 

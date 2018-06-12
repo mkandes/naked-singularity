@@ -4,19 +4,27 @@ OSVersion: xenial
 
 %labels
 
-    AUTHOR_NAME Marty Kandes
-    AUTHOR_EMAIL mkandes@sdsc.edu
     APPLICATION_NAME openmpi
     APPLICATION_VERSION 1.8.4
     APPLICATION_URL https://www.open-mpi.org/
+
     SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.3.2
+    SYSTEM_SINGULARITY_VERSION 2.5.1
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
-    LAST_UPDATED 20180320
+
+    SINGULARITY_IMAGE_SIZE 2048
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20180524
 
 %setup
 
 %environment
+
+    # Set system locale
+    export LC_ALL=C
 
 %post -c /bin/bash
 
@@ -111,6 +119,9 @@ OSVersion: xenial
     apt-get -y install libnl-route-3-dev
     apt-get -y install libnl-utils
 
+    # Install OpenMPI dependencies
+    apt-get -y install zlib1g-dev
+
     # Download, build, and install OpenMPI
     wget https://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.4.tar.gz
     tar -xzvf openmpi-1.8.4.tar.gz
@@ -135,7 +146,3 @@ OSVersion: xenial
 %runscript
 
 %test
-
-    export PATH="/opt/openmpi/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/openmpi/lib:${LD_LIBRARY_PATH}"
-    mpirun --version

@@ -4,19 +4,27 @@ OSVersion: xenial
 
 %labels
 
-    AUTHOR_NAME Marty Kandes
-    AUTHOR_EMAIL mkandes@sdsc.edu
     APPLICATION_NAME neon
     APPLICATION_VERSION 2.6.0
     APPLICATION_URL https://ai.intel.com/neon/
+
     SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.3.2
+    SYSTEM_SINGULARITY_VERSION 2.5.1
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
-    LAST_UPDATED 20180410
+
+    SINGULARITY_IMAGE_SIZE 8192
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20180524
 
 %setup
 
 %environment
+
+    # Set system locale
+    export LC_ALL=C
 
 %post -c /bin/bash
 

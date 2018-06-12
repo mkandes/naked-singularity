@@ -4,19 +4,27 @@ OSVersion: xenial
 
 %labels
 
-    AUTHOR_NAME Marty Kandes
-    AUTHOR_EMAIL mkandes@sdsc.edu
     APPLICATION_NAME cuda
     APPLICATION_VERSION 8.0.44
     APPLICATION_URL https://developer.nvidia.com/cuda-zone
+
     SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.3.2
+    SYSTEM_SINGULARITY_VERSION 2.5.1
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
-    LAST_UPDATED 20180320
+
+    SINGULARITY_IMAGE_SIZE 8192
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20180525
 
 %setup
 
 %environment
+
+    # Set system locale
+    export LC_ALL=C
 
 %post -c /bin/bash
 
@@ -160,11 +168,11 @@ OSVersion: xenial
     wget --wait=10 "${CUDA_REPO_URL}/cuda-runtime-8-0_8.0.44-1_amd64.deb"
     wget --wait=10 "${CUDA_REPO_URL}/cuda-demo-suite-8-0_8.0.44-1_amd64.deb"
 
-    wget --wait=10 "${ML_REPO_URL}/libcudnn6_6.0.21-1+cuda8.0_amd64.deb"
-    wget --wait=10 "${ML_REPO_URL}/libcudnn6-dev_6.0.21-1+cuda8.0_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libcudnn7_7.1.4.18-1+cuda8.0_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libcudnn7-dev_7.1.4.18-1+cuda8.0_amd64.deb"
 
-    wget --wait=10 "${ML_REPO_URL}/libnccl2_2.1.2-1+cuda8.0_amd64.deb"
-    wget --wait=10 "${ML_REPO_URL}/libnccl-dev_2.1.2-1+cuda8.0_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libnccl2_2.2.12-1+cuda8.0_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libnccl-dev_2.2.12-1+cuda8.0_amd64.deb"
 
     # Install NVIDIA drivers, libraries, and packages
     dpkg -i nvidia-367_367.48-0ubuntu1_amd64.deb
@@ -208,11 +216,11 @@ OSVersion: xenial
     dpkg -i cuda-runtime-8-0_8.0.44-1_amd64.deb
     dpkg -i cuda-demo-suite-8-0_8.0.44-1_amd64.deb
 
-    dpkg -i libcudnn6_6.0.21-1+cuda8.0_amd64.deb
-    dpkg -i libcudnn6-dev_6.0.21-1+cuda8.0_amd64.deb
+    dpkg -i libcudnn7_7.1.4.18-1+cuda8.0_amd64.deb
+    dpkg -i libcudnn7-dev_7.1.4.18-1+cuda8.0_amd64.deb
 
-    dpkg -i libnccl2_2.1.2-1+cuda8.0_amd64.deb
-    dpkg -i libnccl-dev_2.1.2-1+cuda8.0_amd64.deb
+    dpkg -i libnccl2_2.2.12-1+cuda8.0_amd64.deb
+    dpkg -i libnccl-dev_2.2.12-1+cuda8.0_amd64.deb
 
     # Set paths to CUDA binaries and libraries
     export PATH="/usr/local/cuda-8.0/bin${PATH:+:${PATH}}"

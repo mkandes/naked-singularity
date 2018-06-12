@@ -4,19 +4,27 @@ OSVersion: xenial
 
 %labels
 
-    AUTHOR_NAME Marty Kandes
-    AUTHOR_EMAIL mkandes@sdsc.edu
     APPLICATION_NAME deepbench
     APPLICATION_VERSION unknown
     APPLICATION_URL https://github.com/baidu-research/DeepBench
+
     SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.3.2
+    SYSTEM_SINGULARITY_VERSION 2.5.1
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
-    LAST_UPDATED 20180327
+
+    SINGULARITY_IMAGE_SIZE 8192
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 201808524
 
 %setup
 
 %environment
+
+    # Set system locale
+    export LC_ALL=C
 
 %post -c /bin/bash
 
@@ -307,14 +315,3 @@ OSVersion: xenial
 %runscript
 
 %test
-
-    # Test DeepBench with 32-bit GEMM training benchmark
-    export PATH="/usr/local/cuda-8.0/bin${PATH:+:${PATH}}"
-    export LD_LIBRARY_PATH="/usr/local/cuda-8.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
-    export LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}"
-    export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
-    export PATH="/opt/DeepBench/code/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/DeepBench/code/baidu-allreduce:${LD_LIBRARY_PATH}"
-
-    time -p gemm_bench train float

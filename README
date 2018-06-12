@@ -10,6 +10,22 @@ DESCRIPTION
 
     * http://singularity.lbl.gov/
 
+USAGE
+
+     1. Install Singularity on your local desktop, laptop, or virtual 
+        machine.
+
+            ./naked-singularity.sh install
+
+     2. Build a simple Ubuntu Singularity container.
+
+            ./naked-singularity.sh build -a ubuntu -d ubuntu.def 
+
+     3. Uninstall Singularity from your local desktop, laptop, or 
+        virtual machine.
+
+            ./naked-singularity.sh uninstall
+
 STATUS
 
     A work in progress. 
@@ -29,8 +45,8 @@ AUTHOR
 
 VERSION
 
-    0.3.0
+    0.3.1
 
 LAST UPDATED
 
-    Wednesday, April 18th, 2018
+    Tuesday, June 12th, 2018

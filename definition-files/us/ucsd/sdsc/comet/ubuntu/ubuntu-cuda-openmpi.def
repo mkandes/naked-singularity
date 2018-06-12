@@ -4,19 +4,27 @@ OSVersion: xenial
 
 %labels
 
-    AUTHOR_NAME Marty Kandes
-    AUTHOR_EMAIL mkandes@sdsc.edu
     APPLICATION_NAME cuda + openmpi
     APPLICATION_VERSION 8.0.44 + 1.8.4
     APPLICATION_URL https://www.open-mpi.org/faq/?category=runcuda
+
     SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.3.2
+    SYSTEM_SINGULARITY_VERSION 2.5.1
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
-    LAST_UPDATED 20180320
+
+    SINGULARITY_IMAGE_SIZE 8192
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20180524
 
 %setup
 
 %environment
+
+    # Set system locale
+    export LC_ALL=C
 
 %post -c /bin/bash
 
@@ -248,6 +256,9 @@ OSVersion: xenial
     apt-get -y install libnl-route-3-dev
     apt-get -y install libnl-utils
 
+    # Install OpenMPI dependencies
+    apt-get -y install zlib1g-dev
+
     # Download, build, and install CUDA-aware OpenMPI
     wget https://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.4.tar.gz
     tar -xzvf openmpi-1.8.4.tar.gz
@@ -274,13 +285,3 @@ OSVersion: xenial
 %runscript
 
 %test
-
-    export PATH="/usr/local/cuda-8.0/bin${PATH:+:${PATH}}"
-    export LD_LIBRARY_PATH="/usr/local/cuda-8.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
-    export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
-
-    nvcc --version
-    ompi_info --parsable --all | grep mpi_built_with_cuda_support:value
-    ompi_info --all | grep btl_openib_have_cuda_gdr
-    ompi_info --all | grep btl_openib_have_driver_gdr
