@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20180525
+    LAST_UPDATED 20180615
 
 %setup
 
@@ -97,6 +97,7 @@ OSVersion: xenial
     # Install NVIDIA package dependencies
     apt-get -y install x11-common
     apt-get -y install xserver-xorg-core
+    apt-get -y install xserver-xorg-legacy
     apt-get -y install cmake
     apt-get -y install make
     apt-get -y install dkms
@@ -127,15 +128,15 @@ OSVersion: xenial
     apt-get -y install default-jre
 
     # Download NVIDIA drivers, libraries, and packages
-    wget --wait=10 "${CUDA_REPO_URL}/nvidia-367_367.48-0ubuntu1_amd64.deb" 
-    wget --wait=10 "${CUDA_REPO_URL}/nvidia-367-dev_367.48-0ubuntu1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/nvidia-modprobe_367.48-0ubuntu1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/libcuda1-367_367.48-0ubuntu1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/nvidia-libopencl1-367_367.48-0ubuntu1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/nvidia-opencl-icd-367_367.48-0ubuntu1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/libxnvctrl0_367.48-0ubuntu1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/nvidia-settings_367.48-0ubuntu1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-drivers_367.48-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-396_396.26-0ubuntu1_amd64.deb" 
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-396-dev_396.26-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-modprobe_396.26-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/libcuda1-396_396.26-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-libopencl1-396_396.26-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-opencl-icd-396_396.26-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/libxnvctrl0_396.26-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-settings_396.26-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-drivers_396.26-1_amd64.deb"
 
     wget --wait=10 "${CUDA_REPO_URL}/cuda-license-8-0_8.0.44-1_amd64.deb"
     wget --wait=10 "${CUDA_REPO_URL}/cuda-misc-headers-8-0_8.0.44-1_amd64.deb"
@@ -174,16 +175,19 @@ OSVersion: xenial
     wget --wait=10 "${ML_REPO_URL}/libnccl2_2.2.12-1+cuda8.0_amd64.deb"
     wget --wait=10 "${ML_REPO_URL}/libnccl-dev_2.2.12-1+cuda8.0_amd64.deb"
 
+    # Fix for "update-alternatives: error: error creating symbolic link '/usr/lib/nvidia/alternate-install-present.dpkg-tmp': No such file or directory"
+    mkdir -p /usr/lib/nvidia
+
     # Install NVIDIA drivers, libraries, and packages
-    dpkg -i nvidia-367_367.48-0ubuntu1_amd64.deb
-    dpkg -i nvidia-367-dev_367.48-0ubuntu1_amd64.deb
-    dpkg -i nvidia-modprobe_367.48-0ubuntu1_amd64.deb
-    dpkg -i libcuda1-367_367.48-0ubuntu1_amd64.deb
-    dpkg -i nvidia-libopencl1-367_367.48-0ubuntu1_amd64.deb
-    dpkg -i nvidia-opencl-icd-367_367.48-0ubuntu1_amd64.deb
-    dpkg -i libxnvctrl0_367.48-0ubuntu1_amd64.deb
-    dpkg -i nvidia-settings_367.48-0ubuntu1_amd64.deb
-    dpkg -i cuda-drivers_367.48-1_amd64.deb
+    dpkg -i nvidia-396_396.26-0ubuntu1_amd64.deb
+    dpkg -i nvidia-396-dev_396.26-0ubuntu1_amd64.deb
+    dpkg -i nvidia-modprobe_396.26-0ubuntu1_amd64.deb
+    dpkg -i libcuda1-396_396.26-0ubuntu1_amd64.deb
+    dpkg -i nvidia-libopencl1-396_396.26-0ubuntu1_amd64.deb
+    dpkg -i nvidia-opencl-icd-396_396.26-0ubuntu1_amd64.deb
+    dpkg -i libxnvctrl0_396.26-0ubuntu1_amd64.deb
+    dpkg -i nvidia-settings_396.26-0ubuntu1_amd64.deb
+    dpkg -i cuda-drivers_396.26-1_amd64.deb
 
     dpkg -i cuda-license-8-0_8.0.44-1_amd64.deb
     dpkg -i cuda-misc-headers-8-0_8.0.44-1_amd64.deb
