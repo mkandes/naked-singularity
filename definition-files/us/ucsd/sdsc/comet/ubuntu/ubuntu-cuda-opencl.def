@@ -4,9 +4,9 @@ OSVersion: xenial
 
 %labels
 
-    APPLICATION_NAME ubuntu + cuda
-    APPLICATION_VERSION 16.04 + 8.0.44
-    APPLICATION_URL https://developer.nvidia.com/cuda-zone
+    APPLICATION_NAME ubuntu + cuda + opencl
+    APPLICATION_VERSION ubuntu + 8.0.44 + 16.1.2
+    APPLICATION_URL https://software.intel.com/en-us/articles/opencl-drivers#latest_CPU_runtime
 
     SYSTEM_NAME comet
     SYSTEM_SINGULARITY_VERSION 2.5.1
@@ -230,6 +230,40 @@ OSVersion: xenial
     export PATH="/usr/local/cuda-8.0/bin${PATH:+:${PATH}}"
     export LD_LIBRARY_PATH="/usr/local/cuda-8.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
 
+    # Location of Intel repository
+    declare -r INTEL_ROOT_URL='http://registrationcenter-download.intel.com'
+
+    # Install generic OpenCL packages
+    apt-get -y install ocl-icd-libopencl1
+    apt-get -y install opencl-headers
+    apt-get -y install clinfo
+    apt-get -y install ocl-icd-opencl-dev
+
+    # Install packages for turing rpm into deb
+    apt-get -y install rpm
+    apt-get -y install alien
+    apt-get -y install libnuma1
+
+    # Download OpenCL runtime rpm, convert to deb, then install
+    wget "${INTEL_ROOT_URL}/akdlm/irc_nas/12556/opencl_runtime_16.1.2_x64_rh_6.4.0.37.tgz
+    tar -xzf opencl_runtime_16.1.2_x64_rh_6.4.0.37.tgz
+
+    cd opencl_runtime_16.1.2_x64_rh_6.4.0.37/rpm
+
+    fakeroot alien --to-deb opencl-1.2-base-6.4.0.37-1.x86_64.rpm
+    fakeroot alien --to-deb opencl-1.2-intel-cpu-6.4.0.37-1.x86_64.rpm
+
+    dpkg -i opencl-1.2-base_6.4.0.37-2_amd64.deb
+    dpkg -i opencl-1.2-intel-cpu_6.4.0.37-2_amd64.deb
+
+    # Add path to clinfo
+    echo '/opt/intel/opencl-1.2-6.4.0.37/lib64/clinfo' > /etc/ld.so.conf.d/intelOpenCL.conf
+
+    # Create a vendors dir and add intel.icd 
+    mkdir -p /etc/OpenCL/vendors
+    ln /opt/intel/opencl-1.2-6.4.0.37/etc/intel64.icd /etc/OpenCL/vendors/intel64.icd
+    ldconfig
+ 
     # Set container environment variables
     cd /.singularity.d/env
     echo 'export PATH="/usr/local/cuda-8.0/bin${PATH:+:${PATH}}"' >> 90-environment.sh
@@ -248,3 +282,5 @@ OSVersion: xenial
     export LD_LIBRARY_PATH="/usr/local/cuda-8.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
     nvcc --version
 
+    # Test OpenCL installation
+    clinfo

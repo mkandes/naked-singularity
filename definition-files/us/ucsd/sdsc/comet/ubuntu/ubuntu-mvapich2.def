@@ -4,8 +4,8 @@ OSVersion: xenial
 
 %labels
 
-    APPLICATION_NAME mvapich2
-    APPLICATION_VERSION 2.1
+    APPLICATION_NAME ubuntu + mvapich2
+    APPLICATION_VERSION 16.04 + 2.1
     APPLICATION_URL http://mvapich.cse.ohio-state.edu/
 
     SYSTEM_NAME comet
@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20180523
+    LAST_UPDATED 20180619
 
 %setup
 
@@ -144,6 +144,6 @@ OSVersion: xenial
 
 %test
 
-    export PATH="/opt/mvapich2/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/mvapich2/lib:${LD_LIBRARY_PATH}"
-    mpirun --version
+    #export PATH="/opt/mvapich2/bin:${PATH}"
+    #export LD_LIBRARY_PATH="/opt/mvapich2/lib:${LD_LIBRARY_PATH}"
+    #mpirun --version

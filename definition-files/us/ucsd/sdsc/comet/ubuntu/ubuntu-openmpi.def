@@ -4,8 +4,8 @@ OSVersion: xenial
 
 %labels
 
-    APPLICATION_NAME openmpi
-    APPLICATION_VERSION 1.8.4
+    APPLICATION_NAME ubuntu + openmpi
+    APPLICATION_VERSION 16.04 + 1.8.4
     APPLICATION_URL https://www.open-mpi.org/
 
     SYSTEM_NAME comet
@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20180524
+    LAST_UPDATED 20180619
 
 %setup
 
@@ -146,3 +146,7 @@ OSVersion: xenial
 %runscript
 
 %test
+
+    #export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
+    #export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
+    #mpirun --version
