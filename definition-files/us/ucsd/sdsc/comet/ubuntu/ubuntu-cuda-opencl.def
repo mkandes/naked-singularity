@@ -5,7 +5,7 @@ OSVersion: xenial
 %labels
 
     APPLICATION_NAME ubuntu + cuda + opencl
-    APPLICATION_VERSION ubuntu + 8.0.44 + 16.1.2
+    APPLICATION_VERSION 16.04 + 8.0.44 + 16.1.2
     APPLICATION_URL https://software.intel.com/en-us/articles/opencl-drivers#latest_CPU_runtime
 
     SYSTEM_NAME comet
@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20180628
+    LAST_UPDATED 20180706
 
 %setup
 
