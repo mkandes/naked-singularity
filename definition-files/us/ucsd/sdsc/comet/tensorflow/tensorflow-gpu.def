@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20180601
+    LAST_UPDATED 20180712
 
 %setup
 
@@ -63,6 +63,7 @@ OSVersion: xenial
     apt-get -y install autoconf
     apt-get -y install automake
     apt-get -y install build-essential
+    apt-get -y install cmake
     apt-get -y install libtool
     apt-get -y install pkg-config
     apt-get -y install gfortran
@@ -86,6 +87,7 @@ OSVersion: xenial
     # Install NVIDIA package dependencies
     apt-get -y install x11-common
     apt-get -y install xserver-xorg-core
+    apt-get -y install xserver-xorg-legacy
     apt-get -y install cmake
     apt-get -y install make
     apt-get -y install dkms
@@ -116,15 +118,15 @@ OSVersion: xenial
     apt-get -y install default-jre
 
     # Download NVIDIA drivers, libraries, and packages
-    wget --wait=10 "${CUDA_REPO_URL}/nvidia-367_367.48-0ubuntu1_amd64.deb" 
-    wget --wait=10 "${CUDA_REPO_URL}/nvidia-367-dev_367.48-0ubuntu1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/nvidia-modprobe_367.48-0ubuntu1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/libcuda1-367_367.48-0ubuntu1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/nvidia-libopencl1-367_367.48-0ubuntu1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/nvidia-opencl-icd-367_367.48-0ubuntu1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/libxnvctrl0_367.48-0ubuntu1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/nvidia-settings_367.48-0ubuntu1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-drivers_367.48-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-396_396.26-0ubuntu1_amd64.deb" 
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-396-dev_396.26-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-modprobe_396.26-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/libcuda1-396_396.26-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-libopencl1-396_396.26-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-opencl-icd-396_396.26-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/libxnvctrl0_396.26-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-settings_396.26-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-drivers_396.26-1_amd64.deb"
 
     wget --wait=10 "${CUDA_REPO_URL}/cuda-license-8-0_8.0.44-1_amd64.deb"
     wget --wait=10 "${CUDA_REPO_URL}/cuda-misc-headers-8-0_8.0.44-1_amd64.deb"
@@ -163,16 +165,19 @@ OSVersion: xenial
     wget --wait=10 "${ML_REPO_URL}/libnccl2_2.2.12-1+cuda8.0_amd64.deb"
     wget --wait=10 "${ML_REPO_URL}/libnccl-dev_2.2.12-1+cuda8.0_amd64.deb"
 
+    # Fix for "update-alternatives: error: error creating symbolic link '/usr/lib/nvidia/alternate-install-present.dpkg-tmp': No such file or directory"
+    mkdir -p /usr/lib/nvidia
+
     # Install NVIDIA drivers, libraries, and packages
-    dpkg -i nvidia-367_367.48-0ubuntu1_amd64.deb
-    dpkg -i nvidia-367-dev_367.48-0ubuntu1_amd64.deb
-    dpkg -i nvidia-modprobe_367.48-0ubuntu1_amd64.deb
-    dpkg -i libcuda1-367_367.48-0ubuntu1_amd64.deb
-    dpkg -i nvidia-libopencl1-367_367.48-0ubuntu1_amd64.deb
-    dpkg -i nvidia-opencl-icd-367_367.48-0ubuntu1_amd64.deb
-    dpkg -i libxnvctrl0_367.48-0ubuntu1_amd64.deb
-    dpkg -i nvidia-settings_367.48-0ubuntu1_amd64.deb
-    dpkg -i cuda-drivers_367.48-1_amd64.deb
+    dpkg -i nvidia-396_396.26-0ubuntu1_amd64.deb
+    dpkg -i nvidia-396-dev_396.26-0ubuntu1_amd64.deb
+    dpkg -i nvidia-modprobe_396.26-0ubuntu1_amd64.deb
+    dpkg -i libcuda1-396_396.26-0ubuntu1_amd64.deb
+    dpkg -i nvidia-libopencl1-396_396.26-0ubuntu1_amd64.deb
+    dpkg -i nvidia-opencl-icd-396_396.26-0ubuntu1_amd64.deb
+    dpkg -i libxnvctrl0_396.26-0ubuntu1_amd64.deb
+    dpkg -i nvidia-settings_396.26-0ubuntu1_amd64.deb
+    dpkg -i cuda-drivers_396.26-1_amd64.deb
 
     dpkg -i cuda-license-8-0_8.0.44-1_amd64.deb
     dpkg -i cuda-misc-headers-8-0_8.0.44-1_amd64.deb
@@ -211,7 +216,7 @@ OSVersion: xenial
     dpkg -i libnccl2_2.2.12-1+cuda8.0_amd64.deb
     dpkg -i libnccl-dev_2.2.12-1+cuda8.0_amd64.deb
 
-    # Fixing some TensorFlow and libnccl*.deb path issues ... 
+    # Fixing some TensorFlow and libnccl*.deb path issues ...
     mv /usr/lib/x86_64-linux-gnu/libnccl_static.a /usr/local/cuda-8.0/lib64/libnccl_static.a
     mv /usr/lib/x86_64-linux-gnu/libnccl.so.2.2.12 /usr/local/cuda-8.0/lib64/libnccl.so.2.2.12
     ln -s /usr/local/cuda-8.0/lib64/libnccl.so.2.2.12 /usr/local/cuda-8.0/lib64/libnccl.so.2
@@ -301,7 +306,7 @@ OSVersion: xenial
     echo 'expect "Please specify optimization flags to use during compilation when bazel option \"--config=opt\" is specified \[Default is -march=native\]: "' >> install-tensorflow-python.exp
     echo 'send " -march=haswell -mmmx -mno-3dnow -msse -msse2 -msse3 -mssse3 -mno-sse4a -mcx16 -msahf -mmovbe -maes -mno-sha -mpclmul -mpopcnt -mabm -mno-lwp -mfma -mno-fma4 -mno-xop -mbmi -mbmi2 -mno-tbm -mavx -mavx2 -msse4.2 -msse4.1 -mlzcnt -mno-rtm -mno-hle -mrdrnd -mf16c -mfsgsbase -mno-rdseed -mno-prfchw -mno-adx -mfxsr -mxsave -mxsaveopt -mno-avx512f -mno-avx512er -mno-avx512cd -mno-avx512pf -mno-prefetchwt1 -mtune=generic\r"' >> install-tensorflow-python.exp
     echo 'expect "Would you like to interactively configure ./WORKSPACE for Android builds? \[y/N\]: "' >> install-tensorflow-python.exp
-    send 'send "N\r"' >> install-tensorflow-python.exp
+    echo 'send "N\r"' >> install-tensorflow-python.exp
     echo 'expect "> "' >> install-tensorflow-python.exp
 
     chmod +x install-tensorflow-python.exp
@@ -322,7 +327,7 @@ OSVersion: xenial
 
     pip install tensorflow_pkg/tensorflow-1.8.0-cp27-cp27mu-linux_x86_64.whl
 
-    # Install common python packages for data science and machine learning applications 
+    # Install common python packages for data science and machine learning applications
     apt-get -y install python-scipy
     apt-get -y install python-pandas
     apt-get -y install python-matplotlib
@@ -336,6 +341,13 @@ OSVersion: xenial
     apt-get -y install python-statsmodels
     apt-get -y install libopencv-dev
     apt-get -y install python-opencv
+
+    # Install common python packages for the biological and biomedical sciences
+    apt-get -y install python-biopython
+    apt-get -y install python-biopython-sql
+
+    # Install other common python packages
+    apt-get -y install python-h5py
 
     # Install TensorFlow python3 dependencies
     apt-get -y install python3
@@ -384,10 +396,8 @@ OSVersion: xenial
     echo 'send "N\r"' >> install-tensorflow-python3.exp
     echo 'expect "Please specify the NCCL version you want to use. \[Leave empty to default to NCCL 1.3\]:"' >> install-tensorflow-python3.exp
     echo 'send "2.2.12\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Please specify the location where NCCL 2 library is installed. Refer to README.md for more details. \[Default is /usr/local/cuda\]: "' >> install-tensorflow-python.exp
+    echo 'expect "Please specify the location where NCCL 2 library is installed. Refer to README.md for more details. \[Default is /usr/local/cuda\]: "' >> install-tensorflow-python3.exp
     echo 'send "/usr/local/cuda\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Do you wish to build TensorFlow with TensorRT support? \[y/N\]: "' >> install-tensorflow-python3.exp
-    echo 'send "N\r"' >> install-tensorflow-python3.exp
     echo 'expect "Please specify a list of comma-separated Cuda compute capabilities you want to build with.\r"' >> install-tensorflow-python3.exp
     echo 'expect "You can find the compute capability of your device at: https://developer.nvidia.com/cuda-gpus.\r"' >> install-tensorflow-python3.exp
     echo 'expect "Please note that each additional compute capability significantly increases your build time and binary size. \[Default is: 3.5,5.2\]"' >> install-tensorflow-python3.exp
@@ -401,7 +411,7 @@ OSVersion: xenial
     echo 'expect "Please specify optimization flags to use during compilation when bazel option \"--config=opt\" is specified \[Default is -march=native\]: "' >> install-tensorflow-python3.exp
     echo 'send " -march=haswell -mmmx -mno-3dnow -msse -msse2 -msse3 -mssse3 -mno-sse4a -mcx16 -msahf -mmovbe -maes -mno-sha -mpclmul -mpopcnt -mabm -mno-lwp -mfma -mno-fma4 -mno-xop -mbmi -mbmi2 -mno-tbm -mavx -mavx2 -msse4.2 -msse4.1 -mlzcnt -mno-rtm -mno-hle -mrdrnd -mf16c -mfsgsbase -mno-rdseed -mno-prfchw -mno-adx -mfxsr -mxsave -mxsaveopt -mno-avx512f -mno-avx512er -mno-avx512cd -mno-avx512pf -mno-prefetchwt1 -mtune=generic\r"' >> install-tensorflow-python3.exp
     echo 'expect "Would you like to interactively configure ./WORKSPACE for Android builds? \[y/N\]: "' >> install-tensorflow-python3.exp
-    send 'send "N\r"' >> install-tensorflow-python3.exp
+    echo 'send "N\r"' >> install-tensorflow-python3.exp
     echo 'expect "> "' >> install-tensorflow-python3.exp
 
     chmod +x install-tensorflow-python3.exp
@@ -422,6 +432,13 @@ OSVersion: xenial
     apt-get -y install python3-nose
     apt-get -y install python3-sklearn
     apt-get -y install python3-nltk
+
+    # Install common python3 packages for the biological and biomedical sciences
+    apt-get -y install python3-biopython
+    apt-get -y install python3-biopython-sql
+
+    # Install other common python3 packages
+    apt-get -y install python3-h5py
 
     # Set container environment variables
     cd /.singularity.d/env

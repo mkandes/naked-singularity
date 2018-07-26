@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20180601
+    LAST_UPDATED 20180712
 
 %setup
 
@@ -78,14 +78,6 @@ OSVersion: xenial
     # bootstraping process
     cd /tmp
 
-    ### Install Bazel using custom APT repository
-    ###apt-get -y install openjdk-8-jdk
-    ###echo "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8" | tee /etc/apt/sources.list.d/bazel.list
-    ###curl https://bazel.build/bazel-release.pub.gpg | apt-key add -
-    ###apt-get -y update
-    ###apt-get -y install bazel
-    ###apt-get -y upgrade bazel
-
     # Install Bazel from Debian Package
     apt-get -y install openjdk-8-jdk
     apt-get -y install zlib1g-dev
@@ -93,12 +85,13 @@ OSVersion: xenial
     dpkg -i bazel_0.13.1-linux-x86_64.deb
 
     # Install TensorFlow python(2) dependencies
-    apt-get -y install python-numpy
+    apt-get -y install python
     apt-get -y install python-dev
     apt-get -y install python-pip
     apt-get -y install python-wheel
     apt-get -y install python-enum34
     apt-get -y install python-mock
+    apt-get -y install python-numpy
     
     # Download TensorFlow source
     cd /opt
@@ -140,7 +133,7 @@ OSVersion: xenial
     echo 'expect "Please specify optimization flags to use during compilation when bazel option \"--config=opt\" is specified \[Default is -march=native\]: "' >> install-tensorflow-python.exp
     echo 'send " -march=haswell -mmmx -mno-3dnow -msse -msse2 -msse3 -mssse3 -mno-sse4a -mcx16 -msahf -mmovbe -maes -mno-sha -mpclmul -mpopcnt -mabm -mno-lwp -mfma -mno-fma4 -mno-xop -mbmi -mbmi2 -mno-tbm -mavx -mavx2 -msse4.2 -msse4.1 -mlzcnt -mno-rtm -mno-hle -mrdrnd -mf16c -mfsgsbase -mno-rdseed -mno-prfchw -mno-adx -mfxsr -mxsave -mxsaveopt -mno-avx512f -mno-avx512er -mno-avx512cd -mno-avx512pf -mno-prefetchwt1 -mtune=generic\r"' >> install-tensorflow-python.exp
     echo 'expect "Would you like to interactively configure ./WORKSPACE for Android builds? \[y/N\]: "' >> install-tensorflow-python.exp
-    send 'send "N\r"' >> install-tensorflow-python.exp
+    echo 'send "N\r"' >> install-tensorflow-python.exp
     echo 'expect "> "' >> install-tensorflow-python.exp
 
     chmod +x install-tensorflow-python.exp
@@ -168,6 +161,13 @@ OSVersion: xenial
     apt-get -y install python-statsmodels
     apt-get -y install libopencv-dev
     apt-get -y install python-opencv
+
+    # Install common python packages for the biological and biomedical sciences
+    apt-get -y install python-biopython
+    apt-get -y install python-biopython-sql
+
+    # Install other common python packages
+    apt-get -y install python-h5py
 
     # Install TensorFlow python3 dependencies
     apt-get -y install python3-numpy
@@ -203,14 +203,14 @@ OSVersion: xenial
     echo 'send "N\r"' >> install-tensorflow-python3.exp
     echo 'expect "Do you wish to build TensorFlow with CUDA support? \[y/N\]: "' >> install-tensorflow-python3.exp
     echo 'send "N\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Do you wish to download a fresh release of clang? (Experimental) \[y/N\]: "' >> install-tensorflow-python.exp
-    echo 'send "N\r"' >> install-tensorflow-python.exp
+    echo 'expect "Do you wish to download a fresh release of clang? (Experimental) \[y/N\]: "' >> install-tensorflow-python3.exp
+    echo 'send "N\r"' >> install-tensorflow-python3.exp
     echo 'expect "Do you wish to build TensorFlow with MPI support? \[y/N\]: "' >> install-tensorflow-python3.exp
     echo 'send "N\r"' >> install-tensorflow-python3.exp
     echo 'expect "Please specify optimization flags to use during compilation when bazel option \"--config=opt\" is specified \[Default is -march=native\]: "' >> install-tensorflow-python3.exp
     echo 'send " -march=haswell -mmmx -mno-3dnow -msse -msse2 -msse3 -mssse3 -mno-sse4a -mcx16 -msahf -mmovbe -maes -mno-sha -mpclmul -mpopcnt -mabm -mno-lwp -mfma -mno-fma4 -mno-xop -mbmi -mbmi2 -mno-tbm -mavx -mavx2 -msse4.2 -msse4.1 -mlzcnt -mno-rtm -mno-hle -mrdrnd -mf16c -mfsgsbase -mno-rdseed -mno-prfchw -mno-adx -mfxsr -mxsave -mxsaveopt -mno-avx512f -mno-avx512er -mno-avx512cd -mno-avx512pf -mno-prefetchwt1 -mtune=generic\r"' >> install-tensorflow-python3.exp
     echo 'expect "Would you like to interactively configure ./WORKSPACE for Android builds? \[y/N\]: "' >> install-tensorflow-python3.exp
-    send 'send "N\r"' >> install-tensorflow-python3.exp
+    echo 'send "N\r"' >> install-tensorflow-python3.exp
     echo 'expect "> "' >> install-tensorflow-python3.exp
 
     chmod +x install-tensorflow-python3.exp
@@ -232,6 +232,13 @@ OSVersion: xenial
     apt-get -y install python3-sklearn
     apt-get -y install python3-nltk
 
+    # Install common python3 packages for the biological and biomedical sciences
+    apt-get -y install python3-biopython
+    apt-get -y install python3-biopython-sql
+
+    # Install other common python3 packages
+    apt-get -y install python3-h5py
+
     # Set container environment variables
     cd /.singularity.d/env
 
@@ -243,8 +250,3 @@ OSVersion: xenial
 %runscript
 
 %test
-
-    # Test TensorFlow for both python and python3
-    time -p python /opt/tensorflow/tensorflow/examples/tutorials/mnist/mnist_deep.py
-    time -p python3 /opt/tensorflow/tensorflow/examples/tutorials/mnist/mnist_deep.py
-
