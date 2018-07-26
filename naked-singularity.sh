@@ -373,8 +373,8 @@ naked_install() {
     naked_out 'Installing Singularity dependencies ...'
     echo "sudo yum groupinstall -y 'Development Tools'"
     sudo yum groupinstall -y 'Development Tools'
-    echo 'yum install -y libarchive-devel'
-    yum install -y libarchive-devel
+    echo 'sudo yum install -y libarchive-devel'
+    sudo yum install -y libarchive-devel
 
   elif [[ "${operating_system}" = 'ubuntu' ]]; then
 
