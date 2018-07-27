@@ -1,0 +1,247 @@
+Bootstrap: debootstrap
+MirrorURL: http://us.archive.ubuntu.com/ubuntu
+OSVersion: xenial
+
+%labels
+
+    APPLICATION_NAME ubuntu + cuda
+    APPLICATION_VERSION 16.04 + 8.0.44
+    APPLICATION_URL https://developer.nvidia.com/cuda-zone
+
+    SYSTEM_NAME tscc
+    SYSTEM_SINGULARITY_VERSION 2.5.2
+    SYSTEM_URL https://www.sdsc.edu/support/user_guides/tscc.html
+
+    SINGULARITY_IMAGE_SIZE 8192
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20180726
+
+%setup
+
+%environment
+
+    # Set system locale
+    export LC_ALL=C
+
+%post -c /bin/bash
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Install system metapackages
+    apt-get -y install ubuntu-standard
+    apt-get -y install ubuntu-server
+
+    # Add repositories
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} restricted"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates restricted"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports restricted"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security restricted"
+
+    # Upgrade all packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    # Install common packages from 'main'
+    apt-get -y install autoconf
+    apt-get -y install automake
+    apt-get -y install build-essential
+    apt-get -y install cmake
+    apt-get -y install libtool
+    apt-get -y install pkg-config
+    apt-get -y install gfortran
+    apt-get -y install zip
+
+    # Install expect to automate responses for interactive build questions
+    apt-get -y install expect
+
+    # Make filesystem mount points
+    mkdir /oasis /projects
+
+    # Use /tmp to store temporary files within the container during the
+    # bootstraping process
+    cd /tmp
+
+    # Install miniconda2
+    wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
+    chmod +x Miniconda2-latest-Linux-x86_64.sh
+    ./Miniconda2-latest-Linux-x86_64.sh -b -p /opt/miniconda2
+
+    # Install miniconda3
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    chmod +x Miniconda3-latest-Linux-x86_64.sh
+    ./Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda3
+
+    # Location of NVIDIA repositories
+    declare -r NVIDIA_ROOT_URL='http://developer.download.nvidia.com/compute'
+    declare -r CUDA_REPO_URL="${NVIDIA_ROOT_URL}/cuda/repos/ubuntu1604/x86_64"
+    declare -r ML_REPO_URL="${NVIDIA_ROOT_URL}/machine-learning/repos/ubuntu1604/x86_64/"
+
+    # Install NVIDIA package dependencies
+    apt-get -y install x11-common
+    apt-get -y install xserver-xorg-core
+    apt-get -y install xserver-xorg-legacy
+    apt-get -y install cmake
+    apt-get -y install make
+    apt-get -y install dkms
+    apt-get -y install linux-libc-dev
+    apt-get -y install libc6-dev
+    apt-get -y install lib32gcc1
+    apt-get -y install libc6-i386
+    apt-get -y install libgl1
+    apt-get -y install libwayland-client0
+    apt-get -y install libwayland-server0
+    apt-get -y install pkg-config
+    apt-get -y install screen-resolution-extra
+    apt-get -y install libvdpau1
+    apt-get -y install libatk1.0-0
+    apt-get -y install libcairo-gobject2
+    apt-get -y install libcairo2
+    apt-get -y install libfontconfig1
+    apt-get -y install libgdk-pixbuf2.0-0
+    apt-get -y install libgtk-3-0
+    apt-get -y install libgtk2.0-0
+    apt-get -y install libjansson4
+    apt-get -y install freeglut3-dev
+    apt-get -y install libx11-dev
+    apt-get -y install libxmu-dev
+    apt-get -y install libxi-dev
+    apt-get -y install libglu1-mesa
+    apt-get -y install libglu1-mesa-dev
+    apt-get -y install default-jre
+
+    # Download NVIDIA drivers, libraries, and packages
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-384_384.66-0ubuntu1_amd64.deb" 
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-384-dev_384.66-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-modprobe_384.66-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/libcuda1-384_384.66-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-libopencl1-384_384.66-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-opencl-icd-384_384.66-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/libxnvctrl0_384.66-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-settings_384.66-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-drivers_384.66-1_amd64.deb"
+
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-license-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-misc-headers-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-core-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cudart-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-driver-dev-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cudart-dev-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-command-line-tools-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvrtc-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvrtc-dev-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvml-dev-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvgraph-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvgraph-dev-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusolver-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusolver-dev-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cublas-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cublas-dev-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cufft-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cufft-dev-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-curand-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-curand-dev-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusparse-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusparse-dev-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-npp-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-npp-dev-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-samples-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-documentation-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-visual-tools-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-toolkit-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-runtime-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-demo-suite-8-0_8.0.44-1_amd64.deb"
+
+    wget --wait=10 "${ML_REPO_URL}/libcudnn7_7.1.4.18-1+cuda8.0_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libcudnn7-dev_7.1.4.18-1+cuda8.0_amd64.deb"
+
+    wget --wait=10 "${ML_REPO_URL}/libnccl2_2.2.12-1+cuda8.0_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libnccl-dev_2.2.12-1+cuda8.0_amd64.deb"
+
+    # Fix for "update-alternatives: error: error creating symbolic link '/usr/lib/nvidia/alternate-install-present.dpkg-tmp': No such file or directory"
+    mkdir -p /usr/lib/nvidia
+
+    # Install NVIDIA drivers, libraries, and packages
+    dpkg -i nvidia-384_384.66-0ubuntu1_amd64.deb
+    dpkg -i nvidia-384-dev_384.66-0ubuntu1_amd64.deb
+    dpkg -i nvidia-modprobe_384.66-0ubuntu1_amd64.deb
+    dpkg -i libcuda1-384_384.66-0ubuntu1_amd64.deb
+    dpkg -i nvidia-libopencl1-384_384.66-0ubuntu1_amd64.deb
+    dpkg -i nvidia-opencl-icd-384_384.66-0ubuntu1_amd64.deb
+    dpkg -i libxnvctrl0_384.66-0ubuntu1_amd64.deb
+    dpkg -i nvidia-settings_384.66-0ubuntu1_amd64.deb
+    dpkg -i cuda-drivers_384.66-1_amd64.deb
+
+    dpkg -i cuda-license-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-misc-headers-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-core-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-cudart-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-driver-dev-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-cudart-dev-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-command-line-tools-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-nvrtc-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-nvrtc-dev-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-nvml-dev-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-nvgraph-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-nvgraph-dev-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-cusolver-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-cusolver-dev-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-cublas-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-cublas-dev-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-cufft-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-cufft-dev-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-curand-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-curand-dev-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-cusparse-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-cusparse-dev-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-npp-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-npp-dev-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-samples-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-documentation-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-visual-tools-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-toolkit-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-runtime-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-demo-suite-8-0_8.0.44-1_amd64.deb
+
+    dpkg -i libcudnn7_7.1.4.18-1+cuda8.0_amd64.deb
+    dpkg -i libcudnn7-dev_7.1.4.18-1+cuda8.0_amd64.deb
+
+    dpkg -i libnccl2_2.2.12-1+cuda8.0_amd64.deb
+    dpkg -i libnccl-dev_2.2.12-1+cuda8.0_amd64.deb
+
+    # Set paths to CUDA binaries and libraries
+    export PATH="/usr/local/cuda-8.0/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="/usr/local/cuda-8.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+    export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/extras/CUPTI/lib64"
+
+    # Set container environment variables
+    cd /.singularity.d/env
+    echo 'export PATH="/usr/local/cuda-8.0/bin${PATH:+:${PATH}}"' >> 90-environment.sh
+    echo 'export LD_LIBRARY_PATH="/usr/local/cuda-8.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"' >> 90-environment.sh
+    echo 'export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/extras/CUPTI/lib64"' >> 90-environment.sh
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
