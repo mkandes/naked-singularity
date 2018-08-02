@@ -5,11 +5,11 @@ OSVersion: xenial
 %labels
 
     APPLICATION_NAME pytorch
-    APPLICATION_VERSION 0.3.1
+    APPLICATION_VERSION 0.4.1
     APPLICATION_URL http://pytorch.org/
 
     SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.5.1
+    SYSTEM_SINGULARITY_VERSION 2.5.2
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
 
     SINGULARITY_IMAGE_SIZE 16384
@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20180524
+    LAST_UPDATED 20180731
 
 %setup
 
@@ -63,6 +63,7 @@ OSVersion: xenial
     apt-get -y install autoconf
     apt-get -y install automake
     apt-get -y install build-essential
+    apt-get -y install cmake
     apt-get -y install libtool
     apt-get -y install pkg-config
     apt-get -y install gfortran
@@ -118,9 +119,34 @@ OSVersion: xenial
     apt-get -y install libnl-route-3-dev
     apt-get -y install libnl-utils
 
-    # Install PyTorch for python(2)
+    # Install PyTorch dependencies for python(2)
     export PATH="/opt/miniconda2/bin:${PATH}"
-    conda install -y pytorch-cpu torchvision -c pytorch
+    export CMAKE_PREFIX_PATH="$(dirname $(which conda))/../"
+    conda install -y numpy
+    conda install -y pyyaml
+    conda install -y mkl
+    conda install -y mkl-include
+    conda install -y setuptools
+    conda install -y cmake
+    conda install -y cffi
+    conda install -y typing
+    conda install -y mkldnn -c mingfeima
+
+    cd /opt
+
+    # Download, build, and install PyTorch for python2
+    git clone --recursive https://github.com/pytorch/pytorch
+    cd /opt/pytorch
+    export PYTORCH_BUILD_VERSION='0.4.1'
+    export PYTORCH_BUILD_NUMBER='1'
+    export NO_CUDA='1'
+    git checkout "v${PYTORCH_BUILD_VERSION}"
+    python setup.py install
+
+    # Download and install PyTorch Vision package for python2
+    git clone https://github.com/pytorch/vision.git
+    cd /opt/pytorch/vision
+    python setup.py install
 
     # Install common python packages for data science and machine
     # learning applications
@@ -135,22 +161,42 @@ OSVersion: xenial
     conda install -y statsmodels
     conda install -y opencv
 
-    # Install PyTorch for python3
-    export PATH="/opt/miniconda3/bin:${PATH}"
-    conda install -y pytorch-cpu torchvision -c pytorch
+    # Install PyTorch dependencies for python3
+    #export PATH="/opt/miniconda3/bin:${PATH}"
+    #export CMAKE_PREFIX_PATH="$(dirname $(which conda))/../"
+    #conda install -y numpy
+    #conda install -y pyyaml
+    #conda install -y mkl
+    #conda install -y mkl-include
+    #conda install -y setuptools
+    #conda install -y cmake
+    #conda install -y cffi
+    #conda install -y typing
+    #conda install -y mkldnn -c mingfeima
 
+    # Build and install PyTorch for python3
+    #python3 setup.py install
+
+    #conda install -y torchvision -c pytorch
+    
     # Install common python3 packages for data science and machine
     # learning applications
-    conda install -y pandas
-    conda install -y matplotlib
-    conda install -y ipython
-    conda install -y ipython-notebook
-    conda install -y sympy
-    conda install -y nose
-    conda install -y scikit-learn
-    conda install -y nltk
-    conda install -y statsmodels
-    conda install -y opencv
+    #conda install -y pandas
+    #conda install -y matplotlib
+    #conda install -y ipython
+    #conda install -y ipython-notebook
+    #conda install -y sympy
+    #conda install -y nose
+    #conda install -y scikit-learn
+    #conda install -y nltk
+    #conda install -y statsmodels
+    #conda install -y opencv
+
+    cd /opt
+
+    # Download the PyTorch examples repository
+    git clone https://github.com/pytorch/examples.git
+    mv examples pytorch-examples
 
     # Set container environment variables
     cd /.singularity.d/env
