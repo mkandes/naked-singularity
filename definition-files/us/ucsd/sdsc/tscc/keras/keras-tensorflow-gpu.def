@@ -1,0 +1,461 @@
+Bootstrap: debootstrap
+MirrorURL: http://us.archive.ubuntu.com/ubuntu
+OSVersion: xenial
+
+%labels
+
+    APPLICATION_NAME keras + tensorflow
+    APPLICATION_VERSION 2.2.0 + 1.7.1
+    APPLICATION_URL https://keras.io/
+
+    SYSTEM_NAME tscc
+    SYSTEM_SINGULARITY_VERSION 2.5.2
+    SYSTEM_URL https://www.sdsc.edu/support/user_guides/tscc.html
+
+    SINGULARITY_IMAGE_SIZE 32768
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20180910
+
+%setup
+
+%environment
+   
+    # Set system locale
+    export LC_ALL=C
+
+%post -c /bin/bash
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Install system metapackages
+    apt-get -y install ubuntu-standard
+    apt-get -y install ubuntu-server
+
+    # Add repositories
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} restricted"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates restricted"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports restricted"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security restricted"
+
+    # Upgrade all packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    # Install common packages from 'main'
+    apt-get -y install autoconf
+    apt-get -y install automake
+    apt-get -y install build-essential
+    apt-get -y install cmake
+    apt-get -y install libtool
+    apt-get -y install pkg-config
+    apt-get -y install gfortran
+    apt-get -y install zip
+
+    # Install expect to automate responses for interactive build questions
+    apt-get -y install expect
+
+    # Make filesystem mount points
+    mkdir /cvmfs /oasis /projects /scratch
+
+    # Use /tmp to store temporary files within the container during the
+    # bootstraping process
+    cd /tmp
+
+    # Location of NVIDIA repositories
+    declare -r NVIDIA_ROOT_URL='http://developer.download.nvidia.com/compute'
+    declare -r CUDA_REPO_URL="${NVIDIA_ROOT_URL}/cuda/repos/ubuntu1604/x86_64"
+    declare -r ML_REPO_URL="${NVIDIA_ROOT_URL}/machine-learning/repos/ubuntu1604/x86_64/"
+
+    # Install NVIDIA package dependencies
+    apt-get -y install x11-common
+    apt-get -y install xserver-xorg-core
+    apt-get -y install xserver-xorg-legacy
+    apt-get -y install cmake
+    apt-get -y install make
+    apt-get -y install dkms
+    apt-get -y install linux-libc-dev
+    apt-get -y install libc6-dev
+    apt-get -y install lib32gcc1
+    apt-get -y install libc6-i386
+    apt-get -y install libgl1
+    apt-get -y install libwayland-client0
+    apt-get -y install libwayland-server0
+    apt-get -y install pkg-config
+    apt-get -y install screen-resolution-extra
+    apt-get -y install libvdpau1
+    apt-get -y install libatk1.0-0
+    apt-get -y install libcairo-gobject2
+    apt-get -y install libcairo2
+    apt-get -y install libfontconfig1
+    apt-get -y install libgdk-pixbuf2.0-0
+    apt-get -y install libgtk-3-0
+    apt-get -y install libgtk2.0-0
+    apt-get -y install libjansson4
+    apt-get -y install freeglut3-dev
+    apt-get -y install libx11-dev
+    apt-get -y install libxmu-dev
+    apt-get -y install libxi-dev
+    apt-get -y install libglu1-mesa
+    apt-get -y install libglu1-mesa-dev
+    apt-get -y install default-jre
+
+    # Download NVIDIA drivers, libraries, and packages
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-384_384.66-0ubuntu1_amd64.deb" 
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-384-dev_384.66-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-modprobe_384.66-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/libcuda1-384_384.66-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-libopencl1-384_384.66-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-opencl-icd-384_384.66-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/libxnvctrl0_384.66-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-settings_384.66-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-drivers_384.66-1_amd64.deb"
+
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-license-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-misc-headers-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-core-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cudart-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-driver-dev-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cudart-dev-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-command-line-tools-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvrtc-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvrtc-dev-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvml-dev-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvgraph-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvgraph-dev-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusolver-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusolver-dev-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cublas-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cublas-dev-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cufft-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cufft-dev-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-curand-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-curand-dev-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusparse-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusparse-dev-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-npp-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-npp-dev-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-samples-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-documentation-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-visual-tools-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-toolkit-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-runtime-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-demo-suite-8-0_8.0.44-1_amd64.deb"
+
+    wget --wait=10 "${ML_REPO_URL}/libcudnn7_7.1.4.18-1+cuda8.0_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libcudnn7-dev_7.1.4.18-1+cuda8.0_amd64.deb"
+
+    wget --wait=10 "${ML_REPO_URL}/libnccl2_2.2.12-1+cuda8.0_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libnccl-dev_2.2.12-1+cuda8.0_amd64.deb"
+
+    # Fix for "update-alternatives: error: error creating symbolic link '/usr/lib/nvidia/alternate-install-present.dpkg-tmp': No such file or directory"
+    mkdir -p /usr/lib/nvidia
+
+    # Install NVIDIA drivers, libraries, and packages
+    dpkg -i nvidia-384_384.66-0ubuntu1_amd64.deb
+    dpkg -i nvidia-384-dev_384.66-0ubuntu1_amd64.deb
+    dpkg -i nvidia-modprobe_384.66-0ubuntu1_amd64.deb
+    dpkg -i libcuda1-384_384.66-0ubuntu1_amd64.deb
+    dpkg -i nvidia-libopencl1-384_384.66-0ubuntu1_amd64.deb
+    dpkg -i nvidia-opencl-icd-384_384.66-0ubuntu1_amd64.deb
+    dpkg -i libxnvctrl0_384.66-0ubuntu1_amd64.deb
+    dpkg -i nvidia-settings_384.66-0ubuntu1_amd64.deb
+    dpkg -i cuda-drivers_384.66-1_amd64.deb
+
+    dpkg -i cuda-license-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-misc-headers-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-core-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-cudart-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-driver-dev-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-cudart-dev-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-command-line-tools-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-nvrtc-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-nvrtc-dev-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-nvml-dev-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-nvgraph-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-nvgraph-dev-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-cusolver-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-cusolver-dev-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-cublas-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-cublas-dev-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-cufft-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-cufft-dev-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-curand-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-curand-dev-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-cusparse-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-cusparse-dev-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-npp-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-npp-dev-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-samples-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-documentation-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-visual-tools-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-toolkit-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-runtime-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-demo-suite-8-0_8.0.44-1_amd64.deb
+
+    dpkg -i libcudnn7_7.1.4.18-1+cuda8.0_amd64.deb
+    dpkg -i libcudnn7-dev_7.1.4.18-1+cuda8.0_amd64.deb
+
+    dpkg -i libnccl2_2.2.12-1+cuda8.0_amd64.deb
+    dpkg -i libnccl-dev_2.2.12-1+cuda8.0_amd64.deb
+
+    # Fixing some TensorFlow and libnccl*.deb path issues ...
+    mv /usr/lib/x86_64-linux-gnu/libnccl_static.a /usr/local/cuda-8.0/lib64/libnccl_static.a
+    mv /usr/lib/x86_64-linux-gnu/libnccl.so.2.2.12 /usr/local/cuda-8.0/lib64/libnccl.so.2.2.12
+    ln -s /usr/local/cuda-8.0/lib64/libnccl.so.2.2.12 /usr/local/cuda-8.0/lib64/libnccl.so.2
+    ln -s /usr/local/cuda-8.0/lib64/libnccl.so.2 /usr/local/cuda-8.0/lib64/libnccl.so
+    mv /usr/include/nccl.h /usr/local/cuda-8.0/include/nccl.h
+    ln -s /usr/local/cuda-8.0/lib64 /usr/local/cuda-8.0/lib
+    mv /usr/share/doc/libnccl2/NCCL-SLA.txt.gz /usr/local/cuda-8.0/NCCL-SLA.txt
+
+    # Set paths to CUDA binaries and libraries
+    export PATH="/usr/local/cuda-8.0/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="/usr/local/cuda-8.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+    export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/extras/CUPTI/lib64"
+
+    # Install Bazel from Debian Package
+    apt-get -y install openjdk-8-jdk
+    apt-get -y install zlib1g-dev
+    wget https://github.com/bazelbuild/bazel/releases/download/0.13.1/bazel_0.13.1-linux-x86_64.deb
+    dpkg -i bazel_0.13.1-linux-x86_64.deb
+
+    # Install TensorFlow python(2) dependencies
+    apt-get -y install python
+    apt-get -y install python-dev
+    apt-get -y install python-pip
+    apt-get -y install python-wheel
+    apt-get -y install python-enum34
+    apt-get -y install python-mock
+    apt-get -y install python-numpy
+
+    cd /opt
+
+    # Download TensorFlow source
+    git clone https://github.com/tensorflow/tensorflow
+    cd tensorflow
+    git checkout r1.7
+
+    # Build and install TensorFlow for python(2)
+    echo '#!/usr/bin/expect -f' > install-tensorflow-python.exp
+    echo 'spawn ./configure' >> install-tensorflow-python.exp
+    echo 'expect "Please specify the location of python. \[Default is /usr/bin/python\]: "' >> install-tensorflow-python.exp
+    echo 'send "/usr/bin/python\r"' >> install-tensorflow-python.exp
+    echo 'expect "Please input the desired Python library path to use.  Default is \[/usr/local/lib/python2.7/dist-packages\]\r"' >> install-tensorflow-python.exp
+    echo 'send "/usr/local/lib/python2.7/dist-packages\r"' >> install-tensorflow-python.exp
+    echo 'expect "Do you wish to build TensorFlow with jemalloc as malloc support? \[Y/n\]: "' >> install-tensorflow-python.exp
+    echo 'send "Y\r"' >> install-tensorflow-python.exp
+    echo 'expect "Do you wish to build TensorFlow with Google Cloud Platform support? \[Y/n\]: "' >> install-tensorflow-python.exp
+    echo 'send "N\r"' >> install-tensorflow-python.exp
+    echo 'expect "Do you wish to build TensorFlow with Hadoop File System support? \[Y/n\]: "' >> install-tensorflow-python.exp
+    echo 'send "N\r"' >> install-tensorflow-python.exp
+    echo 'expect "Do you wish to build TensorFlow with Amazon S3 File System support? \[Y/n\]: "' >> install-tensorflow-python.exp
+    echo 'send "N\r"' >> install-tensorflow-python.exp
+    echo 'expect "Do you wish to build TensorFlow with Apache Kafka Platform support? \[y/N\]: "' >> install-tensorflow-python.exp
+    echo 'send "N\r"' >> install-tensorflow-python.exp
+    echo 'expect "Do you wish to build TensorFlow with XLA JIT support? \[y/N\]: "' >> install-tensorflow-python.exp
+    echo 'send "N\r"' >> install-tensorflow-python.exp
+    echo 'expect "Do you wish to build TensorFlow with GDR support? \[y/N\]: "' >> install-tensorflow-python.exp
+    echo 'send "N\r"' >> install-tensorflow-python.exp
+    echo 'expect "Do you wish to build TensorFlow with VERBS support? \[y/N\]: "' >> install-tensorflow-python.exp
+    echo 'send "N\r"' >> install-tensorflow-python.exp
+    echo 'expect "Do you wish to build TensorFlow with OpenCL SYCL support? \[y/N\]: "' >> install-tensorflow-python.exp
+    echo 'send "N\r"' >> install-tensorflow-python.exp
+    echo 'expect "Do you wish to build TensorFlow with CUDA support? \[y/N\]: "' >> install-tensorflow-python.exp
+    echo 'send "Y\r"' >> install-tensorflow-python.exp
+    echo 'expect "Please specify the CUDA SDK version you want to use, e.g. 7.0. \[Leave empty to default to CUDA 9.0\]: "' >> install-tensorflow-python.exp
+    echo 'send "8.0\r"' >> install-tensorflow-python.exp
+    echo 'expect "Please specify the location where CUDA 8.0 toolkit is installed. Refer to README.md for more details. \[Default is /usr/local/cuda\]: "' >> install-tensorflow-python.exp
+    echo 'send "/usr/local/cuda\r"' >> install-tensorflow-python.exp
+    echo 'expect "Please specify the cuDNN version you want to use. \[Leave empty to default to cuDNN 7.0\]: "' >> install-tensorflow-python.exp
+    echo 'send "7.1.4.18\r"' >> install-tensorflow-python.exp
+    echo 'expect "Please specify the location where cuDNN 7.1.4.18 library is installed. Refer to README.md for more details. \[Default is /usr/local/cuda\]: "' >> install-tensorflow-python.exp
+    echo 'send "/usr/lib/x86_64-linux-gnu\r"' >> install-tensorflow-python.exp
+    echo 'expect "Do you wish to build TensorFlow with TensorRT support? \[y/N\]: "' >> install-tensorflow-python.exp
+    echo 'send "N\r"' >> install-tensorflow-python.exp
+    echo 'expect "Please specify a list of comma-separated Cuda compute capabilities you want to build with.\r"' >> install-tensorflow-python.exp
+    echo 'expect "You can find the compute capability of your device at: https://developer.nvidia.com/cuda-gpus.\r"' >> install-tensorflow-python.exp
+    echo 'expect "Please note that each additional compute capability significantly increases your build time and binary size. \[Default is: 3.5,5.2\]"' >> install-tensorflow-python.exp
+    echo 'send "3.0,3.5,3.7,5.2,6.1\r"' >> install-tensorflow-python.exp
+    echo 'expect "Do you want to use clang as CUDA compiler? \[y/N\]: "' >> install-tensorflow-python.exp
+    echo 'send "N\r"' >> install-tensorflow-python.exp
+    echo 'expect "Please specify which gcc should be used by nvcc as the host compiler. \[Default is /usr/bin/gcc\]: "' >> install-tensorflow-python.exp
+    echo 'send "/usr/bin/gcc\r"' >> install-tensorflow-python.exp
+    echo 'expect "Do you wish to build TensorFlow with MPI support? \[y/N\]: "' >> install-tensorflow-python.exp
+    echo 'send "N\r"' >> install-tensorflow-python.exp
+    echo 'expect "Please specify optimization flags to use during compilation when bazel option \"--config=opt\" is specified \[Default is -march=native\]: "' >> install-tensorflow-python.exp
+    echo 'send " -march=sandybridge -mmmx -mno-3dnow -msse -msse2 -msse3 -mssse3 -mno-sse4a -mcx16 -msahf -mno-movbe -maes -mno-sha -mpclmul -mpopcnt -mno-abm -mno-lwp -mno-fma -mno-fma4 -mno-xop -mno-bmi -mno-bmi2 -mno-tbm -mavx -mno-avx2 -msse4.2 -msse4.1 -mno-lzcnt -mno-rtm -mno-hle -mno-rdrnd -mno-f16c -mno-fsgsbase -mno-rdseed -mno-prfchw -mno-adx -mfxsr -mxsave -mxsaveopt -mno-avx512f -mno-avx512er -mno-avx512cd -mno-avx512pf -mno-prefetchwt1 -mtune=sandybridge\r"' >> install-tensorflow-python.exp
+    echo 'expect "Would you like to interactively configure ./WORKSPACE for Android builds? \[y/N\]: "' >> install-tensorflow-python.exp
+    echo 'send "N\r"' >> install-tensorflow-python.exp
+    echo 'expect "> "' >> install-tensorflow-python.exp
+
+    chmod +x install-tensorflow-python.exp
+    ./install-tensorflow-python.exp
+ 
+    # See https://github.com/tensorflow/tensorflow/issues/17801
+    ln -s /usr/local/cuda-8.0/nvvm/libdevice/libdevice.compute_50.10.bc /usr/local/cuda-8.0/nvvm/libdevice/libdevice.10.bc
+
+    # See https://github.com/tensorflow/tensorflow/issues/19203
+    #     https://github.com/ghostplant/tensorflow-cuda8-optimized/blob/master/Dockerfile.tf18-py35-cuda8-cudnn6021
+    sed -i 's/^#if TF_HAS_.*$/#if !defined(__NVCC__)/g' tensorflow/core/platform/macros.h
+
+    # Clear /home/root/.cache prior to bazel build. Otherwise, previous builds may cause some conflicts. See 'dangling symbolic links' at https://github.com/tensorflow/tensorflow/issues/13928
+    rm -rf /home/root/.cache
+
+    bazel build --config=opt --config=cuda //tensorflow/tools/pip_package:build_pip_package
+    bazel-bin/tensorflow/tools/pip_package/build_pip_package tensorflow_pkg
+
+    pip install tensorflow_pkg/tensorflow-1.7.1-cp27-cp27mu-linux_x86_64.whl
+
+    # Install common python packages for data science and machine learning applications
+    apt-get -y install python-scipy
+    apt-get -y install python-pandas
+    apt-get -y install python-matplotlib
+    apt-get -y install ipython
+    apt-get -y install ipython-notebook
+    apt-get -y install python-sympy
+    apt-get -y install python-nose
+    apt-get -y install python-sklearn
+    apt-get -y install python-mlpy
+    apt-get -y install python-nltk
+    apt-get -y install python-statsmodels
+    apt-get -y install libopencv-dev
+    apt-get -y install python-opencv
+
+    # Install common python packages for the biological and biomedical sciences
+    apt-get -y install python-biopython
+    apt-get -y install python-biopython-sql
+
+    # Install other common python packages
+    apt-get -y install python-h5py
+
+    # Install TensorFlow python3 dependencies
+    apt-get -y install python3
+    apt-get -y install python3-dev
+    apt-get -y install python3-pip
+    apt-get -y install python3-wheel
+    apt-get -y install python3-mock
+    apt-get -y install python3-numpy
+
+    # Build and install TensorFlow for python3
+    echo '#!/usr/bin/expect -f' > install-tensorflow-python3.exp
+    echo 'spawn ./configure' >> install-tensorflow-python3.exp
+    echo 'expect "Please specify the location of python. \[Default is /usr/bin/python\]: "' >> install-tensorflow-python3.exp
+    echo 'send "/usr/bin/python3\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Please input the desired Python library path to use.  Default is \[/usr/local/lib/python3.5/dist-packages\]\r"' >> install-tensorflow-python3.exp
+    echo 'send "/usr/local/lib/python3.5/dist-packages\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Do you wish to build TensorFlow with jemalloc as malloc support? \[Y/n\]: "' >> install-tensorflow-python3.exp
+    echo 'send "Y\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Do you wish to build TensorFlow with Google Cloud Platform support? \[Y/n\]: "' >> install-tensorflow-python3.exp
+    echo 'send "N\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Do you wish to build TensorFlow with Hadoop File System support? \[Y/n\]: "' >> install-tensorflow-python3.exp
+    echo 'send "N\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Do you wish to build TensorFlow with Amazon S3 File System support? \[Y/n\]: "' >> install-tensorflow-python3.exp
+    echo 'send "N\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Do you wish to build TensorFlow with Apache Kafka Platform support? \[y/N\]: "' >> install-tensorflow-python3.exp
+    echo 'send "N\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Do you wish to build TensorFlow with XLA JIT support? \[y/N\]: "' >> install-tensorflow-python3.exp
+    echo 'send "N\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Do you wish to build TensorFlow with GDR support? \[y/N\]: "' >> install-tensorflow-python3.exp
+    echo 'send "N\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Do you wish to build TensorFlow with VERBS support? \[y/N\]: "' >> install-tensorflow-python3.exp
+    echo 'send "N\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Do you wish to build TensorFlow with OpenCL SYCL support? \[y/N\]: "' >> install-tensorflow-python3.exp
+    echo 'send "N\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Do you wish to build TensorFlow with CUDA support? \[y/N\]: "' >> install-tensorflow-python3.exp
+    echo 'send "Y\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Please specify the CUDA SDK version you want to use, e.g. 7.0. \[Leave empty to default to CUDA 9.0\]: "' >> install-tensorflow-python3.exp
+    echo 'send "8.0\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Please specify the location where CUDA 8.0 toolkit is installed. Refer to README.md for more details. \[Default is /usr/local/cuda\]: "' >> install-tensorflow-python3.exp
+    echo 'send "/usr/local/cuda\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Please specify the cuDNN version you want to use. \[Leave empty to default to cuDNN 7.0\]: "' >> install-tensorflow-python3.exp
+    echo 'send "7.1.4.18\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Please specify the location where cuDNN 7.1.4.18 library is installed. Refer to README.md for more details. \[Default is /usr/local/cuda\]: "' >> install-tensorflow-python3.exp
+    echo 'send "/usr/lib/x86_64-linux-gnu\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Do you wish to build TensorFlow with TensorRT support? \[y/N\]: "' >> install-tensorflow-python3.exp
+    echo 'send "N\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Please specify a list of comma-separated Cuda compute capabilities you want to build with.\r"' >> install-tensorflow-python3.exp
+    echo 'expect "You can find the compute capability of your device at: https://developer.nvidia.com/cuda-gpus.\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Please note that each additional compute capability significantly increases your build time and binary size. \[Default is: 3.5,5.2\]"' >> install-tensorflow-python3.exp
+    echo 'send "3.0,3.5,3.7,5.2,6.1\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Do you want to use clang as CUDA compiler? \[y/N\]: "' >> install-tensorflow-python3.exp
+    echo 'send "N\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Please specify which gcc should be used by nvcc as the host compiler. \[Default is /usr/bin/gcc\]: "' >> install-tensorflow-python3.exp
+    echo 'send "/usr/bin/gcc\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Do you wish to build TensorFlow with MPI support? \[y/N\]: "' >> install-tensorflow-python3.exp
+    echo 'send "N\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Please specify optimization flags to use during compilation when bazel option \"--config=opt\" is specified \[Default is -march=native\]: "' >> install-tensorflow-python3.exp
+    echo 'send " -march=sandybridge -mmmx -mno-3dnow -msse -msse2 -msse3 -mssse3 -mno-sse4a -mcx16 -msahf -mno-movbe -maes -mno-sha -mpclmul -mpopcnt -mno-abm -mno-lwp -mno-fma -mno-fma4 -mno-xop -mno-bmi -mno-bmi2 -mno-tbm -mavx -mno-avx2 -msse4.2 -msse4.1 -mno-lzcnt -mno-rtm -mno-hle -mno-rdrnd -mno-f16c -mno-fsgsbase -mno-rdseed -mno-prfchw -mno-adx -mfxsr -mxsave -mxsaveopt -mno-avx512f -mno-avx512er -mno-avx512cd -mno-avx512pf -mno-prefetchwt1 -mtune=sandybridge\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Would you like to interactively configure ./WORKSPACE for Android builds? \[y/N\]: "' >> install-tensorflow-python3.exp
+    echo 'send "N\r"' >> install-tensorflow-python3.exp
+    echo 'expect "> "' >> install-tensorflow-python3.exp
+
+    chmod +x install-tensorflow-python3.exp
+    ./install-tensorflow-python3.exp
+
+    bazel build --config=opt --config=cuda //tensorflow/tools/pip_package:build_pip_package
+    bazel-bin/tensorflow/tools/pip_package/build_pip_package tensorflow_pkg
+
+    pip3 install tensorflow_pkg/tensorflow-1.7.1-cp35-cp35m-linux_x86_64.whl
+
+    # Install common python3 packages for data science and machine learning applications
+    apt-get -y install python3-scipy
+    apt-get -y install python3-pandas
+    apt-get -y install python3-matplotlib
+    apt-get -y install ipython3
+    apt-get -y install ipython3-notebook
+    apt-get -y install python3-sympy
+    apt-get -y install python3-nose
+    apt-get -y install python3-sklearn
+    apt-get -y install python3-nltk
+
+    # Install common python3 packages for the biological and biomedical sciences
+    apt-get -y install python3-biopython
+    apt-get -y install python3-biopython-sql
+
+    # Install other common python3 packages
+    apt-get -y install python3-h5py
+
+    # Install Keras dependencies for python(2) and python3
+    apt-get -y install python-yaml
+    apt-get -y install python3-yaml
+
+    cd /opt
+
+    # Download, build, and install Keras
+    wget https://github.com/keras-team/keras/archive/2.2.0.tar.gz
+    tar -xzvf 2.2.0.tar.gz
+    cd /opt/keras-2.2.0
+    python setup.py install
+    python3 setup.py install
+
+    # Set container environment variables
+    cd /.singularity.d/env
+    echo 'export PATH="/usr/local/cuda-8.0/bin${PATH:+:${PATH}}"' >> 90-environment.sh
+    echo 'export LD_LIBRARY_PATH="/usr/local/cuda-8.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"' >> 90-environment.sh
+    echo 'export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/extras/CUPTI/lib64"' >> 90-environment.sh
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test

@@ -4,20 +4,20 @@ OSVersion: xenial
 
 %labels
 
-    APPLICATION_NAME tensorflow
-    APPLICATION_VERSION 1.8
+    APPLICATION_NAME keras + tensorflow
+    APPLICATION_VERSION 2.2.0 + 1.8
     APPLICATION_URL https://www.tensorflow.org
 
-    SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.5.1
-    SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
+    SYSTEM_NAME tscc
+    SYSTEM_SINGULARITY_VERSION 2.5.2
+    SYSTEM_URL https://www.sdsc.edu/support/user_guides/tscc.html
 
     SINGULARITY_IMAGE_SIZE 16384
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20180726
+    LAST_UPDATED 20180910
 
 %setup
 
@@ -132,7 +132,7 @@ OSVersion: xenial
     echo 'expect "Do you wish to build TensorFlow with MPI support? \[y/N\]: "' >> install-tensorflow-python.exp
     echo 'send "N\r"' >> install-tensorflow-python.exp
     echo 'expect "Please specify optimization flags to use during compilation when bazel option \"--config=opt\" is specified \[Default is -march=native\]: "' >> install-tensorflow-python.exp
-    echo 'send " -march=haswell -mmmx -mno-3dnow -msse -msse2 -msse3 -mssse3 -mno-sse4a -mcx16 -msahf -mmovbe -maes -mno-sha -mpclmul -mpopcnt -mabm -mno-lwp -mfma -mno-fma4 -mno-xop -mbmi -mbmi2 -mno-tbm -mavx -mavx2 -msse4.2 -msse4.1 -mlzcnt -mno-rtm -mno-hle -mrdrnd -mf16c -mfsgsbase -mno-rdseed -mno-prfchw -mno-adx -mfxsr -mxsave -mxsaveopt -mno-avx512f -mno-avx512er -mno-avx512cd -mno-avx512pf -mno-prefetchwt1 -mtune=generic\r"' >> install-tensorflow-python.exp
+    echo 'send " -march=sandybridge -mmmx -mno-3dnow -msse -msse2 -msse3 -mssse3 -mno-sse4a -mcx16 -msahf -mno-movbe -maes -mno-sha -mpclmul -mpopcnt -mno-abm -mno-lwp -mno-fma -mno-fma4 -mno-xop -mno-bmi -mno-bmi2 -mno-tbm -mavx -mno-avx2 -msse4.2 -msse4.1 -mno-lzcnt -mno-rtm -mno-hle -mno-rdrnd -mno-f16c -mno-fsgsbase -mno-rdseed -mno-prfchw -mno-adx -mfxsr -mxsave -mxsaveopt -mno-avx512f -mno-avx512er -mno-avx512cd -mno-avx512pf -mno-prefetchwt1 -mtune=sandybridge\r"' >> install-tensorflow-python.exp
     echo 'expect "Would you like to interactively configure ./WORKSPACE for Android builds? \[y/N\]: "' >> install-tensorflow-python.exp
     echo 'send "N\r"' >> install-tensorflow-python.exp
     echo 'expect "> "' >> install-tensorflow-python.exp
@@ -210,7 +210,7 @@ OSVersion: xenial
     echo 'expect "Do you wish to build TensorFlow with MPI support? \[y/N\]: "' >> install-tensorflow-python3.exp
     echo 'send "N\r"' >> install-tensorflow-python3.exp
     echo 'expect "Please specify optimization flags to use during compilation when bazel option \"--config=opt\" is specified \[Default is -march=native\]: "' >> install-tensorflow-python3.exp
-    echo 'send " -march=haswell -mmmx -mno-3dnow -msse -msse2 -msse3 -mssse3 -mno-sse4a -mcx16 -msahf -mmovbe -maes -mno-sha -mpclmul -mpopcnt -mabm -mno-lwp -mfma -mno-fma4 -mno-xop -mbmi -mbmi2 -mno-tbm -mavx -mavx2 -msse4.2 -msse4.1 -mlzcnt -mno-rtm -mno-hle -mrdrnd -mf16c -mfsgsbase -mno-rdseed -mno-prfchw -mno-adx -mfxsr -mxsave -mxsaveopt -mno-avx512f -mno-avx512er -mno-avx512cd -mno-avx512pf -mno-prefetchwt1 -mtune=generic\r"' >> install-tensorflow-python3.exp
+    echo 'send " -march=sandybridge -mmmx -mno-3dnow -msse -msse2 -msse3 -mssse3 -mno-sse4a -mcx16 -msahf -mno-movbe -maes -mno-sha -mpclmul -mpopcnt -mno-abm -mno-lwp -mno-fma -mno-fma4 -mno-xop -mno-bmi -mno-bmi2 -mno-tbm -mavx -mno-avx2 -msse4.2 -msse4.1 -mno-lzcnt -mno-rtm -mno-hle -mno-rdrnd -mno-f16c -mno-fsgsbase -mno-rdseed -mno-prfchw -mno-adx -mfxsr -mxsave -mxsaveopt -mno-avx512f -mno-avx512er -mno-avx512cd -mno-avx512pf -mno-prefetchwt1 -mtune=sandybridge\r"' >> install-tensorflow-python3.exp
     echo 'expect "Would you like to interactively configure ./WORKSPACE for Android builds? \[y/N\]: "' >> install-tensorflow-python3.exp
     echo 'send "N\r"' >> install-tensorflow-python3.exp
     echo 'expect "> "' >> install-tensorflow-python3.exp
@@ -240,6 +240,19 @@ OSVersion: xenial
 
     # Install other common python3 packages
     apt-get -y install python3-h5py
+
+    # Install Keras dependencies for python(2) and python3
+    apt-get -y install python-yaml
+    apt-get -y install python3-yaml
+
+    cd /opt
+
+    # Download, build, and install Keras
+    wget https://github.com/keras-team/keras/archive/2.2.0.tar.gz
+    tar -xzvf 2.2.0.tar.gz
+    cd /opt/keras-2.2.0
+    python setup.py install
+    python3 setup.py install
 
     # Set container environment variables
     cd /.singularity.d/env
