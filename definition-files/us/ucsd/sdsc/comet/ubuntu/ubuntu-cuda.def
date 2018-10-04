@@ -5,7 +5,7 @@ OSVersion: xenial
 %labels
 
     APPLICATION_NAME ubuntu + cuda
-    APPLICATION_VERSION 16.04 + 9.2.8
+    APPLICATION_VERSION 16.04 + 9.2.88
     APPLICATION_URL https://developer.nvidia.com/cuda-zone
 
     SYSTEM_NAME comet
@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20180927
+    LAST_UPDATED 20181003
 
 %setup
 
@@ -272,5 +272,13 @@ OSVersion: xenial
 %files
 
 %runscript
+
+    echo "                                                "
+    echo "      __________________  __  _______________   "
+    echo "    -----/ ____/ __ \/  |/  / ____/_  __/       "
+    echo "      --/ /   / / / / /|_/ / __/   / /          "
+    echo "       / /___/ /_/ / /  / / /___  / /           "
+    echo "       \____/\____/_/  /_/_____/ /_/            "
+    echo "                                                "
 
 %test

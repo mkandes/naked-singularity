@@ -9,7 +9,7 @@ OSVersion: xenial
     APPLICATION_URL https://www.ubuntu.com/
 
     SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.5.1
+    SYSTEM_SINGULARITY_VERSION 2.5.2
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
 
     SINGULARITY_IMAGE_SIZE 2048
@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20180718
+    LAST_UPDATED 20181003
 
 %setup
 
@@ -89,9 +89,6 @@ OSVersion: xenial
     chmod +x Miniconda3-latest-Linux-x86_64.sh
     ./Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda3
     
-    # Set container environment variables
-    cd /.singularity.d/env
-
     # Update database for mlocate
     updatedb
 
