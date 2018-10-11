@@ -5,11 +5,11 @@ OSVersion: xenial
 %labels
 
     APPLICATION_NAME tensorflow
-    APPLICATION_VERSION 1.8
+    APPLICATION_VERSION 1.11
     APPLICATION_URL https://www.tensorflow.org
 
     SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.5.1
+    SYSTEM_SINGULARITY_VERSION 2.5.2
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
 
     SINGULARITY_IMAGE_SIZE 32768
@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20180712
+    LAST_UPDATED 20181008
 
 %setup
 
@@ -25,6 +25,9 @@ OSVersion: xenial
 
     # Set system locale
     export LC_ALL=C
+    export PATH="/usr/local/cuda-9.2/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="/usr/local/cuda-9.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+    export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/extras/CUPTI/lib64"
 
 %post -c /bin/bash
 
@@ -118,7 +121,7 @@ OSVersion: xenial
     apt-get -y install default-jre
 
     # Download NVIDIA drivers, libraries, and packages
-    wget --wait=10 "${CUDA_REPO_URL}/nvidia-396_396.26-0ubuntu1_amd64.deb" 
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-396_396.26-0ubuntu1_amd64.deb"
     wget --wait=10 "${CUDA_REPO_URL}/nvidia-396-dev_396.26-0ubuntu1_amd64.deb"
     wget --wait=10 "${CUDA_REPO_URL}/nvidia-modprobe_396.26-0ubuntu1_amd64.deb"
     wget --wait=10 "${CUDA_REPO_URL}/libcuda1-396_396.26-0ubuntu1_amd64.deb"
@@ -128,42 +131,58 @@ OSVersion: xenial
     wget --wait=10 "${CUDA_REPO_URL}/nvidia-settings_396.26-0ubuntu1_amd64.deb"
     wget --wait=10 "${CUDA_REPO_URL}/cuda-drivers_396.26-1_amd64.deb"
 
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-license-8-0_8.0.44-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-misc-headers-8-0_8.0.44-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-core-8-0_8.0.44-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-cudart-8-0_8.0.44-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-driver-dev-8-0_8.0.44-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-cudart-dev-8-0_8.0.44-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-command-line-tools-8-0_8.0.44-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvrtc-8-0_8.0.44-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvrtc-dev-8-0_8.0.44-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvml-dev-8-0_8.0.44-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvgraph-8-0_8.0.44-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvgraph-dev-8-0_8.0.44-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusolver-8-0_8.0.44-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusolver-dev-8-0_8.0.44-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-cublas-8-0_8.0.44-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-cublas-dev-8-0_8.0.44-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-cufft-8-0_8.0.44-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-cufft-dev-8-0_8.0.44-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-curand-8-0_8.0.44-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-curand-dev-8-0_8.0.44-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusparse-8-0_8.0.44-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusparse-dev-8-0_8.0.44-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-npp-8-0_8.0.44-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-npp-dev-8-0_8.0.44-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-samples-8-0_8.0.44-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-documentation-8-0_8.0.44-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-visual-tools-8-0_8.0.44-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-toolkit-8-0_8.0.44-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-runtime-8-0_8.0.44-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-demo-suite-8-0_8.0.44-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-license-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-misc-headers-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvcc-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cuobjdump-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvprune-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-compiler-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-core-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cudart-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-driver-dev-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cudart-dev-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvdisasm-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-gdb-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvprof-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-memcheck-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cupti-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-gpu-library-advisor-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvtx-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-command-line-tools-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvrtc-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvrtc-dev-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvml-dev-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvgraph-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvgraph-dev-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusolver-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusolver-dev-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cublas-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cublas-dev-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cufft-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cufft-dev-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-curand-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-curand-dev-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusparse-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusparse-dev-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-npp-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-npp-dev-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-samples-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-documentation-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nsight-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvvp-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-visual-tools-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-tools-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-libraries-dev-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-toolkit-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-libraries-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-runtime-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-demo-suite-9-2_9.2.88-1_amd64.deb"
 
-    wget --wait=10 "${ML_REPO_URL}/libcudnn7_7.1.4.18-1+cuda8.0_amd64.deb"
-    wget --wait=10 "${ML_REPO_URL}/libcudnn7-dev_7.1.4.18-1+cuda8.0_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libcudnn7_7.2.1.38-1+cuda9.2_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libcudnn7-dev_7.2.1.38-1+cuda9.2_amd64.deb"
 
-    wget --wait=10 "${ML_REPO_URL}/libnccl2_2.2.12-1+cuda8.0_amd64.deb"
-    wget --wait=10 "${ML_REPO_URL}/libnccl-dev_2.2.12-1+cuda8.0_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libnccl2_2.3.4-1+cuda9.2_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libnccl-dev_2.3.4-1+cuda9.2_amd64.deb"
 
     # Fix for "update-alternatives: error: error creating symbolic link '/usr/lib/nvidia/alternate-install-present.dpkg-tmp': No such file or directory"
     mkdir -p /usr/lib/nvidia
@@ -179,78 +198,98 @@ OSVersion: xenial
     dpkg -i nvidia-settings_396.26-0ubuntu1_amd64.deb
     dpkg -i cuda-drivers_396.26-1_amd64.deb
 
-    dpkg -i cuda-license-8-0_8.0.44-1_amd64.deb
-    dpkg -i cuda-misc-headers-8-0_8.0.44-1_amd64.deb
-    dpkg -i cuda-core-8-0_8.0.44-1_amd64.deb
-    dpkg -i cuda-cudart-8-0_8.0.44-1_amd64.deb
-    dpkg -i cuda-driver-dev-8-0_8.0.44-1_amd64.deb
-    dpkg -i cuda-cudart-dev-8-0_8.0.44-1_amd64.deb
-    dpkg -i cuda-command-line-tools-8-0_8.0.44-1_amd64.deb
-    dpkg -i cuda-nvrtc-8-0_8.0.44-1_amd64.deb
-    dpkg -i cuda-nvrtc-dev-8-0_8.0.44-1_amd64.deb
-    dpkg -i cuda-nvml-dev-8-0_8.0.44-1_amd64.deb
-    dpkg -i cuda-nvgraph-8-0_8.0.44-1_amd64.deb
-    dpkg -i cuda-nvgraph-dev-8-0_8.0.44-1_amd64.deb
-    dpkg -i cuda-cusolver-8-0_8.0.44-1_amd64.deb
-    dpkg -i cuda-cusolver-dev-8-0_8.0.44-1_amd64.deb
-    dpkg -i cuda-cublas-8-0_8.0.44-1_amd64.deb
-    dpkg -i cuda-cublas-dev-8-0_8.0.44-1_amd64.deb
-    dpkg -i cuda-cufft-8-0_8.0.44-1_amd64.deb
-    dpkg -i cuda-cufft-dev-8-0_8.0.44-1_amd64.deb
-    dpkg -i cuda-curand-8-0_8.0.44-1_amd64.deb
-    dpkg -i cuda-curand-dev-8-0_8.0.44-1_amd64.deb
-    dpkg -i cuda-cusparse-8-0_8.0.44-1_amd64.deb
-    dpkg -i cuda-cusparse-dev-8-0_8.0.44-1_amd64.deb
-    dpkg -i cuda-npp-8-0_8.0.44-1_amd64.deb
-    dpkg -i cuda-npp-dev-8-0_8.0.44-1_amd64.deb
-    dpkg -i cuda-samples-8-0_8.0.44-1_amd64.deb
-    dpkg -i cuda-documentation-8-0_8.0.44-1_amd64.deb
-    dpkg -i cuda-visual-tools-8-0_8.0.44-1_amd64.deb
-    dpkg -i cuda-toolkit-8-0_8.0.44-1_amd64.deb
-    dpkg -i cuda-runtime-8-0_8.0.44-1_amd64.deb
-    dpkg -i cuda-demo-suite-8-0_8.0.44-1_amd64.deb
+    dpkg -i cuda-license-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-misc-headers-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-nvcc-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-cuobjdump-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-nvprune-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-compiler-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-core-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-cudart-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-driver-dev-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-cudart-dev-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-nvdisasm-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-gdb-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-nvprof-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-memcheck-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-cupti-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-gpu-library-advisor-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-nvtx-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-command-line-tools-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-nvrtc-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-nvrtc-dev-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-nvml-dev-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-nvgraph-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-nvgraph-dev-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-cusolver-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-cusolver-dev-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-cublas-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-cublas-dev-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-cufft-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-cufft-dev-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-curand-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-curand-dev-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-cusparse-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-cusparse-dev-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-npp-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-npp-dev-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-samples-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-documentation-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-nsight-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-nvvp-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-visual-tools-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-tools-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-libraries-dev-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-toolkit-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-libraries-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-runtime-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-demo-suite-9-2_9.2.88-1_amd64.deb
 
-    dpkg -i libcudnn7_7.1.4.18-1+cuda8.0_amd64.deb
-    dpkg -i libcudnn7-dev_7.1.4.18-1+cuda8.0_amd64.deb
+    dpkg -i libcudnn7_7.2.1.38-1+cuda9.2_amd64.deb
+    dpkg -i libcudnn7-dev_7.2.1.38-1+cuda9.2_amd64.deb
 
-    dpkg -i libnccl2_2.2.12-1+cuda8.0_amd64.deb
-    dpkg -i libnccl-dev_2.2.12-1+cuda8.0_amd64.deb
+    dpkg -i libnccl2_2.3.4-1+cuda9.2_amd64.deb
+    dpkg -i libnccl-dev_2.3.4-1+cuda9.2_amd64.deb
 
     # Fixing some TensorFlow and libnccl*.deb path issues ...
-    mv /usr/lib/x86_64-linux-gnu/libnccl_static.a /usr/local/cuda-8.0/lib64/libnccl_static.a
-    mv /usr/lib/x86_64-linux-gnu/libnccl.so.2.2.12 /usr/local/cuda-8.0/lib64/libnccl.so.2.2.12
-    ln -s /usr/local/cuda-8.0/lib64/libnccl.so.2.2.12 /usr/local/cuda-8.0/lib64/libnccl.so.2
-    ln -s /usr/local/cuda-8.0/lib64/libnccl.so.2 /usr/local/cuda-8.0/lib64/libnccl.so
-    mv /usr/include/nccl.h /usr/local/cuda-8.0/include/nccl.h
-    ln -s /usr/local/cuda-8.0/lib64 /usr/local/cuda-8.0/lib
-    mv /usr/share/doc/libnccl2/NCCL-SLA.txt.gz /usr/local/cuda-8.0/NCCL-SLA.txt
+    mv /usr/lib/x86_64-linux-gnu/libnccl_static.a /usr/local/cuda-9.2/lib64/libnccl_static.a
+    mv /usr/lib/x86_64-linux-gnu/libnccl.so.2.3.4 /usr/local/cuda-9.2/lib64/libnccl.so.2.3.4
+    ln -s /usr/local/cuda-9.2/lib64/libnccl.so.2.3.4 /usr/local/cuda-9.2/lib64/libnccl.so.2
+    ln -s /usr/local/cuda-9.2/lib64/libnccl.so.2 /usr/local/cuda-9.2/lib64/libnccl.so
+    mv /usr/include/nccl.h /usr/local/cuda-9.2/include/nccl.h
+    ln -s /usr/local/cuda-9.2/lib64 /usr/local/cuda-9.2/lib
+    mv /usr/share/doc/libnccl2/NCCL-SLA.txt.gz /usr/local/cuda-9.2/NCCL-SLA.txt
 
     # Set paths to CUDA binaries and libraries
-    export PATH="/usr/local/cuda-8.0/bin${PATH:+:${PATH}}"
-    export LD_LIBRARY_PATH="/usr/local/cuda-8.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+    export PATH="/usr/local/cuda-9.2/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="/usr/local/cuda-9.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
     export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/extras/CUPTI/lib64"
 
     # Install Bazel from Debian Package
     apt-get -y install openjdk-8-jdk
     apt-get -y install zlib1g-dev
-    wget https://github.com/bazelbuild/bazel/releases/download/0.13.1/bazel_0.13.1-linux-x86_64.deb
-    dpkg -i bazel_0.13.1-linux-x86_64.deb
+    wget https://github.com/bazelbuild/bazel/releases/download/0.17.2/bazel_0.17.2-linux-x86_64.deb
+    dpkg -i bazel_0.17.2-linux-x86_64.deb
 
     # Install TensorFlow python(2) dependencies
     apt-get -y install python
     apt-get -y install python-dev
     apt-get -y install python-pip
+    apt-get -y install python-six
     apt-get -y install python-wheel
     apt-get -y install python-enum34
     apt-get -y install python-mock
     apt-get -y install python-numpy
 
+    pip install keras_applications==1.0.5 --no-deps
+    pip install keras_preprocessing==1.0.3 --no-deps
+
     cd /opt
 
     # Download TensorFlow source
     git clone https://github.com/tensorflow/tensorflow
-    cd tensorflow
-    git checkout r1.8
+    cd /opt/tensorflow
+    git checkout r1.11
 
     # Build and install TensorFlow for python(2)
     echo '#!/usr/bin/expect -f' > install-tensorflow-python.exp
@@ -275,27 +314,29 @@ OSVersion: xenial
     echo 'send "N\r"' >> install-tensorflow-python.exp
     echo 'expect "Do you wish to build TensorFlow with VERBS support? \[y/N\]: "' >> install-tensorflow-python.exp
     echo 'send "N\r"' >> install-tensorflow-python.exp
+    echo 'expect "Do you wish to build TensorFlow with nGraph support? \[y/N\]: "' >> install-tensorflow-python.exp
+    echo 'send "N\r"' >> install-tensorflow-python.exp
     echo 'expect "Do you wish to build TensorFlow with OpenCL SYCL support? \[y/N\]: "' >> install-tensorflow-python.exp
     echo 'send "N\r"' >> install-tensorflow-python.exp
     echo 'expect "Do you wish to build TensorFlow with CUDA support? \[y/N\]: "' >> install-tensorflow-python.exp
     echo 'send "Y\r"' >> install-tensorflow-python.exp
-    echo 'expect "Please specify the CUDA SDK version you want to use, e.g. 7.0. \[Leave empty to default to CUDA 9.0\]: "' >> install-tensorflow-python.exp
-    echo 'send "8.0.44\r"' >> install-tensorflow-python.exp
-    echo 'expect "Please specify the location where CUDA 8.0 toolkit is installed. Refer to README.md for more details. \[Default is /usr/local/cuda\]: "' >> install-tensorflow-python.exp
+    echo 'expect "Please specify the CUDA SDK version you want to use. \[Leave empty to default to CUDA 9.0\]: "' >> install-tensorflow-python.exp
+    echo 'send "9.2.88\r"' >> install-tensorflow-python.exp
+    echo 'expect "Please specify the location where CUDA 9.2 toolkit is installed. Refer to README.md for more details. \[Default is /usr/local/cuda\]: "' >> install-tensorflow-python.exp
     echo 'send "/usr/local/cuda\r"' >> install-tensorflow-python.exp
     echo 'expect "Please specify the cuDNN version you want to use. \[Leave empty to default to cuDNN 7.0\]: "' >> install-tensorflow-python.exp
-    echo 'send "7.1.4.18\r"' >> install-tensorflow-python.exp
-    echo 'expect "Please specify the location where cuDNN 7.1.4.18 library is installed. Refer to README.md for more details. \[Default is /usr/local/cuda\]: "' >> install-tensorflow-python.exp
+    echo 'send "7.2.1.38\r"' >> install-tensorflow-python.exp
+    echo 'expect "Please specify the location where cuDNN 7 library is installed. Refer to README.md for more details. \[Default is /usr/local/cuda\]: "' >> install-tensorflow-python.exp
     echo 'send "/usr/lib/x86_64-linux-gnu\r"' >> install-tensorflow-python.exp
     echo 'expect "Do you wish to build TensorFlow with TensorRT support? \[y/N\]: "' >> install-tensorflow-python.exp
     echo 'send "N\r"' >> install-tensorflow-python.exp
-    echo 'expect "Please specify the NCCL version you want to use. \[Leave empty to default to NCCL 1.3\]:"' >> install-tensorflow-python.exp
-    echo 'send "2.2.12\r"' >> install-tensorflow-python.exp
+    echo 'expect "Please specify the NCCL version you want to use. \[Leave empty to default to NCCL 2.2\]:"' >> install-tensorflow-python.exp
+    echo 'send "2.3.4\r"' >> install-tensorflow-python.exp
     echo 'expect "Please specify the location where NCCL 2 library is installed. Refer to README.md for more details. \[Default is /usr/local/cuda\]: "' >> install-tensorflow-python.exp
     echo 'send "/usr/local/cuda\r"' >> install-tensorflow-python.exp
     echo 'expect "Please specify a list of comma-separated Cuda compute capabilities you want to build with.\r"' >> install-tensorflow-python.exp
     echo 'expect "You can find the compute capability of your device at: https://developer.nvidia.com/cuda-gpus.\r"' >> install-tensorflow-python.exp
-    echo 'expect "Please note that each additional compute capability significantly increases your build time and binary size. \[Default is: 3.5,5.2\]"' >> install-tensorflow-python.exp
+    echo 'expect "Please note that each additional compute capability significantly increases your build time and binary size. \[Default is: 3.5,7.0\]"' >> install-tensorflow-python.exp
     echo 'send "3.7,6.0\r"' >> install-tensorflow-python.exp
     echo 'expect "Do you want to use clang as CUDA compiler? \[y/N\]: "' >> install-tensorflow-python.exp
     echo 'send "N\r"' >> install-tensorflow-python.exp
@@ -313,19 +354,19 @@ OSVersion: xenial
     ./install-tensorflow-python.exp
  
     # See https://github.com/tensorflow/tensorflow/issues/17801
-    ln -s /usr/local/cuda-8.0/nvvm/libdevice/libdevice.compute_50.10.bc /usr/local/cuda-8.0/nvvm/libdevice/libdevice.10.bc
+    #ln -s /usr/local/cuda-8.0/nvvm/libdevice/libdevice.compute_50.10.bc /usr/local/cuda-8.0/nvvm/libdevice/libdevice.10.bc
 
     # See https://github.com/tensorflow/tensorflow/issues/19203
     #     https://github.com/ghostplant/tensorflow-cuda8-optimized/blob/master/Dockerfile.tf18-py35-cuda8-cudnn6021
-    sed -i 's/^#if TF_HAS_.*$/#if !defined(__NVCC__)/g' tensorflow/core/platform/macros.h
+    #sed -i 's/^#if TF_HAS_.*$/#if !defined(__NVCC__)/g' tensorflow/core/platform/macros.h
 
     # Clear /home/root/.cache prior to bazel build. Otherwise, previous builds may cause some conflicts. See 'dangling symbolic links' at https://github.com/tensorflow/tensorflow/issues/13928
     rm -rf /home/root/.cache
 
-    bazel build --config=opt --config=cuda //tensorflow/tools/pip_package:build_pip_package
+    bazel build --local_resources 2048,.5,1.0 -c opt --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" --config=cuda //tensorflow/tools/pip_package:build_pip_package
     bazel-bin/tensorflow/tools/pip_package/build_pip_package tensorflow_pkg
 
-    pip install tensorflow_pkg/tensorflow-1.8.0-cp27-cp27mu-linux_x86_64.whl
+    pip install tensorflow_pkg/tensorflow-1.11.0-cp27-cp27mu-linux_x86_64.whl
 
     # Install common python packages for data science and machine learning applications
     apt-get -y install python-scipy
@@ -353,16 +394,20 @@ OSVersion: xenial
     apt-get -y install python3
     apt-get -y install python3-dev
     apt-get -y install python3-pip
+    apt-get -y install python3-six
     apt-get -y install python3-wheel
     apt-get -y install python3-mock
     apt-get -y install python3-numpy
+
+    pip3 install keras_applications==1.0.5 --no-deps
+    pip3 install keras_preprocessing==1.0.3 --no-deps
 
     # Build and install TensorFlow for python3
     echo '#!/usr/bin/expect -f' > install-tensorflow-python3.exp
     echo 'spawn ./configure' >> install-tensorflow-python3.exp
     echo 'expect "Please specify the location of python. \[Default is /usr/bin/python\]: "' >> install-tensorflow-python3.exp
     echo 'send "/usr/bin/python3\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Please input the desired Python library path to use.  Default is \[/usr/local/lib/python3.5/dist-packages\]\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Please input the desired Python library path to use.  Default is \[/usr/local/lib/python2.7/dist-packages\]\r"' >> install-tensorflow-python3.exp
     echo 'send "/usr/local/lib/python3.5/dist-packages\r"' >> install-tensorflow-python3.exp
     echo 'expect "Do you wish to build TensorFlow with jemalloc as malloc support? \[Y/n\]: "' >> install-tensorflow-python3.exp
     echo 'send "Y\r"' >> install-tensorflow-python3.exp
@@ -380,27 +425,29 @@ OSVersion: xenial
     echo 'send "N\r"' >> install-tensorflow-python3.exp
     echo 'expect "Do you wish to build TensorFlow with VERBS support? \[y/N\]: "' >> install-tensorflow-python3.exp
     echo 'send "N\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Do you wish to build TensorFlow with nGraph support? \[y/N\]: "' >> install-tensorflow-python3.exp
+    echo 'send "N\r"' >> install-tensorflow-python3.exp
     echo 'expect "Do you wish to build TensorFlow with OpenCL SYCL support? \[y/N\]: "' >> install-tensorflow-python3.exp
     echo 'send "N\r"' >> install-tensorflow-python3.exp
     echo 'expect "Do you wish to build TensorFlow with CUDA support? \[y/N\]: "' >> install-tensorflow-python3.exp
     echo 'send "Y\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Please specify the CUDA SDK version you want to use, e.g. 7.0. \[Leave empty to default to CUDA 9.0\]: "' >> install-tensorflow-python3.exp
-    echo 'send "8.0.44\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Please specify the location where CUDA 8.0 toolkit is installed. Refer to README.md for more details. \[Default is /usr/local/cuda\]: "' >> install-tensorflow-python3.exp
+    echo 'expect "Please specify the CUDA SDK version you want to use. \[Leave empty to default to CUDA 9.0\]: "' >> install-tensorflow-python3.exp
+    echo 'send "9.2.88\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Please specify the location where CUDA 9.2 toolkit is installed. Refer to README.md for more details. \[Default is /usr/local/cuda\]: "' >> install-tensorflow-python3.exp
     echo 'send "/usr/local/cuda\r"' >> install-tensorflow-python3.exp
     echo 'expect "Please specify the cuDNN version you want to use. \[Leave empty to default to cuDNN 7.0\]: "' >> install-tensorflow-python3.exp
-    echo 'send "7.1.4.18\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Please specify the location where cuDNN 7.1.4.18 library is installed. Refer to README.md for more details. \[Default is /usr/local/cuda\]: "' >> install-tensorflow-python3.exp
+    echo 'send "7.2.1.38\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Please specify the location where cuDNN 7 library is installed. Refer to README.md for more details. \[Default is /usr/local/cuda\]: "' >> install-tensorflow-python3.exp
     echo 'send "/usr/lib/x86_64-linux-gnu\r"' >> install-tensorflow-python3.exp
     echo 'expect "Do you wish to build TensorFlow with TensorRT support? \[y/N\]: "' >> install-tensorflow-python3.exp
     echo 'send "N\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Please specify the NCCL version you want to use. \[Leave empty to default to NCCL 1.3\]:"' >> install-tensorflow-python3.exp
-    echo 'send "2.2.12\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Please specify the NCCL version you want to use. \[Leave empty to default to NCCL 2.2\]:"' >> install-tensorflow-python3.exp
+    echo 'send "2.3.4\r"' >> install-tensorflow-python3.exp
     echo 'expect "Please specify the location where NCCL 2 library is installed. Refer to README.md for more details. \[Default is /usr/local/cuda\]: "' >> install-tensorflow-python3.exp
     echo 'send "/usr/local/cuda\r"' >> install-tensorflow-python3.exp
     echo 'expect "Please specify a list of comma-separated Cuda compute capabilities you want to build with.\r"' >> install-tensorflow-python3.exp
     echo 'expect "You can find the compute capability of your device at: https://developer.nvidia.com/cuda-gpus.\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Please note that each additional compute capability significantly increases your build time and binary size. \[Default is: 3.5,5.2\]"' >> install-tensorflow-python3.exp
+    echo 'expect "Please note that each additional compute capability significantly increases your build time and binary size. \[Default is: 3.5,7.0\]"' >> install-tensorflow-python3.exp
     echo 'send "3.7,6.0\r"' >> install-tensorflow-python3.exp
     echo 'expect "Do you want to use clang as CUDA compiler? \[y/N\]: "' >> install-tensorflow-python3.exp
     echo 'send "N\r"' >> install-tensorflow-python3.exp
@@ -417,10 +464,16 @@ OSVersion: xenial
     chmod +x install-tensorflow-python3.exp
     ./install-tensorflow-python3.exp
 
-    bazel build --config=opt --config=cuda //tensorflow/tools/pip_package:build_pip_package
+     # Clear /home/root/.cache prior to bazel build. Otherwise, previous builds may cause some conflicts. See 'dangling symbolic links' at https://github.com/tensorflow/tensorflow/issues/13928
+    rm -rf /home/root/.cache
+
+    # It is recommended to run bazel clean when switching between two configurations in the same source tree.
+    bazel clean
+
+    bazel build --local_resources 2048,.5,1.0 -c opt --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" --config=cuda //tensorflow/tools/pip_package:build_pip_package
     bazel-bin/tensorflow/tools/pip_package/build_pip_package tensorflow_pkg
 
-    pip3 install tensorflow_pkg/tensorflow-1.8.0-cp35-cp35m-linux_x86_64.whl
+    pip3 install tensorflow_pkg/tensorflow-1.11.0-cp35-cp35m-linux_x86_64.whl
 
     # Install common python3 packages for data science and machine learning applications
     apt-get -y install python3-scipy
@@ -439,12 +492,6 @@ OSVersion: xenial
 
     # Install other common python3 packages
     apt-get -y install python3-h5py
-
-    # Set container environment variables
-    cd /.singularity.d/env
-    echo 'export PATH="/usr/local/cuda-8.0/bin${PATH:+:${PATH}}"' >> 90-environment.sh
-    echo 'export LD_LIBRARY_PATH="/usr/local/cuda-8.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"' >> 90-environment.sh
-    echo 'export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/extras/CUPTI/lib64"' >> 90-environment.sh
 
     # Update database for mlocate
     updatedb
