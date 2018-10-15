@@ -5,11 +5,11 @@ OSVersion: xenial
 %labels
 
     APPLICATION_NAME mxnet-cpu
-    APPLICATION_VERSION 1.1.0
+    APPLICATION_VERSION 1.3.0
     APPLICATION_URL http://mxnet.io
 
     SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.5.1
+    SYSTEM_SINGULARITY_VERSION 2.5.2
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
 
     SINGULARITY_IMAGE_SIZE 8192
@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20180524
+    LAST_UPDATED 20181011
 
 %setup
 
@@ -63,6 +63,7 @@ OSVersion: xenial
     apt-get -y install autoconf
     apt-get -y install automake
     apt-get -y install build-essential
+    apt-get -y install cmake
     apt-get -y install libtool
     apt-get -y install pkg-config
     apt-get -y install gfortran
@@ -96,9 +97,9 @@ OSVersion: xenial
     cd /opt
 
     # Download, build and install MXNet core shared library
-    wget https://github.com/apache/incubator-mxnet/releases/download/1.1.0/apache-mxnet-src-1.1.0-incubating.tar.gz
-    tar -xzvf apache-mxnet-src-1.1.0-incubating.tar.gz
-    cd /opt/apache-mxnet-src-1.1.0-incubating
+    wget https://github.com/apache/incubator-mxnet/releases/download/1.3.0/apache-mxnet-src-1.3.0-incubating.tar.gz
+    tar -xzvf apache-mxnet-src-1.3.0-incubating.tar.gz
+    cd /opt/apache-mxnet-src-1.3.0-incubating
     make USE_OPENCV=1 USE_BLAS=openblas USE_DIST_KVSTORE=1
 
     # Install MXNet python(2) bindings
@@ -107,21 +108,9 @@ OSVersion: xenial
     apt-get -y install python-pip
     apt-get -y install libgfortran3
 
-    cd /opt/apache-mxnet-src-1.1.0-incubating/python
-    pip install --upgrade pip
-    pip install -e ./
+    cd /opt/apache-mxnet-src-1.3.0-incubating/python
+    python setup.py install
 
-    # Install MXNet python3 bindings
-    apt-get -y install python3-dev
-    apt-get -y install python3-setuptools
-    apt-get -y install python3-pip
-
-    pip3 install --upgrade pip
-    pip3 install -e ./
-
-    # Install graphviz (needed for graph visualization using mxnet.viz).
-    apt-get -y install graphviz
-    
     # Install common python packages for data science and machine learning applications
     apt-get -y install python-scipy
     apt-get -y install python-pandas
@@ -137,6 +126,20 @@ OSVersion: xenial
     apt-get -y install libopencv-dev
     apt-get -y install python-opencv
 
+    # Install common python packages for the biological and biomedical sciences
+    apt-get -y install python-biopython
+    apt-get -y install python-biopython-sql
+
+    # Install other common python packages
+    apt-get -y install python-h5py
+
+    # Install MXNet python3 bindings
+    apt-get -y install python3-dev
+    apt-get -y install python3-setuptools
+    apt-get -y install python3-pip
+
+    python3 setup.py install
+
     # Install common python3 packages for data science and machine learning applications
     apt-get -y install python3-scipy
     apt-get -y install python3-pandas
@@ -147,10 +150,17 @@ OSVersion: xenial
     apt-get -y install python3-nose
     apt-get -y install python3-sklearn
     apt-get -y install python3-nltk
-    
-    # Set container environment variables
-    cd /.singularity.d/env
 
+    # Install common python3 packages for the biological and biomedical sciences
+    apt-get -y install python3-biopython
+    apt-get -y install python3-biopython-sql
+
+    # Install other common python3 packages
+    apt-get -y install python3-h5py
+
+    # Install graphviz (needed for graph visualization using mxnet.viz).
+    apt-get -y install graphviz
+    
     # Update database for mlocate
     updatedb
 
