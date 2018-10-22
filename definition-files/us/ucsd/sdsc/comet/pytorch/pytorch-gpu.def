@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20181002
+    LAST_UPDATED 20181019
 
 %setup
 
@@ -315,12 +315,22 @@ OSVersion: xenial
     cd /opt
 
     # Download, build, and install PyTorch for python2
-    git clone --recursive https://github.com/pytorch/pytorch
-    git submodule update --init
-    cd /opt/pytorch
     export PYTORCH_BUILD_VERSION='0.4.1'
     export PYTORCH_BUILD_NUMBER='1'
+    export CFLAGS='-march=haswell -mmmx -mno-3dnow -msse -msse2 -msse3 -mssse3 -mno-sse4a -mcx16 -msahf -mmovbe -maes -mno-sha -mpclmul -mpopcnt -mabm -mno-lwp -mfma -mno-fma4 -mno-xop -mbmi -mbmi2 -mno-tbm -mavx -mavx2 -msse4.2 -msse4.1 -mlzcnt -mno-rtm -mno-hle -mrdrnd -mf16c -mfsgsbase -mno-rdseed -mno-prfchw -mno-adx -mfxsr -mxsave -mxsaveopt -mno-avx512f -mno-avx512er -mno-avx512cd -mno-avx512pf -mno-prefetchwt1 -mtune=haswell'
+    export USE_OPENMP='ON'
+    export USE_NNPACK='ON'
+    export USE_MKLDNN='ON'
+    export USE_DISTRIBUTED='ON'
+    export USE_GLOO='ON'
+    export USE_GLOO_IBVERBS='ON'
+    export USE_CUDA='ON'
+    export USE_CUDNN='ON'
+    export USE_NCCL='ON'
+    git clone --recursive https://github.com/pytorch/pytorch
+    cd /opt/pytorch
     git checkout "v${PYTORCH_BUILD_VERSION}"
+    git submodule update --init
     python setup.py install
 
     # Download and install PyTorch Vision package for python2
@@ -343,8 +353,9 @@ OSVersion: xenial
     conda install -y opencv
 
     # Install PyTorch dependencies for python3
-    export PATH="/opt/miniconda3/bin:${PATH}"
+    export PATH="$(echo "${PATH}" | sed s+'/opt/miniconda2/bin'+'/opt/miniconda3/bin'+)"
     export CMAKE_PREFIX_PATH="$(dirname $(which conda))/../"
+    conda install -y python=3.5
     conda install -y numpy
     conda install -y pyyaml
     conda install -y mkl
@@ -380,11 +391,9 @@ OSVersion: xenial
     conda install -y statsmodels
     conda install -y opencv
 
-    cd /opt
-
     # Download the PyTorch examples repository
+    cd /opt/pytorch
     git clone https://github.com/pytorch/examples.git
-    mv examples pytorch-examples
 
     # Update database for mlocate
     updatedb
