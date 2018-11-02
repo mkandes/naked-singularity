@@ -5,11 +5,11 @@ OSVersion: xenial
 %labels
 
     APPLICATION_NAME meep
-    APPLICATION_VERSION 1.4.3
-    APPLICATION_URL https://www.open-mpi.org/
+    APPLICATION_VERSION 1.6.0
+    APPLICATION_URL https://meep.readthedocs.io/en/latest/
 
     SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.5.1
+    SYSTEM_SINGULARITY_VERSION 2.5.2
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
 
     SINGULARITY_IMAGE_SIZE 4092
@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20180530
+    LAST_UPDATED 20181102
 
 %setup
 
@@ -25,6 +25,22 @@ OSVersion: xenial
 
     # Set system locale
     export LC_ALL=C
+    export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/harminv-1.4.1/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/harminv-1.4.1/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/libctl-4.1.3/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/libctl-4.1.3/lib:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="/opt/zlib-1.2.11/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/hdf5-1.10.1/hdf5/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/hdf5-1.10.1/hdf5/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/h5utils-1.13/bin:${PATH}"
+    export PATH="/opt/fftw-3.3.7/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/fftw-3.3.7/lib:{LD_LIBRARY_PATH}"
+    export PATH="/opt/mpb-1.6.2/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/mpb-1.6.2/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/meep-1.6.0/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/meep-1.6.0/lib:${LD_LIBRARY_PATH}"
 
 %post -c /bin/bash
 
@@ -108,12 +124,14 @@ OSVersion: xenial
     apt-get -y install libnl-route-3-dev
     apt-get -y install libnl-utils
 
+    cd /opt
+
     # Download, build, and install openmpi
     wget https://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.4.tar.gz
     tar -xzvf openmpi-1.8.4.tar.gz
     cd openmpi-1.8.4
     ./configure --prefix=/opt/openmpi-1.8.4
-     make all install
+    make all install
 
     export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
     export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
@@ -147,15 +165,15 @@ OSVersion: xenial
 
     cd ../
 
-    wget https://github.com/stevengj/libctl/archive/v4.0.0.tar.gz
-    tar -xzvf v4.0.0.tar.gz
-    cd libctl-4.0.0
-    sh autogen.sh --prefix='/opt/libctl-4.0.0' --enable-shared
+    wget https://github.com/stevengj/libctl/archive/v4.1.3.tar.gz
+    tar -xzvf v4.1.3.tar.gz
+    cd libctl-4.1.3
+    sh autogen.sh --prefix='/opt/libctl-4.1.3' --enable-shared
     make
-    make install 
+    make install
 
-    export PATH="/opt/libctl-4.0.0/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/libctl-4.0.0/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/libctl-4.1.3/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/libctl-4.1.3/lib:${LD_LIBRARY_PATH}"
 
     cd ../
 
@@ -205,28 +223,28 @@ OSVersion: xenial
 
     cd ../
 
-    wget https://github.com/stevengj/mpb/archive/v1.6.1.tar.gz
-    tar -xzvf v1.6.1.tar.gz
-    cd mpb-1.6.1
-    sh autogen.sh CC='mpicc' CXX='mpic++' CPPFLAGS='-I/opt/hdf5-1.10.1/hdf5/include -I/opt/libctl-4.0.0/include -I/opt/fftw-3.3.7/include' LDFLAGS='-L/opt/hdf5-1.10.1/hdf5/lib -L/opt/libctl-4.0.0/lib -L/opt/fftw-3.3.7/lib' --prefix='/opt/mpb-1.6.1' --with-libctl='/opt/libctl-4.0.0' --enable-shared --with-openmp
+    wget https://github.com/stevengj/mpb/archive/v1.6.2.tar.gz
+    tar -xzvf v1.6.2.tar.gz
+    cd mpb-1.6.2
+    sh autogen.sh CC='mpicc' CXX='mpic++' CPPFLAGS='-I/opt/hdf5-1.10.1/hdf5/include -I/opt/libctl-4.1.3/include -I/opt/fftw-3.3.7/include' LDFLAGS='-L/opt/hdf5-1.10.1/hdf5/lib -L/opt/libctl-4.1.3/lib -L/opt/fftw-3.3.7/lib' --prefix='/opt/mpb-1.6.2' --with-libctl='/opt/libctl-4.1.3' --enable-shared --with-openmp
     make
     make install
     make distclean
-    sh autogen.sh CC='mpicc' CXX='mpic++' CPPFLAGS='-I/opt/hdf5-1.10.1/hdf5/include -I/opt/libctl-4.0.0/include -I/opt/fftw-3.3.7/include' LDFLAGS='-L/opt/hdf5-1.10.1/hdf5/lib -L/opt/libctl-4.0.0/lib -L/opt/fftw-3.3.7/lib' --prefix='/opt/mpb-1.6.1' --with-libctl='/opt/libctl-4.0.0' --enable-shared --with-mpi
+    sh autogen.sh CC='mpicc' CXX='mpic++' CPPFLAGS='-I/opt/hdf5-1.10.1/hdf5/include -I/opt/libctl-4.1.3/include -I/opt/fftw-3.3.7/include' LDFLAGS='-L/opt/hdf5-1.10.1/hdf5/lib -L/opt/libctl-4.1.3/lib -L/opt/fftw-3.3.7/lib' --prefix='/opt/mpb-1.6.2' --with-libctl='/opt/libctl-4.1.3' --enable-shared --with-mpi
     make
     make install
 
-    #cd /opt/mpb-1.6.1/include
+    #cd /opt/mpb-1.6.2/include
     #ln -s mpb_mpi.h mpb.h
 
-    #cd /opt/mpb-1.6.1/lib
+    #cd /opt/mpb-1.6.2/lib
     #ln -s libmpb_mpi.so.1.0.0 libmpb.so.1
     #ln -s libmpb_mpi.so.1.0.0 libmpb.so
     #ln -s libmpb_mpi.la libmpb.la
     #ln -s libmpb_mpi.a libmpb.a
 
-    export PATH="/opt/mpb-1.6.1/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/mpb-1.6.1/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/mpb-1.6.2/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/mpb-1.6.2/lib:${LD_LIBRARY_PATH}"
 
     cd /opt
 
@@ -248,31 +266,12 @@ OSVersion: xenial
 
     cd ../
 
-    wget https://github.com/stevengj/meep/archive/v1.4.3.tar.gz
-    tar -xzvf v1.4.3.tar.gz
-    cd meep-1.4.3
-    sh autogen.sh CC='mpicc' CXX='mpic++' CPPFLAGS='-I/opt/harminv-1.4.1/include -I/opt/hdf5-1.10.1/hdf5/include -I/opt/libctl-4.0.0/include -I/opt/fftw-3.3.7/include -I/opt/mpb-1.6.1/include' LDFLAGS='-L/opt/harminv-1.4.1/lib -L/opt/hdf5-1.10.1/hdf5/lib -L/opt/libctl-4.0.0/lib -L/opt/fftw-3.3.7/lib -L/opt/mpb-1.6.1/lib' --prefix='/opt/meep-1.4.3' --with-libctl='/opt/libctl-4.0.0' --enable-shared --with-mpi
+    wget https://github.com/stevengj/meep/archive/v1.6.0.tar.gz
+    tar -xzvf v1.6.0.tar.gz
+    cd meep-1.6.0
+    sh autogen.sh CC='mpicc' CXX='mpic++' CPPFLAGS='-I/opt/harminv-1.4.1/include -I/opt/hdf5-1.10.1/hdf5/include -I/opt/libctl-4.1.3/include -I/opt/fftw-3.3.7/include -I/opt/mpb-1.6.2/include' LDFLAGS='-L/opt/harminv-1.4.1/lib -L/opt/hdf5-1.10.1/hdf5/lib -L/opt/libctl-4.1.3/lib -L/opt/fftw-3.3.7/lib -L/opt/mpb-1.6.2/lib' --prefix='/opt/meep-1.6.0' --with-libctl='/opt/libctl-4.1.3' --enable-shared --with-mpi
     make
     make install
-
-    # Set container environment variables
-    cd /.singularity.d/env
-    echo 'export PATH="/opt/openmpi-1.8.4/bin:${PATH}"' >> 90-environment.sh
-    echo 'export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"' >> 90-environment.sh
-    echo 'export PATH="/opt/harminv-1.4.1/bin:${PATH}"' >> 90-environment.sh
-    echo 'export LD_LIBRARY_PATH="/opt/harminv-1.4.1/lib:${LD_LIBRARY_PATH}"' >> 90-environment.sh
-    echo 'export PATH="/opt/libctl-4.0.0/bin:${PATH}"' >> 90-environment.sh
-    echo 'export LD_LIBRARY_PATH="/opt/libctl-4.0.0/lib:${LD_LIBRARY_PATH}"' >> 90-environment.sh
-    echo 'export LD_LIBRARY_PATH="/opt/zlib-1.2.11/lib:${LD_LIBRARY_PATH}"' >> 90-environment.sh
-    echo 'export PATH="/opt/hdf5-1.10.1/hdf5/bin:${PATH}"' >> 90-environment.sh
-    echo 'export LD_LIBRARY_PATH="/opt/hdf5-1.10.1/hdf5/lib:${LD_LIBRARY_PATH}"' >> 90-environment.sh
-    echo 'export PATH="/opt/h5utils-1.13/bin:${PATH}"' >> 90-environment.sh
-    echo 'export PATH="/opt/fftw-3.3.7/bin:${PATH}"' >> 90-environment.sh
-    echo 'export LD_LIBRARY_PATH="/opt/fftw-3.3.7/lib:{LD_LIBRARY_PATH}"' >> 90-environment.sh
-    echo 'export PATH="/opt/mpb-1.6.1/bin:${PATH}"' >> 90-environment.sh
-    echo 'export LD_LIBRARY_PATH="/opt/mpb-1.6.1/lib:${LD_LIBRARY_PATH}"' >> 90-environment.sh
-    echo 'export PATH="/opt/meep-1.4.3/bin:${PATH}"' >> 90-environment.sh
-    echo 'export LD_LIBRARY_PATH="/opt/meep-1.4.3/lib:${LD_LIBRARY_PATH}"' >> 90-environment.sh
 
     # Update database for mlocate
     updatedb
@@ -289,18 +288,18 @@ OSVersion: xenial
     export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
     export PATH="/opt/harminv-1.4.1/bin:${PATH}"
     export LD_LIBRARY_PATH="/opt/harminv-1.4.1/lib:${LD_LIBRARY_PATH}"
-    export PATH="/opt/libctl-4.0.0/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/libctl-4.0.0/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/libctl-4.1.3/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/libctl-4.1.3/lib:${LD_LIBRARY_PATH}"
     export LD_LIBRARY_PATH="/opt/zlib-1.2.11/lib:${LD_LIBRARY_PATH}"
     export PATH="/opt/hdf5-1.10.1/hdf5/bin:${PATH}"
     export LD_LIBRARY_PATH="/opt/hdf5-1.10.1/hdf5/lib:${LD_LIBRARY_PATH}"
     export PATH="/opt/h5utils-1.13/bin:${PATH}"
     export PATH="/opt/fftw-3.3.7/bin:${PATH}"
     export LD_LIBRARY_PATH="/opt/fftw-3.3.7/lib:{LD_LIBRARY_PATH}"
-    export PATH="/opt/mpb-1.6.1/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/mpb-1.6.1/lib:${LD_LIBRARY_PATH}"
-    export PATH="/opt/meep-1.4.3/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/meep-1.4.3/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/mpb-1.6.2/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/mpb-1.6.2/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/meep-1.6.0/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/meep-1.6.0/lib:${LD_LIBRARY_PATH}"
 
-    time -p meep /opt/meep-1.4.3/examples/parallel-wvgs-force.ctl
-    time -p mpirun -np 2 meep /opt/meep-1.4.3/examples/parallel-wvgs-force.ctl
+    time -p meep /opt/meep-1.6.0/scheme/examples/parallel-wvgs-force.ctl
+    time -p mpirun -np 2 meep /opt/meep-1.6.0/scheme/examples/parallel-wvgs-force.ctl
