@@ -20,7 +20,7 @@ USAGE
 
      2. Build a simple Ubuntu Singularity container.
 
-            ./naked-singularity.sh build -a ubuntu -d ubuntu.def 
+            ./naked-singularity.sh build -s comet -a ubuntu -d ubuntu.def 
 
      3. Uninstall Singularity from your local desktop, laptop, or 
         virtual machine.
@@ -46,7 +46,7 @@ AUTHOR
 
 VERSION
 
-    0.5.0
+    0.5.2
 
 LAST UPDATED
 
