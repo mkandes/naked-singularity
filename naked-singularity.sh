@@ -17,9 +17,9 @@
 #
 #            ./naked-singularity.sh install
 #
-#     2. Build a simple Ubuntu Singularity container.
+#     2. Build a simple Ubuntu Singularity container for Comet at SDSC.
 #
-#            ./naked-singularity.sh build -a ubuntu -d ubuntu.def 
+#            ./naked-singularity.sh build -s comet -a ubuntu -d ubuntu.def 
 #
 #     3. Uninstall Singularity from your local desktop, laptop, or 
 #        virtual machine.
@@ -28,7 +28,7 @@
 #
 # LAST UPDATED
 #
-#     Friday, May 18th, 2018
+#     Tuesday, November 6th, 2018
 #
 # ----------------------------------------------------------------------
 
@@ -58,10 +58,7 @@ naked_build() {
   local path_to_definition_file="${naked_dir}/definition-files"
   local path_to_image="${naked_dir}/images"
 
-  local country='us'
-  local organization='ucsd'
-  local unit='sdsc'
-  local system='comet'
+  local system=''
   local application=''
   local definition_file=''
   local image=''
@@ -74,18 +71,6 @@ naked_build() {
   while (( "${#}" > 0 )); do
     naked_out "Read in command-line option '${1}' with input value '${2}' ... "
     case "${1}" in
-      -c | --country )
-        country="${2,,}"
-        shift 2
-        ;;
-      -o | --organization )
-        organization="${2,,}"
-        shift 2
-        ;;
-      -u | --unit )
-        unit="${2,,}"
-        shift 2
-        ;;
       -s | --system )
         system="${2,,}"
         shift 2
@@ -123,66 +108,6 @@ naked_build() {
   naked_out "All command-line options for 'build' command have been read ... "
 
   naked_out 'Check if DEFINITION FILE is exists ...'
-
-  if [[ -z "${country}" ]]; then
-    naked_err 'No COUNTRY code was provided.'
-    naked_err 'Use the -c (or --country) command-line option to specify the two-letter COUNTRY code where the target SYSTEM is located.'
-    naked_err 'Listing COUNTRY codes to choose from ... '
-    echo "ls ${path_to_definition_file}"
-    echo "$(ls "${path_to_definition_file}")"
-    return 1
-  fi
-
-  path_to_definition_file+="/${country}"
-
-  if [[ ! -d "${path_to_definition_file}" ]]; then
-    naked_err "${path_to_definition_file} does not exist."
-    naked_err 'Use the -c (or --country) command-line option to specify the two-letter COUNTRY code where the target SYSTEM is located.'
-    naked_err 'Listing all COUNTRYs to choose from ...'
-    echo "ls ${path_to_definition_file%/${country}}"
-    echo "$(ls "${path_to_definition_file%/${country}}")"
-    return 1
-  fi
-
-  if [[ -z "${organization}" ]]; then
-    naked_err 'No ORGANIZATION was provided.'
-    naked_err 'Use the -o (or --organization) command-line option to specify the acronym of the ORGANIZATION where the target SYSTEM is located.'
-    naked_err 'Listing all ORGANIZATIONs to choose from ... '
-    echo "ls ${path_to_definition_file}"
-    echo "$(ls "${path_to_definition_file}")"
-    return 1
-  fi
-
-  path_to_definition_file+="/${organization}"
-
-  if [[ ! -d "${path_to_definition_file}" ]]; then
-    naked_err "${path_to_definition_file} does not exist."
-    naked_err 'Use the -o (or --organization) command-line option to specify the acronym of the ORGANIZATION where the target SYSTEM is located.'
-    naked_err 'Listing all ORGANIZATIONs to choose from ...'
-    echo "ls ${path_to_definition_file%/${organization}}"
-    echo "$(ls "${path_to_definition_file%/${organization}}")"
-    return 1
-  fi
-
-  if [[ -z "${unit}" ]]; then
-    naked_err 'No UNIT was provided.'
-    naked_err 'Use the -u (or --unit) command-line option to specify the acronym of the UNIT that administers the target SYSTEM.'
-    naked_err 'Listing all UNITs to choose from ...'
-    echo "ls ${path_to_definition_file}"
-    echo "$(ls "${path_to_definition_file}")"
-    return 1
-  fi
-
-  path_to_definition_file+="/${unit}"
-
-  if [[ ! -d "${path_to_definition_file}" ]]; then
-    naked_err "${path_to_definition_file} does not exist."
-    naked_err 'Use the -u (or --unit) command-line option to specify the acronym of the UNIT that administers the target SYSTEM.'
-    naked_err 'Listing all UNITs to choose from ...'
-    echo "ls ${path_to_definition_file%/${unit}}"
-    echo "$(ls "${path_to_definition_file%/${unit}}")"
-    return 1
-  fi
 
   if [[ -z "${system}" ]]; then
     naked_err 'No SYSTEM name was provided.'
@@ -260,9 +185,6 @@ naked_build() {
     naked_out "Setting IMAGE name ... ${image}"
   fi
 
-  path_to_image+="/${country}"
-  path_to_image+="/${organization}"
-  path_to_image+="/${unit}"
   path_to_image+="/${system}"
   path_to_image+="/${application}"
   path_to_image+="/${image}"
