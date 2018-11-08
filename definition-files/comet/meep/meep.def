@@ -5,7 +5,7 @@ OSVersion: xenial
 %labels
 
     APPLICATION_NAME meep
-    APPLICATION_VERSION 1.6.0
+    APPLICATION_VERSION 1.6.0*
     APPLICATION_URL https://meep.readthedocs.io/en/latest/
 
     SYSTEM_NAME comet
@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20181102
+    LAST_UPDATED 20181106
 
 %setup
 
@@ -223,9 +223,11 @@ OSVersion: xenial
 
     cd ../
 
-    wget https://github.com/stevengj/mpb/archive/v1.6.2.tar.gz
-    tar -xzvf v1.6.2.tar.gz
-    cd mpb-1.6.2
+    #wget https://github.com/stevengj/mpb/archive/v1.6.2.tar.gz
+    #tar -xzvf v1.6.2.tar.gz
+    #cd mpb-1.6.2
+    git clone https://github.com/stevengj/mpb.git
+    cd mpb
     sh autogen.sh CC='mpicc' CXX='mpic++' CPPFLAGS='-I/opt/hdf5-1.10.1/hdf5/include -I/opt/libctl-4.1.3/include -I/opt/fftw-3.3.7/include' LDFLAGS='-L/opt/hdf5-1.10.1/hdf5/lib -L/opt/libctl-4.1.3/lib -L/opt/fftw-3.3.7/lib' --prefix='/opt/mpb-1.6.2' --with-libctl='/opt/libctl-4.1.3' --enable-shared --with-openmp
     make
     make install
@@ -266,9 +268,11 @@ OSVersion: xenial
 
     cd ../
 
-    wget https://github.com/stevengj/meep/archive/v1.6.0.tar.gz
-    tar -xzvf v1.6.0.tar.gz
-    cd meep-1.6.0
+    #wget https://github.com/stevengj/meep/archive/v1.6.0.tar.gz
+    #tar -xzvf v1.6.0.tar.gz
+    #cd meep-1.6.0
+    git clone https://github.com/stevengj/meep.git
+    cd meep
     sh autogen.sh CC='mpicc' CXX='mpic++' CPPFLAGS='-I/opt/harminv-1.4.1/include -I/opt/hdf5-1.10.1/hdf5/include -I/opt/libctl-4.1.3/include -I/opt/fftw-3.3.7/include -I/opt/mpb-1.6.2/include' LDFLAGS='-L/opt/harminv-1.4.1/lib -L/opt/hdf5-1.10.1/hdf5/lib -L/opt/libctl-4.1.3/lib -L/opt/fftw-3.3.7/lib -L/opt/mpb-1.6.2/lib' --prefix='/opt/meep-1.6.0' --with-libctl='/opt/libctl-4.1.3' --enable-shared --with-mpi
     make
     make install
@@ -284,22 +288,22 @@ OSVersion: xenial
     
     # Test MEEP (and MPB) with an example calculation
 
-    export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
-    export PATH="/opt/harminv-1.4.1/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/harminv-1.4.1/lib:${LD_LIBRARY_PATH}"
-    export PATH="/opt/libctl-4.1.3/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/libctl-4.1.3/lib:${LD_LIBRARY_PATH}"
-    export LD_LIBRARY_PATH="/opt/zlib-1.2.11/lib:${LD_LIBRARY_PATH}"
-    export PATH="/opt/hdf5-1.10.1/hdf5/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/hdf5-1.10.1/hdf5/lib:${LD_LIBRARY_PATH}"
-    export PATH="/opt/h5utils-1.13/bin:${PATH}"
-    export PATH="/opt/fftw-3.3.7/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/fftw-3.3.7/lib:{LD_LIBRARY_PATH}"
-    export PATH="/opt/mpb-1.6.2/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/mpb-1.6.2/lib:${LD_LIBRARY_PATH}"
-    export PATH="/opt/meep-1.6.0/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/meep-1.6.0/lib:${LD_LIBRARY_PATH}"
+    #export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
+    #export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
+    #export PATH="/opt/harminv-1.4.1/bin:${PATH}"
+    #export LD_LIBRARY_PATH="/opt/harminv-1.4.1/lib:${LD_LIBRARY_PATH}"
+    #export PATH="/opt/libctl-4.1.3/bin:${PATH}"
+    #export LD_LIBRARY_PATH="/opt/libctl-4.1.3/lib:${LD_LIBRARY_PATH}"
+    #export LD_LIBRARY_PATH="/opt/zlib-1.2.11/lib:${LD_LIBRARY_PATH}"
+    #export PATH="/opt/hdf5-1.10.1/hdf5/bin:${PATH}"
+    #export LD_LIBRARY_PATH="/opt/hdf5-1.10.1/hdf5/lib:${LD_LIBRARY_PATH}"
+    #export PATH="/opt/h5utils-1.13/bin:${PATH}"
+    #export PATH="/opt/fftw-3.3.7/bin:${PATH}"
+    #export LD_LIBRARY_PATH="/opt/fftw-3.3.7/lib:{LD_LIBRARY_PATH}"
+    #export PATH="/opt/mpb-1.6.2/bin:${PATH}"
+    #export LD_LIBRARY_PATH="/opt/mpb-1.6.2/lib:${LD_LIBRARY_PATH}"
+    #export PATH="/opt/meep-1.6.0/bin:${PATH}"
+    #export LD_LIBRARY_PATH="/opt/meep-1.6.0/lib:${LD_LIBRARY_PATH}"
 
-    time -p meep /opt/meep-1.6.0/scheme/examples/parallel-wvgs-force.ctl
-    time -p mpirun -np 2 meep /opt/meep-1.6.0/scheme/examples/parallel-wvgs-force.ctl
+    #time -p meep /opt/meep-1.6.0/scheme/examples/parallel-wvgs-force.ctl
+    #time -p mpirun -np 2 meep /opt/meep-1.6.0/scheme/examples/parallel-wvgs-force.ctl
