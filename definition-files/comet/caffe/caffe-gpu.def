@@ -1,0 +1,325 @@
+Bootstrap: debootstrap
+MirrorURL: http://us.archive.ubuntu.com/ubuntu
+OSVersion: xenial
+
+%labels
+
+    APPLICATION_NAME caffe
+    APPLICATION_VERSION 
+    APPLICATION_URL https://developer.nvidia.com/cuda-zone
+
+    SYSTEM_NAME comet
+    SYSTEM_SINGULARITY_VERSION 2.5.2
+    SYSTEM_URL http://caffe.berkeleyvision.org/
+
+    SINGULARITY_IMAGE_SIZE 16384
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20181128
+
+%setup
+
+%environment
+
+    # Set system locale
+    export LC_ALL=C
+    export PATH="/usr/local/cuda-9.2/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="/usr/local/cuda-9.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+    export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/extras/CUPTI/lib64"
+
+%post -c /bin/bash
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Install system metapackages
+    apt-get -y install ubuntu-standard
+    apt-get -y install ubuntu-server
+
+    # Add repositories
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} restricted"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates restricted"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports restricted"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security restricted"
+
+    # Upgrade all packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    # Install common packages from 'main'
+    apt-get -y install autoconf
+    apt-get -y install automake
+    apt-get -y install build-essential
+    apt-get -y install cmake
+    apt-get -y install libtool
+    apt-get -y install pkg-config
+    apt-get -y install gfortran
+    apt-get -y install zip
+
+    # Install expect to automate responses for interactive build questions
+    apt-get -y install expect
+
+    # Make filesystem mount points
+    mkdir /cvmfs /oasis /projects /scratch
+
+    # Use /tmp to store temporary files within the container during the
+    # bootstraping process
+    cd /tmp
+
+    # Install miniconda2
+    wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
+    chmod +x Miniconda2-latest-Linux-x86_64.sh
+    ./Miniconda2-latest-Linux-x86_64.sh -b -p /opt/miniconda2
+
+    # Install miniconda3
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    chmod +x Miniconda3-latest-Linux-x86_64.sh
+    ./Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda3
+
+    # Location of NVIDIA repositories
+    declare -r NVIDIA_ROOT_URL='http://developer.download.nvidia.com/compute'
+    declare -r CUDA_REPO_URL="${NVIDIA_ROOT_URL}/cuda/repos/ubuntu1604/x86_64"
+    declare -r ML_REPO_URL="${NVIDIA_ROOT_URL}/machine-learning/repos/ubuntu1604/x86_64/"
+
+    # Install NVIDIA package dependencies
+    apt-get -y install x11-common
+    apt-get -y install xserver-xorg-core
+    apt-get -y install xserver-xorg-legacy
+    apt-get -y install cmake
+    apt-get -y install make
+    apt-get -y install dkms
+    apt-get -y install linux-libc-dev
+    apt-get -y install libc6-dev
+    apt-get -y install lib32gcc1
+    apt-get -y install libc6-i386
+    apt-get -y install libgl1
+    apt-get -y install libwayland-client0
+    apt-get -y install libwayland-server0
+    apt-get -y install pkg-config
+    apt-get -y install screen-resolution-extra
+    apt-get -y install libvdpau1
+    apt-get -y install libatk1.0-0
+    apt-get -y install libcairo-gobject2
+    apt-get -y install libcairo2
+    apt-get -y install libfontconfig1
+    apt-get -y install libgdk-pixbuf2.0-0
+    apt-get -y install libgtk-3-0
+    apt-get -y install libgtk2.0-0
+    apt-get -y install libjansson4
+    apt-get -y install freeglut3-dev
+    apt-get -y install libx11-dev
+    apt-get -y install libxmu-dev
+    apt-get -y install libxi-dev
+    apt-get -y install libglu1-mesa
+    apt-get -y install libglu1-mesa-dev
+    apt-get -y install default-jre
+
+    # Download NVIDIA drivers, libraries, and packages
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-396_396.26-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-396-dev_396.26-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-modprobe_396.26-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/libcuda1-396_396.26-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-libopencl1-396_396.26-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-opencl-icd-396_396.26-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/libxnvctrl0_396.26-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-settings_396.26-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-drivers_396.26-1_amd64.deb"
+
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-license-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-misc-headers-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvcc-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cuobjdump-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvprune-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-compiler-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-core-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cudart-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-driver-dev-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cudart-dev-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvdisasm-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-gdb-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvprof-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-memcheck-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cupti-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-gpu-library-advisor-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvtx-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-command-line-tools-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvrtc-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvrtc-dev-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvml-dev-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvgraph-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvgraph-dev-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusolver-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusolver-dev-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cublas-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cublas-dev-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cufft-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cufft-dev-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-curand-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-curand-dev-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusparse-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusparse-dev-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-npp-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-npp-dev-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-samples-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-documentation-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nsight-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvvp-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-visual-tools-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-tools-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-libraries-dev-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-toolkit-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-libraries-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-runtime-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-demo-suite-9-2_9.2.88-1_amd64.deb"
+
+    wget --wait=10 "${ML_REPO_URL}/libcudnn7_7.2.1.38-1+cuda9.2_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libcudnn7-dev_7.2.1.38-1+cuda9.2_amd64.deb"
+
+    wget --wait=10 "${ML_REPO_URL}/libnccl2_2.3.4-1+cuda9.2_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libnccl-dev_2.3.4-1+cuda9.2_amd64.deb"
+
+    # Fix for "update-alternatives: error: error creating symbolic link '/usr/lib/nvidia/alternate-install-present.dpkg-tmp': No such file or directory"
+    mkdir -p /usr/lib/nvidia
+
+    # Install NVIDIA drivers, libraries, and packages
+    dpkg -i nvidia-396_396.26-0ubuntu1_amd64.deb
+    dpkg -i nvidia-396-dev_396.26-0ubuntu1_amd64.deb
+    dpkg -i nvidia-modprobe_396.26-0ubuntu1_amd64.deb
+    dpkg -i libcuda1-396_396.26-0ubuntu1_amd64.deb
+    dpkg -i nvidia-libopencl1-396_396.26-0ubuntu1_amd64.deb
+    dpkg -i nvidia-opencl-icd-396_396.26-0ubuntu1_amd64.deb
+    dpkg -i libxnvctrl0_396.26-0ubuntu1_amd64.deb
+    dpkg -i nvidia-settings_396.26-0ubuntu1_amd64.deb
+    dpkg -i cuda-drivers_396.26-1_amd64.deb
+
+    dpkg -i cuda-license-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-misc-headers-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-nvcc-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-cuobjdump-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-nvprune-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-compiler-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-core-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-cudart-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-driver-dev-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-cudart-dev-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-nvdisasm-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-gdb-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-nvprof-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-memcheck-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-cupti-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-gpu-library-advisor-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-nvtx-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-command-line-tools-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-nvrtc-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-nvrtc-dev-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-nvml-dev-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-nvgraph-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-nvgraph-dev-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-cusolver-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-cusolver-dev-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-cublas-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-cublas-dev-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-cufft-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-cufft-dev-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-curand-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-curand-dev-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-cusparse-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-cusparse-dev-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-npp-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-npp-dev-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-samples-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-documentation-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-nsight-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-nvvp-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-visual-tools-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-tools-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-libraries-dev-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-toolkit-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-libraries-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-runtime-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-demo-suite-9-2_9.2.88-1_amd64.deb
+
+    dpkg -i libcudnn7_7.2.1.38-1+cuda9.2_amd64.deb
+    dpkg -i libcudnn7-dev_7.2.1.38-1+cuda9.2_amd64.deb
+
+    dpkg -i libnccl2_2.3.4-1+cuda9.2_amd64.deb
+    dpkg -i libnccl-dev_2.3.4-1+cuda9.2_amd64.deb
+
+    # Set paths to CUDA binaries and libraries
+    export PATH="/usr/local/cuda-9.2/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="/usr/local/cuda-9.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+    export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/extras/CUPTI/lib64"
+
+    # Install general dependencies for caffe
+    apt-get -y install libprotobuf-dev
+    apt-get -y install libleveldb-dev
+    apt-get -y install libsnappy-dev 
+    apt-get -y install libopencv-dev 
+    apt-get -y install libhdf5-dev 
+    apt-get -y install protobuf-compiler
+    apt-get -y install --no-install-recommends libboost-all-dev
+    apt-get -y install libatlas-base-dev
+    apt-get -y install libgflags-dev 
+    apt-get -y install libgoogle-glog-dev 
+    apt-get -y install liblmdb-dev
+
+    # Fix for libhdf5: https://github.com/NVIDIA/DIGITS/issues/156
+    #                  https://github.com/BVLC/caffe/issues/2347
+    cd /usr/lib/x86_64-linux-gnu
+    ln -s libhdf5_serial.so.10.1.0 libhdf5.so
+    ln -s libhdf5_serial_hl.so.10.0.2 libhdf5_hl.so
+
+    cd /opt
+
+    # Download and checkout version of caffe to be compiled
+    git clone https://github.com/BVLC/caffe.git
+    cd /opt/caffe
+    git checkout 1.0
+
+    # Create caffe Makefile.config file
+    echo 'USE_CUDNN := 1' >> Makefile.config
+    echo 'CUDA_DIR := /usr/local/cuda' >> Makefile.config
+    echo 'CUDA_ARCH := -gencode arch=compute_35,code=sm_37 \' >> Makefile.config
+    echo '             -gencode arch=compute_60,code=sm_60' >> Makefile.config
+    echo 'BLAS := atlas' >> Makefile.config
+    echo 'PYTHON_INCLUDE := /usr/include/python2.7 \' >> Makefile.config
+    echo '                  /usr/lib/python2.7/dist-packages/numpy/core/include' >> Makefile.config
+    echo 'INCLUDE_DIRS := $(PYTHON_INCLUDE) /usr/local/include /usr/include/hdf5/serial/' >> Makefile.config
+    echo 'LIBRARY_DIRS := $(PYTHON_LIB) /usr/local/lib /usr/lib' >> Makefile.config
+    echo 'USE_NCCL := 1' >> Makefile.config
+    echo 'BUILD_DIR := build' >> Makefile.config
+    echo 'DISTRIBUTE_DIR := distribute' >> Makefile.config
+    echo 'TEST_GPUID := 0' >> Makefile.config
+    echo 'Q ?= @' >> Makefile.config
+
+    # Build caffe
+    make all
+    make test
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+    cd /opt/caffe
+    make runtest
+
+%test
