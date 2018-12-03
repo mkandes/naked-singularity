@@ -4,15 +4,15 @@ OSVersion: xenial
 
 %labels
 
-    APPLICATION_NAME ubuntu + cuda + opencl + openmpi
-    APPLICATION_VERSION 16.04 + 9.2.88 + 16.1.2 + 1.8.4
-    APPLICATION_URL https://software.intel.com/en-us/articles/opencl-drivers#latest_CPU_runtime
+    APPLICATION_NAME keras + theano
+    APPLICATION_VERSION 2.2.0 + 1.0.3
+    APPLICATION_URL https://keras.io/
 
     SYSTEM_NAME comet
     SYSTEM_SINGULARITY_VERSION 2.5.2
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
 
-    SINGULARITY_IMAGE_SIZE 8192
+    SINGULARITY_IMAGE_SIZE 16384
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
@@ -30,8 +30,10 @@ OSVersion: xenial
     export PATH="/usr/local/cuda-9.2/bin${PATH:+:${PATH}}"
     export LD_LIBRARY_PATH="/usr/local/cuda-9.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
     export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/extras/CUPTI/lib64"
-    export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
+    # Set other environment variables
+    export PATH="/opt/miniconda2/bin:${PATH}"
+    export MKL_THREADING_LAYER='GNU'
+    export KERAS_BACKEND='theano'
 
 %post -c /bin/bash
 
@@ -90,11 +92,6 @@ OSVersion: xenial
     wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
     chmod +x Miniconda2-latest-Linux-x86_64.sh
     ./Miniconda2-latest-Linux-x86_64.sh -b -p /opt/miniconda2
-
-    # Install miniconda3
-    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
-    chmod +x Miniconda3-latest-Linux-x86_64.sh
-    ./Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda3
 
     # Location of NVIDIA repositories
     declare -r NVIDIA_ROOT_URL='http://developer.download.nvidia.com/compute'
@@ -270,100 +267,48 @@ OSVersion: xenial
     export LD_LIBRARY_PATH="/usr/local/cuda-9.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
     export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/extras/CUPTI/lib64"
 
-    # Location of Intel repository
-    declare -r INTEL_ROOT_URL='http://registrationcenter-download.intel.com'
+    # Install python(2) dependencies for Theano
+    export PATH="/opt/miniconda2/bin:${PATH}"
+    conda install -y numpy 
+    conda install -y scipy 
+    conda install -y mkl
+    conda install -y nose
+    conda install -y sphinx
+    conda install -y pydot-ng
 
-    # Install generic OpenCL packages
-    apt-get -y install ocl-icd-libopencl1
-    apt-get -y install opencl-headers
-    apt-get -y install clinfo
-    apt-get -y install ocl-icd-opencl-dev
+    # Install Theano for python(2)
+    conda install -y theano
 
-    # Install packages for turing rpm into deb
-    apt-get -y install rpm
-    apt-get -y install alien
-    apt-get -y install libnuma1
+    # Install common python packages for data science and machine
+    # learning applications
+    conda install -y pandas
+    conda install -y matplotlib
+    conda install -y ipython
+    conda install -y ipython-notebook
+    conda install -y sympy
+    conda install -y scikit-learn
+    conda install -y scikit-image
+    conda install -y nltk
+    conda install -y statsmodels
+    conda install -y opencv
 
-    # Download OpenCL runtime rpm, convert to deb, then install
-    wget "${INTEL_ROOT_URL}/akdlm/irc_nas/12556/opencl_runtime_16.1.2_x64_rh_6.4.0.37.tgz"
-    tar -xzf opencl_runtime_16.1.2_x64_rh_6.4.0.37.tgz
+    # Install Keras dependencies for python(2)
+    conda install -y yaml
+    conda install -y pyyaml
 
-    cd opencl_runtime_16.1.2_x64_rh_6.4.0.37/rpm
+    cd /opt
 
-    fakeroot alien --to-deb opencl-1.2-base-6.4.0.37-1.x86_64.rpm
-    fakeroot alien --to-deb opencl-1.2-intel-cpu-6.4.0.37-1.x86_64.rpm
+    # Download, build, and install Keras
+    wget https://github.com/keras-team/keras/archive/2.2.0.tar.gz
+    tar -xzvf 2.2.0.tar.gz
+    cd /opt/keras-2.2.0
+    python setup.py install
 
-    dpkg -i opencl-1.2-base_6.4.0.37-2_amd64.deb
-    dpkg -i opencl-1.2-intel-cpu_6.4.0.37-2_amd64.deb
-
-    # Add path to clinfo
-    echo '/opt/intel/opencl-1.2-6.4.0.37/lib64/clinfo' > /etc/ld.so.conf.d/intelOpenCL.conf
-
-    # Create a vendors dir and add intel.icd 
-    mkdir -p /etc/OpenCL/vendors
-    ln /opt/intel/opencl-1.2-6.4.0.37/etc/intel64.icd /etc/OpenCL/vendors/intel64.icd
-    ldconfig
-
-    # Test OpenCL installation
-    clinfo
-
-    # Install basic drivers for user space access to Ethernet, RDMA,
-    # and Infiniband. See https://community.mellanox.com/docs/DOC-2431
-    apt-get -y install dkms
-    apt-get -y install infiniband-diags
-    apt-get -y install libibverbs-dev
-    apt-get -y install ibacm
-    apt-get -y install librdmacm-dev
-    apt-get -y install libmlx4-dev
-    apt-get -y install libmlx5-dev
-    apt-get -y install mstflint
-    apt-get -y install libibcm-dev
-    apt-get -y install libibmad-dev
-    apt-get -y install libibumad-dev
-    apt-get -y install opensm
-    apt-get -y install srptools
-
-    # Install additional tools
-    apt-get -y install ibutils
-    apt-get -y install ibverbs-utils
-    apt-get -y install rdmacm-utils
-    apt-get -y install perftest
-    apt-get -y install numactl
-    apt-get -y install libnuma-dev
-
-    # Install libnl
-    apt-get -y install libnl-3-200
-    apt-get -y install libnl-route-3-200
-    apt-get -y install libnl-route-3-dev
-    apt-get -y install libnl-utils
-
-    # Install OpenMPI dependencies
-    apt-get -y install zlib1g-dev
-
-    # Download, build, and install CUDA-aware OpenMPI
-    wget https://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.4.tar.gz
-    tar -xzvf openmpi-1.8.4.tar.gz
-    cd openmpi-1.8.4
-    ./configure --prefix=/opt/openmpi-1.8.4 --with-cuda
-    make all install
-
-    # Set paths to OpenMPI binaries and libraries
-    export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
- 
     # Update database for mlocate
     updatedb
 
 %files
 
 %runscript
-
-    echo "                                                "
-    echo "      __________________  __  _______________   "
-    echo "    -----/ ____/ __ \/  |/  / ____/_  __/       "
-    echo "      --/ /   / / / / /|_/ / __/   / /          "
-    echo "       / /___/ /_/ / /  / / /___  / /           "
-    echo "       \____/\____/_/  /_/_____/ /_/            "
-    echo "                                                "
 
 %test

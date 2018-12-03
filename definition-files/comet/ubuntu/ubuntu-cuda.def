@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20181003
+    LAST_UPDATED 20181203
 
 %setup
 
@@ -25,6 +25,8 @@ OSVersion: xenial
 
     # Set system locale
     export LC_ALL=C
+
+    # Set paths to CUDA binaries and libraries
     export PATH="/usr/local/cuda-9.2/bin${PATH:+:${PATH}}"
     export LD_LIBRARY_PATH="/usr/local/cuda-9.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
     export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/extras/CUPTI/lib64"

@@ -4,9 +4,9 @@ OSVersion: xenial
 
 %labels
 
-    APPLICATION_NAME theano
-    APPLICATION_VERSION 1.0.3
-    APPLICATION_URL http://www.deeplearning.net/software/theano/
+    APPLICATION_NAME keras + theano
+    APPLICATION_VERSION 2.2.0 + 1.0.3
+    APPLICATION_URL https://keras.io/
 
     SYSTEM_NAME comet
     SYSTEM_SINGULARITY_VERSION 2.5.2
@@ -28,7 +28,8 @@ OSVersion: xenial
 
     # Set other environment variables
     export PATH="/opt/miniconda2/bin:${PATH}"
-    export MKL_THREADING_LAYER="GNU"
+    export MKL_THREADING_LAYER='GNU'
+    export KERAS_BACKEND='theano'
 
 %post -c /bin/bash
 
@@ -112,6 +113,18 @@ OSVersion: xenial
     conda install -y nltk
     conda install -y statsmodels
     conda install -y opencv
+
+    # Install Keras dependencies for python(2)
+    conda install -y yaml
+    conda install -y pyyaml
+
+    cd /opt
+
+    # Download, build, and install Keras
+    wget https://github.com/keras-team/keras/archive/2.2.0.tar.gz
+    tar -xzvf 2.2.0.tar.gz
+    cd /opt/keras-2.2.0
+    python setup.py install
 
     # Update database for mlocate
     updatedb
