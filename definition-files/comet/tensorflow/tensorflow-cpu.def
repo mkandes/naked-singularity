@@ -5,7 +5,7 @@ OSVersion: xenial
 %labels
 
     APPLICATION_NAME tensorflow
-    APPLICATION_VERSION 1.11
+    APPLICATION_VERSION 1.12
     APPLICATION_URL https://www.tensorflow.org
 
     SYSTEM_NAME comet
@@ -103,7 +103,7 @@ OSVersion: xenial
     # Download TensorFlow source
     git clone https://github.com/tensorflow/tensorflow
     cd /opt/tensorflow
-    git checkout r1.11
+    git checkout r1.12
 
     # Build and install TensorFlow for python(2)
     echo '#!/usr/bin/expect -f' > install-tensorflow-python.exp
@@ -151,7 +151,7 @@ OSVersion: xenial
     bazel build --local_resources 2048,.5,1.0 -c opt --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" //tensorflow/tools/pip_package:build_pip_package
     bazel-bin/tensorflow/tools/pip_package/build_pip_package tensorflow_pkg
 
-    pip install tensorflow_pkg/tensorflow-1.11.0-cp27-cp27mu-linux_x86_64.whl
+    pip install tensorflow_pkg/tensorflow-1.12.0-cp27-cp27mu-linux_x86_64.whl
 
     # Install common python packages for data science and machine learning applications
     apt-get -y install python-scipy
@@ -242,7 +242,7 @@ OSVersion: xenial
     bazel build --local_resources 2048,.5,1.0 -c opt --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" //tensorflow/tools/pip_package:build_pip_package
     bazel-bin/tensorflow/tools/pip_package/build_pip_package tensorflow_pkg
 
-    pip3 install tensorflow_pkg/tensorflow-1.11.0-cp35-cp35m-linux_x86_64.whl
+    pip3 install tensorflow_pkg/tensorflow-1.12.0-cp35-cp35m-linux_x86_64.whl
 
     # Install common python3 packages for data science and machine learning applications
     apt-get -y install python3-scipy
