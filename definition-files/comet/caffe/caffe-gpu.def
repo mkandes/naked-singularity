@@ -5,7 +5,7 @@ OSVersion: xenial
 %labels
 
     APPLICATION_NAME caffe
-    APPLICATION_VERSION 
+    APPLICATION_VERSION 1.0
     APPLICATION_URL https://developer.nvidia.com/cuda-zone
 
     SYSTEM_NAME comet
@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20181128
+    LAST_UPDATED 20181213
 
 %setup
 
@@ -28,6 +28,7 @@ OSVersion: xenial
     export PATH="/usr/local/cuda-9.2/bin${PATH:+:${PATH}}"
     export LD_LIBRARY_PATH="/usr/local/cuda-9.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
     export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/extras/CUPTI/lib64"
+    export PYTHONPATH="/opt/caffe/python:${PYTHONPATH}"
 
 %post -c /bin/bash
 
@@ -285,6 +286,28 @@ OSVersion: xenial
     ln -s libhdf5_serial.so.10.1.0 libhdf5.so
     ln -s libhdf5_serial_hl.so.10.0.2 libhdf5_hl.so
 
+    # Install dependencies for pycaffe
+    apt-get -y install python
+    apt-get -y install python-dev
+    apt-get -y install python-pip
+    apt-get -y install cython
+    apt-get -y install python-numpy
+    apt-get -y install python-scipy
+    apt-get -y install python-skimage
+    apt-get -y install python-matplotlib
+    apt-get -y install ipython
+    apt-get -y install python-h5py
+    apt-get -y install libleveldb1v5
+    apt-get -y install python-networkx
+    apt-get -y install python-nose
+    apt-get -y install python-pandas
+    apt-get -y install python-dateutil
+    apt-get -y install python-protobuf 
+    apt-get -y install python-gflags
+    apt-get -y install python-yaml
+    apt-get -y install python-pil
+    apt-get -y install python-six
+    
     cd /opt
 
     # Download and checkout version of caffe to be compiled
@@ -300,6 +323,7 @@ OSVersion: xenial
     echo 'BLAS := atlas' >> Makefile.config
     echo 'PYTHON_INCLUDE := /usr/include/python2.7 \' >> Makefile.config
     echo '                  /usr/lib/python2.7/dist-packages/numpy/core/include' >> Makefile.config
+    echo 'PYTHON_LIB := /usr/lib/x86_64-linux-gnu' >> Makefile.config
     echo 'INCLUDE_DIRS := $(PYTHON_INCLUDE) /usr/local/include /usr/include/hdf5/serial/' >> Makefile.config
     echo 'LIBRARY_DIRS := $(PYTHON_LIB) /usr/local/lib /usr/lib' >> Makefile.config
     echo 'USE_NCCL := 1' >> Makefile.config
@@ -309,8 +333,19 @@ OSVersion: xenial
     echo 'Q ?= @' >> Makefile.config
 
     # Build caffe
+    make clean
     make all
     make test
+
+    cd /opt/caffe/python
+
+    # Install any remaining dependencies for pycaffe
+    for req in $(cat requirements.txt); do pip install $req; done
+
+    cd /opt/caffe
+
+    # Build pycaffe
+    make pycaffe
 
     # Update database for mlocate
     updatedb
@@ -319,7 +354,7 @@ OSVersion: xenial
 
 %runscript
 
-    cd /opt/caffe
-    make runtest
+    #cd /opt/caffe
+    #make runtest
 
 %test
