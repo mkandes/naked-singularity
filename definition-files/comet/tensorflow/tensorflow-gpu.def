@@ -5,7 +5,7 @@ OSVersion: xenial
 %labels
 
     APPLICATION_NAME tensorflow
-    APPLICATION_VERSION 1.11
+    APPLICATION_VERSION 1.12
     APPLICATION_URL https://www.tensorflow.org
 
     SYSTEM_NAME comet
@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20181031
+    LAST_UPDATED 20181218
 
 %setup
 
@@ -28,6 +28,8 @@ OSVersion: xenial
     export PATH="/usr/local/cuda-9.2/bin${PATH:+:${PATH}}"
     export LD_LIBRARY_PATH="/usr/local/cuda-9.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
     export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/extras/CUPTI/lib64"
+    export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
 
 %post -c /bin/bash
 
@@ -265,6 +267,50 @@ OSVersion: xenial
     export LD_LIBRARY_PATH="/usr/local/cuda-9.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
     export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/extras/CUPTI/lib64"
 
+    # Install basic drivers for user space access to Ethernet, RDMA,
+    # and Infiniband. See https://community.mellanox.com/docs/DOC-2431
+    apt-get -y install dkms
+    apt-get -y install infiniband-diags
+    apt-get -y install libibverbs-dev
+    apt-get -y install ibacm
+    apt-get -y install librdmacm-dev
+    apt-get -y install libmlx4-dev
+    apt-get -y install libmlx5-dev
+    apt-get -y install mstflint
+    apt-get -y install libibcm-dev
+    apt-get -y install libibmad-dev
+    apt-get -y install libibumad-dev
+    apt-get -y install opensm
+    apt-get -y install srptools
+
+    # Install additional tools
+    apt-get -y install ibutils
+    apt-get -y install ibverbs-utils
+    apt-get -y install rdmacm-utils
+    apt-get -y install perftest
+    apt-get -y install numactl
+    apt-get -y install libnuma-dev
+
+    # Install libnl
+    apt-get -y install libnl-3-200
+    apt-get -y install libnl-route-3-200
+    apt-get -y install libnl-route-3-dev
+    apt-get -y install libnl-utils
+
+    # Install OpenMPI dependencies
+    apt-get -y install zlib1g-dev
+
+    # Download, build, and install CUDA-aware OpenMPI
+    wget https://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.4.tar.gz
+    tar -xzvf openmpi-1.8.4.tar.gz
+    cd openmpi-1.8.4
+    ./configure --prefix=/opt/openmpi-1.8.4 --with-cuda
+    make all install
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
+
     # Install Bazel from Debian Package
     apt-get -y install openjdk-8-jdk
     apt-get -y install zlib1g-dev
@@ -289,7 +335,7 @@ OSVersion: xenial
     # Download TensorFlow source
     git clone https://github.com/tensorflow/tensorflow
     cd /opt/tensorflow
-    git checkout r1.11
+    git checkout r1.12
 
     # Build and install TensorFlow for python(2)
     echo '#!/usr/bin/expect -f' > install-tensorflow-python.exp
@@ -298,25 +344,13 @@ OSVersion: xenial
     echo 'send "/usr/bin/python\r"' >> install-tensorflow-python.exp
     echo 'expect "Please input the desired Python library path to use.  Default is \[/usr/local/lib/python2.7/dist-packages\]\r"' >> install-tensorflow-python.exp
     echo 'send "/usr/local/lib/python2.7/dist-packages\r"' >> install-tensorflow-python.exp
-    echo 'expect "Do you wish to build TensorFlow with jemalloc as malloc support? \[Y/n\]: "' >> install-tensorflow-python.exp
-    echo 'send "Y\r"' >> install-tensorflow-python.exp
-    echo 'expect "Do you wish to build TensorFlow with Google Cloud Platform support? \[Y/n\]: "' >> install-tensorflow-python.exp
+    echo 'expect "Do you wish to build TensorFlow with Apache Ignite support? \[Y/n\]: "' >> install-tensorflow-python.exp
     echo 'send "N\r"' >> install-tensorflow-python.exp
-    echo 'expect "Do you wish to build TensorFlow with Hadoop File System support? \[Y/n\]: "' >> install-tensorflow-python.exp
-    echo 'send "N\r"' >> install-tensorflow-python.exp
-    echo 'expect "Do you wish to build TensorFlow with Amazon S3 File System support? \[Y/n\]: "' >> install-tensorflow-python.exp
-    echo 'send "N\r"' >> install-tensorflow-python.exp
-    echo 'expect "Do you wish to build TensorFlow with Apache Kafka Platform support? \[y/N\]: "' >> install-tensorflow-python.exp
-    echo 'send "N\r"' >> install-tensorflow-python.exp
-    echo 'expect "Do you wish to build TensorFlow with XLA JIT support? \[y/N\]: "' >> install-tensorflow-python.exp
-    echo 'send "N\r"' >> install-tensorflow-python.exp
-    echo 'expect "Do you wish to build TensorFlow with GDR support? \[y/N\]: "' >> install-tensorflow-python.exp
-    echo 'send "N\r"' >> install-tensorflow-python.exp
-    echo 'expect "Do you wish to build TensorFlow with VERBS support? \[y/N\]: "' >> install-tensorflow-python.exp
-    echo 'send "N\r"' >> install-tensorflow-python.exp
-    echo 'expect "Do you wish to build TensorFlow with nGraph support? \[y/N\]: "' >> install-tensorflow-python.exp
+    echo 'expect "Do you wish to build TensorFlow with XLA JIT support? \[Y/n\]: "' >> install-tensorflow-python.exp
     echo 'send "N\r"' >> install-tensorflow-python.exp
     echo 'expect "Do you wish to build TensorFlow with OpenCL SYCL support? \[y/N\]: "' >> install-tensorflow-python.exp
+    echo 'send "N\r"' >> install-tensorflow-python.exp
+    echo 'expect "Do you wish to build TensorFlow with ROCm support? \[y/N\]: "' >> install-tensorflow-python.exp
     echo 'send "N\r"' >> install-tensorflow-python.exp
     echo 'expect "Do you wish to build TensorFlow with CUDA support? \[y/N\]: "' >> install-tensorflow-python.exp
     echo 'send "Y\r"' >> install-tensorflow-python.exp
@@ -324,16 +358,14 @@ OSVersion: xenial
     echo 'send "9.2.88\r"' >> install-tensorflow-python.exp
     echo 'expect "Please specify the location where CUDA 9.2 toolkit is installed. Refer to README.md for more details. \[Default is /usr/local/cuda\]: "' >> install-tensorflow-python.exp
     echo 'send "/usr/local/cuda\r"' >> install-tensorflow-python.exp
-    echo 'expect "Please specify the cuDNN version you want to use. \[Leave empty to default to cuDNN 7.0\]: "' >> install-tensorflow-python.exp
+    echo 'expect "Please specify the cuDNN version you want to use. \[Leave empty to default to cuDNN 7\]: "' >> install-tensorflow-python.exp
     echo 'send "7.2.1.38\r"' >> install-tensorflow-python.exp
     echo 'expect "Please specify the location where cuDNN 7 library is installed. Refer to README.md for more details. \[Default is /usr/local/cuda\]: "' >> install-tensorflow-python.exp
     echo 'send "/usr/lib/x86_64-linux-gnu\r"' >> install-tensorflow-python.exp
     echo 'expect "Do you wish to build TensorFlow with TensorRT support? \[y/N\]: "' >> install-tensorflow-python.exp
     echo 'send "N\r"' >> install-tensorflow-python.exp
-    echo 'expect "Please specify the NCCL version you want to use. \[Leave empty to default to NCCL 2.2\]:"' >> install-tensorflow-python.exp
+    echo 'expect "Please specify the NCCL version you want to use. If NCCL 2.2 is not installed, then you can use version 1.3 that can be fected automatically but it may have worse performance with multiple GPUs. \[Default is 2.2\]:"' >> install-tensorflow-python.exp
     echo 'send "2.3.4\r"' >> install-tensorflow-python.exp
-    echo 'expect "Please specify the location where NCCL 2 library is installed. Refer to README.md for more details. \[Default is /usr/local/cuda\]: "' >> install-tensorflow-python.exp
-    echo 'send "/usr/local/cuda\r"' >> install-tensorflow-python.exp
     echo 'expect "Please specify a list of comma-separated Cuda compute capabilities you want to build with.\r"' >> install-tensorflow-python.exp
     echo 'expect "You can find the compute capability of your device at: https://developer.nvidia.com/cuda-gpus.\r"' >> install-tensorflow-python.exp
     echo 'expect "Please note that each additional compute capability significantly increases your build time and binary size. \[Default is: 3.5,7.0\]"' >> install-tensorflow-python.exp
@@ -344,6 +376,8 @@ OSVersion: xenial
     echo 'send "/usr/bin/gcc\r"' >> install-tensorflow-python.exp
     echo 'expect "Do you wish to build TensorFlow with MPI support? \[y/N\]: "' >> install-tensorflow-python.exp
     echo 'send "N\r"' >> install-tensorflow-python.exp
+    #echo 'expect "Please specify the MPI toolkit folder. \[Default is /opt/openmpi-1.8.4\]: "' >> install-tensorflow-python.exp
+    #echo 'send "/opt/openmpi-1.8.4\r"' >> install-tensorflow-python.exp
     echo 'expect "Please specify optimization flags to use during compilation when bazel option \"--config=opt\" is specified \[Default is -march=native\]: "' >> install-tensorflow-python.exp
     echo 'send " -march=haswell -mmmx -mno-3dnow -msse -msse2 -msse3 -mssse3 -mno-sse4a -mcx16 -msahf -mmovbe -maes -mno-sha -mpclmul -mpopcnt -mabm -mno-lwp -mfma -mno-fma4 -mno-xop -mbmi -mbmi2 -mno-tbm -mavx -mavx2 -msse4.2 -msse4.1 -mlzcnt -mno-rtm -mno-hle -mrdrnd -mf16c -mfsgsbase -mno-rdseed -mno-prfchw -mno-adx -mfxsr -mxsave -mxsaveopt -mno-avx512f -mno-avx512er -mno-avx512cd -mno-avx512pf -mno-prefetchwt1 -mtune=haswell \r"' >> install-tensorflow-python.exp
     echo 'expect "Would you like to interactively configure ./WORKSPACE for Android builds? \[y/N\]: "' >> install-tensorflow-python.exp
@@ -363,10 +397,11 @@ OSVersion: xenial
     # Clear /home/root/.cache prior to bazel build. Otherwise, previous builds may cause some conflicts. See 'dangling symbolic links' at https://github.com/tensorflow/tensorflow/issues/13928
     rm -rf /home/root/.cache
 
+    #bazel build --local_resources 2048,.5,1.0 -c opt --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" --config=cuda --config=gdr --config=verbs //tensorflow/tools/pip_package:build_pip_package
     bazel build --local_resources 2048,.5,1.0 -c opt --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" --config=cuda //tensorflow/tools/pip_package:build_pip_package
     bazel-bin/tensorflow/tools/pip_package/build_pip_package tensorflow_pkg
 
-    pip install tensorflow_pkg/tensorflow-1.11.0-cp27-cp27mu-linux_x86_64.whl
+    pip install tensorflow_pkg/tensorflow-1.12.0-cp27-cp27mu-linux_x86_64.whl
 
     # Install common python packages for data science and machine learning applications
     apt-get -y install python-scipy
@@ -415,25 +450,13 @@ OSVersion: xenial
     echo 'send "/usr/bin/python3\r"' >> install-tensorflow-python3.exp
     echo 'expect "Please input the desired Python library path to use.  Default is \[/usr/local/lib/python2.7/dist-packages\]\r"' >> install-tensorflow-python3.exp
     echo 'send "/usr/local/lib/python3.5/dist-packages\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Do you wish to build TensorFlow with jemalloc as malloc support? \[Y/n\]: "' >> install-tensorflow-python3.exp
-    echo 'send "Y\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Do you wish to build TensorFlow with Google Cloud Platform support? \[Y/n\]: "' >> install-tensorflow-python3.exp
+    echo 'expect "Do you wish to build TensorFlow with Apache Ignite support? \[Y/n\]: "' >> install-tensorflow-python3.exp
     echo 'send "N\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Do you wish to build TensorFlow with Hadoop File System support? \[Y/n\]: "' >> install-tensorflow-python3.exp
-    echo 'send "N\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Do you wish to build TensorFlow with Amazon S3 File System support? \[Y/n\]: "' >> install-tensorflow-python3.exp
-    echo 'send "N\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Do you wish to build TensorFlow with Apache Kafka Platform support? \[y/N\]: "' >> install-tensorflow-python3.exp
-    echo 'send "N\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Do you wish to build TensorFlow with XLA JIT support? \[y/N\]: "' >> install-tensorflow-python3.exp
-    echo 'send "N\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Do you wish to build TensorFlow with GDR support? \[y/N\]: "' >> install-tensorflow-python3.exp
-    echo 'send "N\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Do you wish to build TensorFlow with VERBS support? \[y/N\]: "' >> install-tensorflow-python3.exp
-    echo 'send "N\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Do you wish to build TensorFlow with nGraph support? \[y/N\]: "' >> install-tensorflow-python3.exp
+    echo 'expect "Do you wish to build TensorFlow with XLA JIT support? \[Y/n\]: "' >> install-tensorflow-python3.exp
     echo 'send "N\r"' >> install-tensorflow-python3.exp
     echo 'expect "Do you wish to build TensorFlow with OpenCL SYCL support? \[y/N\]: "' >> install-tensorflow-python3.exp
+    echo 'send "N\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Do you wish to build TensorFlow with ROCm support? \[y/N\]: "' >> install-tensorflow-python3.exp
     echo 'send "N\r"' >> install-tensorflow-python3.exp
     echo 'expect "Do you wish to build TensorFlow with CUDA support? \[y/N\]: "' >> install-tensorflow-python3.exp
     echo 'send "Y\r"' >> install-tensorflow-python3.exp
@@ -441,16 +464,14 @@ OSVersion: xenial
     echo 'send "9.2.88\r"' >> install-tensorflow-python3.exp
     echo 'expect "Please specify the location where CUDA 9.2 toolkit is installed. Refer to README.md for more details. \[Default is /usr/local/cuda\]: "' >> install-tensorflow-python3.exp
     echo 'send "/usr/local/cuda\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Please specify the cuDNN version you want to use. \[Leave empty to default to cuDNN 7.0\]: "' >> install-tensorflow-python3.exp
+    echo 'expect "Please specify the cuDNN version you want to use. \[Leave empty to default to cuDNN 7\]: "' >> install-tensorflow-python3.exp
     echo 'send "7.2.1.38\r"' >> install-tensorflow-python3.exp
     echo 'expect "Please specify the location where cuDNN 7 library is installed. Refer to README.md for more details. \[Default is /usr/local/cuda\]: "' >> install-tensorflow-python3.exp
     echo 'send "/usr/lib/x86_64-linux-gnu\r"' >> install-tensorflow-python3.exp
     echo 'expect "Do you wish to build TensorFlow with TensorRT support? \[y/N\]: "' >> install-tensorflow-python3.exp
     echo 'send "N\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Please specify the NCCL version you want to use. \[Leave empty to default to NCCL 2.2\]:"' >> install-tensorflow-python3.exp
+    echo 'expect "Please specify the NCCL version you want to use. If NCCL 2.2 is not installed, then you can use version 1.3 that can be fected automatically but it may have worse performance with multiple GPUs. \[Default is 2.2\]:"' >> install-tensorflow-python3.exp
     echo 'send "2.3.4\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Please specify the location where NCCL 2 library is installed. Refer to README.md for more details. \[Default is /usr/local/cuda\]: "' >> install-tensorflow-python3.exp
-    echo 'send "/usr/local/cuda\r"' >> install-tensorflow-python3.exp
     echo 'expect "Please specify a list of comma-separated Cuda compute capabilities you want to build with.\r"' >> install-tensorflow-python3.exp
     echo 'expect "You can find the compute capability of your device at: https://developer.nvidia.com/cuda-gpus.\r"' >> install-tensorflow-python3.exp
     echo 'expect "Please note that each additional compute capability significantly increases your build time and binary size. \[Default is: 3.5,7.0\]"' >> install-tensorflow-python3.exp
@@ -461,6 +482,8 @@ OSVersion: xenial
     echo 'send "/usr/bin/gcc\r"' >> install-tensorflow-python3.exp
     echo 'expect "Do you wish to build TensorFlow with MPI support? \[y/N\]: "' >> install-tensorflow-python3.exp
     echo 'send "N\r"' >> install-tensorflow-python3.exp
+    #echo 'expect "Please specify the MPI toolkit folder. \[Default is /opt/openmpi-1.8.4\]: "' >> install-tensorflow-python3.exp
+    #echo 'send "/opt/openmpi-1.8.4\r"' >> install-tensorflow-python3.exp
     echo 'expect "Please specify optimization flags to use during compilation when bazel option \"--config=opt\" is specified \[Default is -march=native\]: "' >> install-tensorflow-python3.exp
     echo 'send " -march=haswell -mmmx -mno-3dnow -msse -msse2 -msse3 -mssse3 -mno-sse4a -mcx16 -msahf -mmovbe -maes -mno-sha -mpclmul -mpopcnt -mabm -mno-lwp -mfma -mno-fma4 -mno-xop -mbmi -mbmi2 -mno-tbm -mavx -mavx2 -msse4.2 -msse4.1 -mlzcnt -mno-rtm -mno-hle -mrdrnd -mf16c -mfsgsbase -mno-rdseed -mno-prfchw -mno-adx -mfxsr -mxsave -mxsaveopt -mno-avx512f -mno-avx512er -mno-avx512cd -mno-avx512pf -mno-prefetchwt1 -mtune=haswell \r"' >> install-tensorflow-python3.exp
     echo 'expect "Would you like to interactively configure ./WORKSPACE for Android builds? \[y/N\]: "' >> install-tensorflow-python3.exp
@@ -479,7 +502,7 @@ OSVersion: xenial
     bazel build --local_resources 2048,.5,1.0 -c opt --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" --config=cuda //tensorflow/tools/pip_package:build_pip_package
     bazel-bin/tensorflow/tools/pip_package/build_pip_package tensorflow_pkg
 
-    pip3 install tensorflow_pkg/tensorflow-1.11.0-cp35-cp35m-linux_x86_64.whl
+    pip3 install tensorflow_pkg/tensorflow-1.12.0-cp35-cp35m-linux_x86_64.whl
 
     # Install common python3 packages for data science and machine learning applications
     apt-get -y install python3-scipy
