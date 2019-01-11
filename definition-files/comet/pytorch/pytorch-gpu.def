@@ -5,7 +5,7 @@ OSVersion: xenial
 %labels
 
     APPLICATION_NAME pytorch
-    APPLICATION_VERSION 1.0.0rc1
+    APPLICATION_VERSION 1.0.0
     APPLICATION_URL http://pytorch.org/
 
     SYSTEM_NAME comet
@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20181105
+    LAST_UPDATED 20190110
 
 %setup
 
@@ -30,6 +30,7 @@ OSVersion: xenial
     export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/extras/CUPTI/lib64"
     export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
     export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/miniconda3/bin:${PATH}"
 
 %post -c /bin/bash
 
@@ -305,7 +306,7 @@ OSVersion: xenial
     wget https://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.4.tar.gz
     tar -xzvf openmpi-1.8.4.tar.gz
     cd openmpi-1.8.4
-    ./configure --prefix=/opt/openmpi-1.8.4
+    ./configure --prefix=/opt/openmpi-1.8.4 --with-cuda
      make all install
 
     # Set paths to OpenMPI binaries and libraries
@@ -314,8 +315,8 @@ OSVersion: xenial
 
     # Install PyTorch dependencies for python(2)
     export PATH="/opt/miniconda2/bin:${PATH}"
-    export CMAKE_PREFIX_PATH="$(dirname $(which conda))/../"
-    conda install -y numpy=1.15.2
+    export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
+    conda install -y numpy
     conda install -y pyyaml
     conda install -y mkl
     conda install -y mkl-include
@@ -327,34 +328,6 @@ OSVersion: xenial
 
     # Add LAPACK support for the GPU
     conda install -y magma-cuda92 -c pytorch
-
-    cd /opt
-
-    # Download, build, and install PyTorch for python2
-    #export PYTORCH_BUILD_VERSION='1.0.0'
-    #export PYTORCH_BUILD_NUMBER='1'
-    #export CFLAGS='-march=haswell -mmmx -mno-3dnow -msse -msse2 -msse3 -mssse3 -mno-sse4a -mcx16 -msahf -mmovbe -maes -mno-sha -mpclmul -mpopcnt -mabm -mno-lwp -mfma -mno-fma4 -mno-xop -mbmi -mbmi2 -mno-tbm -mavx -mavx2 -msse4.2 -msse4.1 -mlzcnt -mno-rtm -mno-hle -mrdrnd -mf16c -mfsgsbase -mno-rdseed -mno-prfchw -mno-adx -mfxsr -mxsave -mxsaveopt -mno-avx512f -mno-avx512er -mno-avx512cd -mno-avx512pf -mno-prefetchwt1 -mtune=haswell'
-    #export USE_OPENMP='ON'
-    #export USE_NNPACK='ON'
-    export USE_MKLDNN='ON'
-    #export USE_DISTRIBUTED='ON'
-    #export USE_GLOO='ON'
-    export USE_GLOO_IBVERBS='ON'
-    #export USE_CUDA='ON'
-    #export USE_CUDNN='ON'
-    #export USE_NCCL='ON'
-    #export USE_SYSTEM_NCCL='ON'
-    export TORCH_CUDA_ARCH_LIST="3.7;6.0"
-    git clone --recursive https://github.com/pytorch/pytorch
-    cd /opt/pytorch
-    #git checkout v1.0rc1
-    #git submodule update --init
-    python setup.py install
-
-    # Download and install PyTorch Vision package for python2
-    git clone https://github.com/pytorch/vision.git
-    cd /opt/pytorch/vision
-    python setup.py install
 
     # Install common python packages for data science and machine
     # learning applications
@@ -362,6 +335,7 @@ OSVersion: xenial
     conda install -y matplotlib
     conda install -y ipython
     conda install -y ipython-notebook
+    conda install -y jupyter
     conda install -y sympy
     conda install -y nose
     conda install -y scikit-learn
@@ -370,11 +344,41 @@ OSVersion: xenial
     conda install -y statsmodels
     conda install -y opencv
 
+    cd /opt
+
+    # Download, build, and install PyTorch for python2
+    export CC='mpicc'
+    export CXX='mpicxx'
+    export CFLAGS='-march=haswell -mmmx -mno-3dnow -msse -msse2 -msse3 -mssse3 -mno-sse4a -mcx16 -msahf -mmovbe -maes -mno-sha -mpclmul -mpopcnt -mabm -mno-lwp -mfma -mno-fma4 -mno-xop -mbmi -mbmi2 -mno-tbm -mavx -mavx2 -msse4.2 -msse4.1 -mlzcnt -mno-rtm -mno-hle -mrdrnd -mf16c -mfsgsbase -mno-rdseed -mno-prfchw -mno-adx -mfxsr -mxsave -mxsaveopt -mno-avx512f -mno-avx512er -mno-avx512cd -mno-avx512pf -mno-prefetchwt1 -mtune=haswell'
+    export USE_OPENMP=1
+    export USE_NNPACK=1
+    export USE_QNNPACK=1
+    export USE_MKLDNN=1
+    export USE_DISTRIBUTED=1
+    export USE_GLOO=1
+    export USE_GLOO_IBVERBS=1
+    export USE_MPI=1
+    export USE_C10D_MPI=1
+    export USE_CUDA=1
+    export USE_CUDNN=1
+    export USE_NCCL=1
+    export USE_OPENCV=1
+    export TORCH_CUDA_ARCH_LIST="3.7;6.0"
+    git clone --recursive https://github.com/pytorch/pytorch
+    cd /opt/pytorch
+    git checkout v1.0.0
+    git submodule update --init
+    python setup.py install
+
+    # Download and install PyTorch Vision package for python2
+    git clone https://github.com/pytorch/vision.git
+    cd /opt/pytorch/vision
+    python setup.py install
+
     # Install PyTorch dependencies for python3
-    export PATH="$(echo "${PATH}" | sed s+'/opt/miniconda2/bin'+'/opt/miniconda3/bin'+)"
-    export CMAKE_PREFIX_PATH="$(dirname $(which conda))/../"
-    conda install -y python=3.5
-    conda install -y numpy=1.15.2
+    export PATH="/opt/miniconda3/bin:${PATH}"
+    xport CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
+    conda install -y numpy
     conda install -y pyyaml
     conda install -y mkl
     conda install -y mkl-include
@@ -387,20 +391,12 @@ OSVersion: xenial
     # Add LAPACK support for the GPU
     conda install -y magma-cuda92 -c pytorch
 
-    # Download, build, and install PyTorch for python3
-    cd /opt/pytorch
-    python setup.py install
-
-    # Download and install PyTorch Vision package for python3
-    cd /opt/pytorch/vision
-    python setup.py install
-
     # Install common python3 packages for data science and machine
     # learning applications
     conda install -y pandas
     conda install -y matplotlib
     conda install -y ipython
-    conda install -y ipython-notebook
+    conda install -y jupyter
     conda install -y sympy
     conda install -y nose
     conda install -y scikit-learn
@@ -408,6 +404,16 @@ OSVersion: xenial
     conda install -y nltk
     conda install -y statsmodels
     conda install -y opencv
+
+    # Download, build, and install PyTorch for python3
+    cd /opt/pytorch
+    python setup.py clean --all
+    python setup.py install
+
+    # Download and install PyTorch Vision package for python3
+    cd /opt/pytorch/vision
+    python setup.py clean --all
+    python setup.py install
 
     # Download the PyTorch examples repository
     cd /opt/pytorch
