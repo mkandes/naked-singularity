@@ -5,7 +5,7 @@ OSVersion: xenial
 %labels
 
     APPLICATION_NAME tensorflow
-    APPLICATION_VERSION 1.11
+    APPLICATION_VERSION 1.12
     APPLICATION_URL https://www.tensorflow.org
 
     SYSTEM_NAME comet
@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20181031
+    LAST_UPDATED 20190111
 
 %setup
 
@@ -25,6 +25,8 @@ OSVersion: xenial
 
     # Set system locale
     export LC_ALL=C
+    export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
 
 %post -c /bin/bash
 
@@ -79,6 +81,46 @@ OSVersion: xenial
     # bootstraping process
     cd /tmp
 
+    # Install basic drivers for user space access to Ethernet, RDMA,
+    # and Infiniband. See https://community.mellanox.com/docs/DOC-2431
+    apt-get -y install dkms
+    apt-get -y install infiniband-diags
+    apt-get -y install libibverbs-dev
+    apt-get -y install ibacm
+    apt-get -y install librdmacm-dev
+    apt-get -y install libmlx4-dev
+    apt-get -y install libmlx5-dev
+    apt-get -y install mstflint
+    apt-get -y install libibcm-dev
+    apt-get -y install libibmad-dev
+    apt-get -y install libibumad-dev
+    apt-get -y install opensm
+    apt-get -y install srptools
+
+    # Install additional tools
+    apt-get -y install ibutils
+    apt-get -y install ibverbs-utils
+    apt-get -y install rdmacm-utils
+    apt-get -y install perftest
+    apt-get -y install numactl
+    apt-get -y install libnuma-dev
+
+    # Install libnl
+    apt-get -y install libnl-3-200
+    apt-get -y install libnl-route-3-200
+    apt-get -y install libnl-route-3-dev
+    apt-get -y install libnl-utils
+
+    # Install OpenMPI dependencies
+    apt-get -y install zlib1g-dev
+
+    # Download, build, and install OpenMPI
+    wget https://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.4.tar.gz
+    tar -xzvf openmpi-1.8.4.tar.gz
+    cd openmpi-1.8.4
+    ./configure --prefix=/opt/openmpi-1.8.4
+    make all install
+
     # Install Bazel from Debian Package
     apt-get -y install openjdk-8-jdk
     apt-get -y install zlib1g-dev
@@ -103,7 +145,7 @@ OSVersion: xenial
     # Download TensorFlow source
     git clone https://github.com/tensorflow/tensorflow
     cd /opt/tensorflow
-    git checkout r1.11
+    git checkout r1.12
 
     # Build and install TensorFlow for python(2)
     echo '#!/usr/bin/expect -f' > install-tensorflow-python.exp
@@ -112,23 +154,13 @@ OSVersion: xenial
     echo 'send "/usr/bin/python\r"' >> install-tensorflow-python.exp
     echo 'expect "Please input the desired Python library path to use.  Default is \[/usr/local/lib/python2.7/dist-packages\]\r"' >> install-tensorflow-python.exp
     echo 'send "/usr/local/lib/python2.7/dist-packages\r"' >> install-tensorflow-python.exp
-    echo 'expect "Do you wish to build TensorFlow with jemalloc as malloc support? \[Y/n\]: "' >> install-tensorflow-python.exp
-    echo 'send "Y\r"' >> install-tensorflow-python.exp
-    echo 'expect "Do you wish to build TensorFlow with Google Cloud Platform support? \[Y/n\]: "' >> install-tensorflow-python.exp
+    echo 'expect "Do you wish to build TensorFlow with Apache Ignite support? \[Y/n\]: "' >> install-tensorflow-python.exp
     echo 'send "N\r"' >> install-tensorflow-python.exp
-    echo 'expect "Do you wish to build TensorFlow with Hadoop File System support? \[Y/n\]: "' >> install-tensorflow-python.exp
-    echo 'send "N\r"' >> install-tensorflow-python.exp
-    echo 'expect "Do you wish to build TensorFlow with Amazon S3 File System support? \[Y/n\]: "' >> install-tensorflow-python.exp
-    echo 'send "N\r"' >> install-tensorflow-python.exp
-    echo 'expect "Do you wish to build TensorFlow with Apache Kafka Platform support? \[y/N\]: "' >> install-tensorflow-python.exp
-    echo 'send "N\r"' >> install-tensorflow-python.exp
-    echo 'expect "Do you wish to build TensorFlow with XLA JIT support? \[y/N\]: "' >> install-tensorflow-python.exp
-    echo 'send "N\r"' >> install-tensorflow-python.exp
-    echo 'expect "Do you wish to build TensorFlow with GDR support? \[y/N\]: "' >> install-tensorflow-python.exp
-    echo 'send "N\r"' >> install-tensorflow-python.exp
-    echo 'expect "Do you wish to build TensorFlow with VERBS support? \[y/N\]: "' >> install-tensorflow-python.exp
+    echo 'expect "Do you wish to build TensorFlow with XLA JIT support? \[Y/n\]: "' >> install-tensorflow-python.exp
     echo 'send "N\r"' >> install-tensorflow-python.exp
     echo 'expect "Do you wish to build TensorFlow with OpenCL SYCL support? \[y/N\]: "' >> install-tensorflow-python.exp
+    echo 'send "N\r"' >> install-tensorflow-python.exp
+    echo 'expect "Do you wish to build TensorFlow with ROCm support? \[y/N\]: "' >> install-tensorflow-python.exp
     echo 'send "N\r"' >> install-tensorflow-python.exp
     echo 'expect "Do you wish to build TensorFlow with CUDA support? \[y/N\]: "' >> install-tensorflow-python.exp
     echo 'send "N\r"' >> install-tensorflow-python.exp
@@ -151,7 +183,7 @@ OSVersion: xenial
     bazel build --local_resources 2048,.5,1.0 -c opt --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" //tensorflow/tools/pip_package:build_pip_package
     bazel-bin/tensorflow/tools/pip_package/build_pip_package tensorflow_pkg
 
-    pip install tensorflow_pkg/tensorflow-1.11.0-cp27-cp27mu-linux_x86_64.whl
+    pip install tensorflow_pkg/tensorflow-1.12.0-cp27-cp27mu-linux_x86_64.whl
 
     # Install common python packages for data science and machine learning applications
     apt-get -y install python-scipy
@@ -198,25 +230,15 @@ OSVersion: xenial
     echo 'spawn ./configure' >> install-tensorflow-python3.exp
     echo 'expect "Please specify the location of python. \[Default is /usr/bin/python\]: "' >> install-tensorflow-python3.exp
     echo 'send "/usr/bin/python3\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Please input the desired Python library path to use.  Default is \[/usr/local/lib/python3.5/dist-packages\]\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Please input the desired Python library path to use.  Default is \[/usr/local/lib/python2.7/dist-packages\]\r"' >> install-tensorflow-python3.exp
     echo 'send "/usr/local/lib/python3.5/dist-packages\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Do you wish to build TensorFlow with jemalloc as malloc support? \[Y/n\]: "' >> install-tensorflow-python3.exp
-    echo 'send "Y\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Do you wish to build TensorFlow with Google Cloud Platform support? \[Y/n\]: "' >> install-tensorflow-python3.exp
+    echo 'expect "Do you wish to build TensorFlow with Apache Ignite support? \[Y/n\]: "' >> install-tensorflow-python3.exp
     echo 'send "N\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Do you wish to build TensorFlow with Hadoop File System support? \[Y/n\]: "' >> install-tensorflow-python3.exp
-    echo 'send "N\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Do you wish to build TensorFlow with Amazon S3 File System support? \[Y/n\]: "' >> install-tensorflow-python3.exp
-    echo 'send "N\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Do you wish to build TensorFlow with Apache Kafka Platform support? \[y/N\]: "' >> install-tensorflow-python3.exp
-    echo 'send "N\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Do you wish to build TensorFlow with XLA JIT support? \[y/N\]: "' >> install-tensorflow-python3.exp
-    echo 'send "N\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Do you wish to build TensorFlow with GDR support? \[y/N\]: "' >> install-tensorflow-python3.exp
-    echo 'send "N\r"' >> install-tensorflow-python3.exp
-    echo 'expect "Do you wish to build TensorFlow with VERBS support? \[y/N\]: "' >> install-tensorflow-python3.exp
+    echo 'expect "Do you wish to build TensorFlow with XLA JIT support? \[Y/n\]: "' >> install-tensorflow-python3.exp
     echo 'send "N\r"' >> install-tensorflow-python3.exp
     echo 'expect "Do you wish to build TensorFlow with OpenCL SYCL support? \[y/N\]: "' >> install-tensorflow-python3.exp
+    echo 'send "N\r"' >> install-tensorflow-python3.exp
+    echo 'expect "Do you wish to build TensorFlow with ROCm support? \[y/N\]: "' >> install-tensorflow-python3.exp
     echo 'send "N\r"' >> install-tensorflow-python3.exp
     echo 'expect "Do you wish to build TensorFlow with CUDA support? \[y/N\]: "' >> install-tensorflow-python3.exp
     echo 'send "N\r"' >> install-tensorflow-python3.exp
@@ -242,7 +264,7 @@ OSVersion: xenial
     bazel build --local_resources 2048,.5,1.0 -c opt --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" //tensorflow/tools/pip_package:build_pip_package
     bazel-bin/tensorflow/tools/pip_package/build_pip_package tensorflow_pkg
 
-    pip3 install tensorflow_pkg/tensorflow-1.11.0-cp35-cp35m-linux_x86_64.whl
+    pip3 install tensorflow_pkg/tensorflow-1.12.0-cp35-cp35m-linux_x86_64.whl
 
     # Install common python3 packages for data science and machine learning applications
     apt-get -y install python3-scipy
