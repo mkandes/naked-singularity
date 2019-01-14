@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20181213
+    LAST_UPDATED 20190110
 
 %setup
 
@@ -307,6 +307,28 @@ OSVersion: xenial
     apt-get -y install python-yaml
     apt-get -y install python-pil
     apt-get -y install python-six
+
+    # Install common python packages for data science and machine learning applications
+    apt-get -y install python-scipy
+    apt-get -y install python-pandas
+    apt-get -y install python-matplotlib
+    apt-get -y install ipython
+    apt-get -y install ipython-notebook
+    apt-get -y install python-sympy
+    apt-get -y install python-nose
+    apt-get -y install python-sklearn
+    apt-get -y install python-mlpy
+    apt-get -y install python-nltk
+    apt-get -y install python-statsmodels
+    apt-get -y install libopencv-dev
+    apt-get -y install python-opencv
+
+    # Install common python packages for the biological and biomedical sciences
+    apt-get -y install python-biopython
+    apt-get -y install python-biopython-sql
+
+    # Install other common python packages
+    apt-get -y install python-h5py
     
     cd /opt
 
@@ -353,8 +375,5 @@ OSVersion: xenial
 %files
 
 %runscript
-
-    #cd /opt/caffe
-    #make runtest
 
 %test
