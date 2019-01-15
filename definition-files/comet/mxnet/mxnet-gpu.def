@@ -5,7 +5,7 @@ OSVersion: xenial
 %labels
 
     APPLICATION_NAME mxnet-gpu
-    APPLICATION_VERSION 1.3.0
+    APPLICATION_VERSION 1.3.1
     APPLICATION_URL http://mxnet.io
 
     SYSTEM_NAME comet
@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20181011
+    LAST_UPDATED 20190115
 
 %setup
 
@@ -274,9 +274,9 @@ OSVersion: xenial
     cd /opt
 
     # Download, build and install MXNet core shared library
-    wget https://github.com/apache/incubator-mxnet/releases/download/1.3.0/apache-mxnet-src-1.3.0-incubating.tar.gz
-    tar -xzvf apache-mxnet-src-1.3.0-incubating.tar.gz
-    cd /opt/apache-mxnet-src-1.3.0-incubating
+    wget https://github.com/apache/incubator-mxnet/releases/download/1.3.1/apache-mxnet-src-1.3.1.rc0-incubating.tar.gz
+    tar -xzvf apache-mxnet-src-1.3.1.rc0-incubating.tar.gz
+    cd /opt/apache-mxnet-src-1.3.1.rc0-incubating
     make USE_OPENCV=1 USE_BLAS=openblas USE_CUDA=1 USE_CUDA_PATH=/usr/local/cuda USE_CUDNN=1 USE_DIST_KVSTORE=1
 
     # Install MXNet python(2) bindings
@@ -285,7 +285,7 @@ OSVersion: xenial
     apt-get -y install python-pip
     apt-get -y install libgfortran3
 
-    cd /opt/apache-mxnet-src-1.3.0-incubating/python
+    cd /opt/apache-mxnet-src-1.3.1.rc0-incubating/python
     python setup.py install
 
     # Install common python packages for data science and machine learning applications
@@ -300,7 +300,6 @@ OSVersion: xenial
     apt-get -y install python-mlpy
     apt-get -y install python-nltk
     apt-get -y install python-statsmodels
-    apt-get -y install libopencv-dev
     apt-get -y install python-opencv
 
     # Install common python packages for the biological and biomedical sciences
@@ -315,6 +314,7 @@ OSVersion: xenial
     apt-get -y install python3-setuptools
     apt-get -y install python3-pip
 
+    python3 setup.py clean --all
     python3 setup.py install
 
     # Install common python3 packages for data science and machine learning applications
