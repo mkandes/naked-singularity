@@ -72,7 +72,7 @@ naked_build() {
     naked_out "Read in command-line option '${1}' with input value '${2}' ... "
     case "${1}" in
       -s | --system )
-        system="${2,,}"
+        system="${2}"
         shift 2
         ;;
       -a | --application )

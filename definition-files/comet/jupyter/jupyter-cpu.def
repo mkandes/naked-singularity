@@ -1,0 +1,137 @@
+Bootstrap: debootstrap
+MirrorURL: http://us.archive.ubuntu.com/ubuntu
+OSVersion: xenial
+
+%labels
+
+    APPLICATION_NAME jupyter
+    APPLICATION_VERSION 4.4.0
+    APPLICATION_URL https://www.ubuntu.com/
+
+    SYSTEM_NAME comet
+    SYSTEM_SINGULARITY_VERSION 2.5.2
+    SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
+
+    SINGULARITY_IMAGE_SIZE 4096
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20190118
+
+%setup
+
+%environment
+
+    # Set system locale
+    export LC_ALL=C
+    export PATH="/opt/miniconda3/bin:${PATH}"
+
+%post -c /bin/bash
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Install system metapackages
+    apt-get -y install ubuntu-standard
+    apt-get -y install ubuntu-server
+
+    # Add repositories
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} restricted"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates restricted"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports restricted"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security restricted"
+
+    # Upgrade all packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    # Install common packages from 'main'
+    apt-get -y install autoconf
+    apt-get -y install automake
+    apt-get -y install build-essential
+    apt-get -y install cmake
+    apt-get -y install libtool
+    apt-get -y install pkg-config
+    apt-get -y install gfortran
+    apt-get -y install zip
+
+    # Install expect to automate responses for interactive build questions
+    apt-get -y install expect
+
+    # Make filesystem mount points
+    mkdir /cvmfs /oasis /projects /scratch
+
+    # Use /tmp to store temporary files within the container during the
+    # bootstraping process
+    cd /tmp
+
+    # Install miniconda2
+    wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
+    chmod +x Miniconda2-latest-Linux-x86_64.sh
+    ./Miniconda2-latest-Linux-x86_64.sh -b -p /opt/miniconda2
+
+    # Install miniconda3
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    chmod +x Miniconda3-latest-Linux-x86_64.sh
+    ./Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda3
+
+    # Install common python(2) packages for data science and machine
+    # learning applications
+    export PATH="/opt/miniconda2/bin:${PATH}"
+    conda install -y numpy
+    conda install -y mkl
+    conda install -y mkl-include
+    conda install -y pandas
+    conda install -y matplotlib
+    conda install -y ipython
+    conda install -y ipython-notebook
+    conda install -y jupyter
+    conda install -y sympy
+    conda install -y nose
+    conda install -y scikit-learn
+    conda install -y scikit-image
+    conda install -y nltk
+    conda install -y statsmodels
+    conda install -y opencv
+
+    # Install common python3 packages for data science and machine
+    # learning applications
+    export PATH="/opt/miniconda3/bin:${PATH}"
+    conda install -y numpy
+    conda install -y mkl
+    conda install -y mkl-include
+    conda install -y pandas
+    conda install -y matplotlib
+    conda install -y ipython
+    conda install -y jupyter
+    conda install -y sympy
+    conda install -y nose
+    conda install -y scikit-learn
+    conda install -y scikit-image
+    conda install -y nltk
+    conda install -y statsmodels
+    conda install -y opencv
+    
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
