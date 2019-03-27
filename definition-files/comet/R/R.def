@@ -1,0 +1,202 @@
+Bootstrap: debootstrap
+MirrorURL: http://us.archive.ubuntu.com/ubuntu
+OSVersion: xenial
+
+%labels
+
+    APPLICATION_NAME R
+    APPLICATION_VERSION 3.4.2
+    APPLICATION_URL https://www.r-project.org/
+
+    SYSTEM_NAME comet
+    SYSTEM_SINGULARITY_VERSION 2.6.2
+    SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
+
+    SINGULARITY_IMAGE_SIZE 4096
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20190327
+
+%setup
+
+%environment
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Set PATH and LD_LIBRARY_PATH variables
+    export LD_LIBRARY_PATH="/opt/openblas-0.2.20/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/R-3.4.2/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/R-3.4.2/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
+
+%post -c /bin/bash
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Install system metapackages
+    apt-get -y install ubuntu-standard
+    apt-get -y install ubuntu-server
+
+    # Add repositories
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} restricted"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates restricted"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports restricted"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security restricted"
+
+    # Upgrade all packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    # Install common packages and libraries from 'main'
+    apt-get -y install autoconf
+    apt-get -y install automake
+    apt-get -y install build-essential
+    apt-get -y install cmake
+    apt-get -y install libtool
+    apt-get -y install pkg-config
+    apt-get -y install gfortran
+    apt-get -y install zip
+
+    apt-get -y install libgmp-dev
+    apt-get -y install libmpfr-dev
+    apt-get -y install libmpc-dev
+    apt-get -y install libisl-dev
+
+    # Install expect to automate responses for interactive build questions
+    apt-get -y install expect
+
+    # Make filesystem mount points
+    mkdir /cvmfs /oasis /projects /scratch
+
+    # Use /tmp to store temporary files within the container during the
+    # bootstraping process
+    cd /tmp
+
+    # Install miniconda2
+    wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
+    chmod +x Miniconda2-latest-Linux-x86_64.sh
+    ./Miniconda2-latest-Linux-x86_64.sh -b -p /opt/miniconda2
+
+    # Install miniconda3
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    chmod +x Miniconda3-latest-Linux-x86_64.sh
+    ./Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda3
+
+    # Install basic drivers for user space access to Ethernet, RDMA,
+    # and Infiniband. See https://community.mellanox.com/docs/DOC-2431
+    apt-get -y install dkms
+    apt-get -y install infiniband-diags
+    apt-get -y install libibverbs-dev
+    apt-get -y install ibacm
+    apt-get -y install librdmacm-dev
+    apt-get -y install libmlx4-dev
+    apt-get -y install libmlx5-dev
+    apt-get -y install mstflint
+    apt-get -y install libibcm-dev
+    apt-get -y install libibmad-dev
+    apt-get -y install libibumad-dev
+    apt-get -y install opensm
+    apt-get -y install srptools
+
+    # Install additional tools
+    apt-get -y install ibutils
+    apt-get -y install ibverbs-utils
+    apt-get -y install rdmacm-utils
+    apt-get -y install perftest
+    apt-get -y install numactl
+    apt-get -y install libnuma-dev
+
+    # Install libnl
+    apt-get -y install libnl-3-200
+    apt-get -y install libnl-route-3-200
+    apt-get -y install libnl-route-3-dev
+    apt-get -y install libnl-utils
+
+    # Install R dependencies
+    apt-get -y install libreadline-dev
+    apt-get -y install zlib1g-dev
+    apt-get -y install bzip2
+    apt-get -y install libbz2-dev
+    apt-get -y install xz-utils
+    apt-get -y install liblzma-dev
+    apt-get -y install libpcre3
+    apt-get -y install libpcre3-dev
+    apt-get -y install curl
+    apt-get -y install libcurl4-gnutls-dev
+
+    #cd /tmp
+
+    # Download, build, and install OpenBLAS for R
+    wget http://github.com/xianyi/OpenBLAS/archive/v0.2.20.tar.gz
+    tar -xzvf v0.2.20.tar.gz
+    cd OpenBLAS-0.2.20
+    make NUM_THREADS=24
+    make install PREFIX='/opt/openblas-0.2.20'
+
+    export CPPFLAGS="-I/opt/openblas-0.2.20/include ${CPPFLAGS}"
+    export LDFLAGS="-L/opt/openblas-0.2.20/lib ${LDFLAGS}"
+    export LD_LIBRARY_PATH="/opt/openblas-0.2.20/lib:${LD_LIBRARY_PATH}"
+
+    cd /tmp
+
+    # Download, build, and install R
+    wget https://cran.cnr.berkeley.edu/src/base/R-3/R-3.4.2.tar.gz
+    tar -xzvf R-3.4.2.tar.gz
+    cd R-3.4.2
+	./configure --prefix="/opt/R-3.4.2" --enable-R-shlib --with-blas --with-lapack --with-x
+    make
+    make install
+
+    export PATH="/opt/R-3.4.2/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/R-3.4.2/lib:${LD_LIBRARY_PATH}"
+
+    cd /tmp
+
+    # Download, build, and install OpenMPI for Rmpi
+    wget https://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.4.tar.gz
+    tar -xzvf openmpi-1.8.4.tar.gz
+    cd openmpi-1.8.4
+    ./configure --prefix='/opt/openmpi-1.8.4'
+     make all install
+
+    export CPPFLAGS="-I/opt/openmpi-1.8.4/include ${CPPFLAGS}"
+    export LDFLAGS="-L/opt/openmpi-1.8.4/lib ${LDFLAGS}"
+    export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
+
+    cd /tmp
+
+    # Download, build, and install Rmpi
+    wget https://cran.r-project.org/src/contrib/Rmpi_0.6-7.tar.gz
+    R CMD INSTALL Rmpi_0.6-7.tar.gz --configure-args='--with-Rmpi-type=OPENMPI --with-Rmpi-include=/opt/openmpi-1.8.4/include --with-Rmpi-libpath=/opt/openmpi-1.8.4/lib'
+
+    # Install MySQL client / libraries to support RMySQL
+    apt-get -y install libmariadb-client-lgpl-dev
+ 
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
