@@ -248,7 +248,7 @@ naked_install() {
 
   local operating_system='ubuntu'
   local prefix='/usr/local'
-  local version='2.5.2'
+  local version='2.6.1'
 
   naked_out "Read in all command-line options of the 'install' command ..."
 
