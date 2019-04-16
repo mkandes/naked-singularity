@@ -38,7 +38,7 @@ From: ubuntu:16.04
     MODIFYING_AUTHOR_NAME Marty Kandes
     MODIFYING_AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20190402
+    LAST_UPDATED 20190416
 
 %help
    
@@ -93,6 +93,9 @@ From: ubuntu:16.04
     apt-get -y install wget 
     apt-get -y install libboost-dev 
     apt-get -y install liblapack-dev
+
+    # Make filesystem mount points
+    mkdir /cvmfs /oasis /projects /scratch
 
     cd /tmp
 
