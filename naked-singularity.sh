@@ -301,6 +301,8 @@ naked_install() {
     sudo yum install -y epel-release
     echo 'sudo yum install -y debootstrap'
     sudo yum install -y debootstrap
+    echo 'sudo yum install -y debian-keyring'
+    sudo yum install -y debian-keyring
 
   elif [[ "${operating_system}" = 'ubuntu' ]]; then
 
