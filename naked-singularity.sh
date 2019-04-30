@@ -28,7 +28,7 @@
 #
 # LAST UPDATED
 #
-#     Tuesday, November 6th, 2018
+#     Tuesday, April 30th, 2019
 #
 # ----------------------------------------------------------------------
 
@@ -297,6 +297,10 @@ naked_install() {
     sudo yum groupinstall -y 'Development Tools'
     echo 'sudo yum install -y libarchive-devel'
     sudo yum install -y libarchive-devel
+    echo 'sudo yum install -y epel-release'
+    sudo yum install -y epel-release
+    echo 'sudo yum install -y debootstrap'
+    sudo yum install -y debootstrap
 
   elif [[ "${operating_system}" = 'ubuntu' ]]; then
 

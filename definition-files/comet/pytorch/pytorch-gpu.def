@@ -9,7 +9,7 @@ OSVersion: xenial
     APPLICATION_URL http://pytorch.org/
 
     SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.5.2
+    SYSTEM_SINGULARITY_VERSION 2.6.1
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
 
     SINGULARITY_IMAGE_SIZE 32768
@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20190110
+    LAST_UPDATED 20190227
 
 %setup
 
@@ -349,7 +349,7 @@ OSVersion: xenial
     # Download, build, and install PyTorch for python2
     export CC='mpicc'
     export CXX='mpicxx'
-    export CFLAGS='-march=haswell -mmmx -mno-3dnow -msse -msse2 -msse3 -mssse3 -mno-sse4a -mcx16 -msahf -mmovbe -maes -mno-sha -mpclmul -mpopcnt -mabm -mno-lwp -mfma -mno-fma4 -mno-xop -mbmi -mbmi2 -mno-tbm -mavx -mavx2 -msse4.2 -msse4.1 -mlzcnt -mno-rtm -mno-hle -mrdrnd -mf16c -mfsgsbase -mno-rdseed -mno-prfchw -mno-adx -mfxsr -mxsave -mxsaveopt -mno-avx512f -mno-avx512er -mno-avx512cd -mno-avx512pf -mno-prefetchwt1 -mtune=haswell'
+    export CFLAGS='-std=gnu -O3 -ffast-math -march=haswell -mmmx -mno-3dnow -msse -msse2 -msse3 -mssse3 -mno-sse4a -mcx16 -msahf -mmovbe -maes -mno-sha -mpclmul -mpopcnt -mabm -mno-lwp -mfma -mno-fma4 -mno-xop -mbmi -mbmi2 -mno-tbm -mavx -mavx2 -msse4.2 -msse4.1 -mlzcnt -mno-rtm -mno-hle -mrdrnd -mf16c -mfsgsbase -mno-rdseed -mno-prfchw -mno-adx -mfxsr -mxsave -mxsaveopt -mno-avx512f -mno-avx512er -mno-avx512cd -mno-avx512pf -mno-prefetchwt1 -mtune=haswell'
     export USE_OPENMP=1
     export USE_NNPACK=1
     export USE_QNNPACK=1
@@ -363,7 +363,7 @@ OSVersion: xenial
     export USE_CUDNN=1
     export USE_NCCL=1
     export USE_OPENCV=1
-    export TORCH_CUDA_ARCH_LIST="3.7;6.0"
+    export TORCH_CUDA_ARCH_LIST="3.7;6.0;7.0"
     git clone --recursive https://github.com/pytorch/pytorch
     cd /opt/pytorch
     git checkout v1.0.0
