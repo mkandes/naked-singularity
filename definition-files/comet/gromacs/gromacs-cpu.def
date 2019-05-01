@@ -1,0 +1,146 @@
+Bootstrap: debootstrap
+MirrorURL: http://us.archive.ubuntu.com/ubuntu
+OSVersion: xenial
+
+%labels
+
+    APPLICATION_NAME gromacs
+    APPLICATION_VERSION 2019
+    APPLICATION_URL http://www.gromacs.org/
+
+    SYSTEM_NAME comet
+    SYSTEM_SINGULARITY_VERSION 2.6.1
+    SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
+
+    SINGULARITY_IMAGE_SIZE 4096
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20190501
+
+%setup
+
+%environment
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Source GROMACS environment variables
+    export GROMACS_VERSION='2019'
+    export GROMACS_BUILD='tmpi'
+    export GROMACS_ROOT_DIR="/opt/software/molecular-dynamics/gromacs"
+    . "${GROMACS_ROOT_DIR}/${GROMACS_VERSION}/${GROMACS_BUILD}/bin/GMXRC"
+
+%post -c /bin/bash
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Install system metapackages
+    apt-get -y install ubuntu-standard
+    apt-get -y install ubuntu-server
+
+    # Add repositories
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} restricted"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates restricted"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports restricted"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security restricted"
+
+    # Upgrade all packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    # Install common packages from 'main'
+    apt-get -y install autoconf
+    apt-get -y install automake
+    apt-get -y install build-essential
+    apt-get -y install cmake
+    apt-get -y install libtool
+    apt-get -y install pkg-config
+    apt-get -y install gfortran
+    apt-get -y install zip
+
+    # Install expect to automate responses for interactive build questions
+    apt-get -y install expect
+
+    # Make filesystem mount points
+    mkdir /cvmfs /oasis /projects /scratch
+
+    # Use /tmp to store temporary files within the container during the
+    # bootstraping process
+    cd /tmp
+
+    # Install miniconda2
+    wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
+    chmod +x Miniconda2-latest-Linux-x86_64.sh
+    ./Miniconda2-latest-Linux-x86_64.sh -b -p /opt/miniconda2
+
+    # Install miniconda3
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    chmod +x Miniconda3-latest-Linux-x86_64.sh
+    ./Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda3
+
+    # Download, build, and install GROMACS
+    declare -xr GROMACS_VERSION='2019'
+    declare -xr GROMACS_BUILD='tmpi'
+    declare -xr GROMACS_ROOT_DIR="/opt/software/molecular-dynamics/gromacs"
+    declare -xr GROMACS_ROOT_URL='http://ftp.gromacs.org/pub'
+
+    mkdir -p "${GROMACS_ROOT_DIR}/${GROMACS_VERSION}/${GROMACS_BUILD}
+    cd "${GROMACS_ROOT_DIR}/${GROMACS_VERSION}/${GROMACS_BUILD}
+
+    wget "${GROMACS_ROOT_URL}/gromacs/gromacs-${GROMACS_VERSION}.tar.gz"
+    tar -xzvf "gromacs-${GROMACS_VERSION}.tar.gz"
+
+    cd "gromacs-${GROMACS_VERSION}"
+    mkdir -p build
+    cd build
+
+    cmake .. \
+      -DCMAKE_C_COMPILER=gcc \
+      -DCMAKE_CXX_COMPILER=g++ \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_INSTALL_PREFIX="${GROMACS_ROOT_DIR}/${GROMACS_VERSION}/${GROMACS_BUILD}" \
+      -DGMX_PREFER_STATIC_LIBS=ON \
+      -DBUILD_SHARED_LIBS=OFF \
+      -DGMX_EXTERNAL_BLAS=OFF \
+      -DGMX_EXTERNAL_BOOST=OFF \
+      -DGMX_EXTERNAL_LAPACK=OFF \
+      -DGMX_FFT_LIBRARY=fftw3 \
+      -DGMX_BUILD_OWN_FFTW=ON \
+      -DGMX_DOUBLE=OFF \
+      -DGMX_SIMD=AVX2_256 \
+      -DGMX_MPI=OFF \
+      -DGMX_OPENMP=OFF \
+      -DGMX_GPU=OFF \
+      -DREGRESSIONTEST_DOWNLOAD=ON
+
+    make
+    make check
+    make install
+    
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+    exec "${@}"
+
+%test
