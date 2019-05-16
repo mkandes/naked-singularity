@@ -1,0 +1,135 @@
+Bootstrap: yum 
+OSVersion: 7
+MirrorURL: http://mirror.centos.org/centos-7/7.6.1810/os/x86_64/
+Include: yum
+
+%labels
+
+    APPLICATION_NAME centos + openmpi
+    APPLICATION_VERSION 7.6.1810 + 1.8.4
+    APPLICATION_URL https://www.open-mpi.org/
+
+    SYSTEM_NAME comet
+    SYSTEM_SINGULARITY_VERSION 2.6.1
+    SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
+
+    SINGULARITY_IMAGE_SIZE 8192
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20190514
+
+%setup
+
+%environment
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
+
+%post -c /bin/bash
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Add repositories
+    yum -y install epel-release
+
+    # Install system metapackages
+    yum -y groupinstall "Development Tools"
+    yum -y groupinstall "Additional Development"
+    yum -y groupinstall "Compatibility Libraries"
+
+    # Upgrade all packages to their latest versions
+    yum -y update
+
+    # Install common packages
+    yum -y install bc
+    yum -y install cmake
+    yum -y install curl
+    yum -y install mlocate
+    yum -y install rsync
+    yum -y install time
+    yum -y install wget
+    yum -y install which
+
+    # Install expect to automate responses for interactive build questions
+    yum -y install expect
+
+    # Make filesystem mount points
+    mkdir /cvmfs /oasis /projects /scratch
+
+    # Use /tmp to store temporary files within the container during the
+    # bootstraping process
+    cd /tmp
+
+    # Install miniconda2
+    wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
+    chmod +x Miniconda2-latest-Linux-x86_64.sh
+    ./Miniconda2-latest-Linux-x86_64.sh -b -p /opt/miniconda2
+
+    # Install miniconda3
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    chmod +x Miniconda3-latest-Linux-x86_64.sh
+    ./Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda3
+
+    # Install basic drivers for user space access to Ethernet, RDMA,
+    # and Infiniband. See https://community.mellanox.com/docs/DOC-2431
+    yum -y install dkms
+    yum -y install infiniband-diags
+    yum -y install infiniband-diags-devel
+    yum -y install libibverbs
+    yum -y install libibverbs-devel
+    yum -y install ibacm
+    yum -y install librdmacm
+    yum -y install librdmacm-devel
+    yum -y install libmlx4
+    yum -y install libmlx5
+    yum -y install msflint
+    yum -y install libibcm
+    yum -y install libibmad
+    yum -y install libibmad-devel
+    yum -y install libibumad
+    yum -y install libibumad-devel
+    yum -y install opensm
+    yum -y install srptools
+
+    # Install additional tools
+    yum -y install ibutils
+    yum -y install libibverbs-utils
+    yum -y install rdmacm-utils
+    yum -y install librdmacm-utils
+    yum -y install perftest
+    yum -y install numactl
+
+    # Install libnl
+    yum -y install libnl3
+    yum -y install libnl3-devel
+
+    # Install OpenMPI dependencies
+    yum -y install zlib
+    yum -y install zlib-devel
+
+    # Download, build, and install OpenMPI
+    wget https://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.4.tar.gz
+    tar -xzvf openmpi-1.8.4.tar.gz
+    cd openmpi-1.8.4
+    ./configure --prefix=/opt/openmpi-1.8.4
+    make all install
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
+    
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test

@@ -1,0 +1,91 @@
+Bootstrap: yum 
+OSVersion: 7
+MirrorURL: http://mirror.centos.org/centos-7/7.6.1810/os/x86_64/
+Include: yum
+
+%labels
+
+    APPLICATION_NAME centos
+    APPLICATION_VERSION 7.6.1810
+    APPLICATION_URL https://www.centos.org
+
+    SYSTEM_NAME comet
+    SYSTEM_SINGULARITY_VERSION 2.6.1
+    SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
+
+    SINGULARITY_IMAGE_SIZE 4096
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20190513
+
+%setup
+
+%environment
+
+    # Set system locale
+    export LC_ALL=C
+
+%post -c /bin/bash
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Add repositories
+    yum -y install epel-release
+
+    # Install system metapackages
+    yum -y groupinstall "Development Tools"
+    yum -y groupinstall "Additional Development"
+    yum -y groupinstall "Compatibility Libraries"
+
+    # Upgrade all packages to their latest versions
+    yum -y update
+
+    # Install common packages
+    yum -y install bc
+    yum -y install cmake
+    yum -y install curl
+    yum -y install mlocate
+    yum -y install rsync
+    yum -y install time
+    yum -y install wget
+    yum -y install which
+
+    # Install expect to automate responses for interactive build questions
+    yum -y install expect
+
+    # Make filesystem mount points
+    mkdir /cvmfs /oasis /projects /scratch
+
+    # Use /tmp to store temporary files within the container during the
+    # bootstraping process
+    cd /tmp
+
+    # Install miniconda2
+    wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
+    chmod +x Miniconda2-latest-Linux-x86_64.sh
+    ./Miniconda2-latest-Linux-x86_64.sh -b -p /opt/miniconda2
+
+    # Install miniconda3
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    chmod +x Miniconda3-latest-Linux-x86_64.sh
+    ./Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda3
+    
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+    echo "                                                "
+    echo "      __________________  __  _______________   "
+    echo "    -----/ ____/ __ \/  |/  / ____/_  __/       "
+    echo "      --/ /   / / / / /|_/ / __/   / /          "
+    echo "       / /___/ /_/ / /  / / /___  / /           "
+    echo "       \____/\____/_/  /_/_____/ /_/            "
+    echo "                                                "
+
+%test
