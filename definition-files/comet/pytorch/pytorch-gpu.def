@@ -5,7 +5,7 @@ OSVersion: xenial
 %labels
 
     APPLICATION_NAME pytorch
-    APPLICATION_VERSION 1.0.0
+    APPLICATION_VERSION 1.1.0
     APPLICATION_URL http://pytorch.org/
 
     SYSTEM_NAME comet
@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20190227
+    LAST_UPDATED 20190520
 
 %setup
 
@@ -25,11 +25,17 @@ OSVersion: xenial
 
     # Set system locale
     export LC_ALL=C
+
+    # Set paths to CUDA binaries and libraries
     export PATH="/usr/local/cuda-9.2/bin${PATH:+:${PATH}}"
     export LD_LIBRARY_PATH="/usr/local/cuda-9.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
     export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/extras/CUPTI/lib64"
+
+    # Set paths to OpenMPI binaries and libraries
     export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
     export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
+
+    # Set default miniconda environment
     export PATH="/opt/miniconda3/bin:${PATH}"
 
 %post -c /bin/bash
@@ -349,7 +355,7 @@ OSVersion: xenial
     # Download, build, and install PyTorch for python2
     export CC='mpicc'
     export CXX='mpicxx'
-    export CFLAGS='-std=gnu -O3 -ffast-math -march=haswell -mmmx -mno-3dnow -msse -msse2 -msse3 -mssse3 -mno-sse4a -mcx16 -msahf -mmovbe -maes -mno-sha -mpclmul -mpopcnt -mabm -mno-lwp -mfma -mno-fma4 -mno-xop -mbmi -mbmi2 -mno-tbm -mavx -mavx2 -msse4.2 -msse4.1 -mlzcnt -mno-rtm -mno-hle -mrdrnd -mf16c -mfsgsbase -mno-rdseed -mno-prfchw -mno-adx -mfxsr -mxsave -mxsaveopt -mno-avx512f -mno-avx512er -mno-avx512cd -mno-avx512pf -mno-prefetchwt1 -mtune=haswell'
+    export CFLAGS='-march=haswell -mmmx -mno-3dnow -msse -msse2 -msse3 -mssse3 -mno-sse4a -mcx16 -msahf -mmovbe -maes -mno-sha -mpclmul -mpopcnt -mabm -mno-lwp -mfma -mno-fma4 -mno-xop -mbmi -mbmi2 -mno-tbm -mavx -mavx2 -msse4.2 -msse4.1 -mlzcnt -mno-rtm -mno-hle -mrdrnd -mf16c -mfsgsbase -mno-rdseed -mno-prfchw -mno-adx -mfxsr -mxsave -mxsaveopt -mno-avx512f -mno-avx512er -mno-avx512cd -mno-avx512pf -mno-prefetchwt1 -mtune=haswell'
     export USE_OPENMP=1
     export USE_NNPACK=1
     export USE_QNNPACK=1
@@ -366,7 +372,7 @@ OSVersion: xenial
     export TORCH_CUDA_ARCH_LIST="3.7;6.0;7.0"
     git clone --recursive https://github.com/pytorch/pytorch
     cd /opt/pytorch
-    git checkout v1.0.0
+    git checkout v1.1.0
     git submodule update --init
     python setup.py install
 
