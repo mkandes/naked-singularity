@@ -9,7 +9,7 @@ OSVersion: xenial
     APPLICATION_URL https://software.intel.com/en-us/articles/opencl-drivers#latest_CPU_runtime
 
     SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.5.2
+    SYSTEM_SINGULARITY_VERSION 2.6.1
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
 
     SINGULARITY_IMAGE_SIZE 8192
@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20181203
+    LAST_UPDATED 20190814
 
 %setup
 
@@ -30,6 +30,9 @@ OSVersion: xenial
     export PATH="/usr/local/cuda-9.2/bin${PATH:+:${PATH}}"
     export LD_LIBRARY_PATH="/usr/local/cuda-9.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
     export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/extras/CUPTI/lib64"
+
+    # Set default miniconda environment
+    export PATH="/opt/miniconda3/bin:${PATH}"
 
 %post -c /bin/bash
 
@@ -70,8 +73,9 @@ OSVersion: xenial
     apt-get -y install build-essential
     apt-get -y install cmake
     apt-get -y install libtool
-    apt-get -y install pkg-config
     apt-get -y install gfortran
+    apt-get -y install pkg-config
+    apt-get -y install wget
     apt-get -y install zip
 
     # Install expect to automate responses for interactive build questions

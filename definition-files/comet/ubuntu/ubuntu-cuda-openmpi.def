@@ -9,7 +9,7 @@ OSVersion: xenial
     APPLICATION_URL https://www.open-mpi.org/faq/?category=runcuda
 
     SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.5.2
+    SYSTEM_SINGULARITY_VERSION 2.6.1
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
 
     SINGULARITY_IMAGE_SIZE 8192
@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20181203
+    LAST_UPDATED 20190814
 
 %setup
 
@@ -32,6 +32,9 @@ OSVersion: xenial
     export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/extras/CUPTI/lib64"
     export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
     export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
+
+    # Set default miniconda environment
+    export PATH="/opt/miniconda3/bin:${PATH}"
 
 %post -c /bin/bash
 
@@ -72,8 +75,9 @@ OSVersion: xenial
     apt-get -y install build-essential
     apt-get -y install cmake
     apt-get -y install libtool
-    apt-get -y install pkg-config
     apt-get -y install gfortran
+    apt-get -y install pkg-config
+    apt-get -y install wget
     apt-get -y install zip
 
     # Install expect to automate responses for interactive build questions
@@ -309,10 +313,6 @@ OSVersion: xenial
     cd openmpi-1.8.4
     ./configure --prefix=/opt/openmpi-1.8.4 --with-cuda
     make all install
-
-    # Set paths to OpenMPI binaries and libraries
-    export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
 
     # Update database for mlocate
     updatedb

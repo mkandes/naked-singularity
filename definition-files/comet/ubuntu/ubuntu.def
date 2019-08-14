@@ -9,7 +9,7 @@ OSVersion: xenial
     APPLICATION_URL https://www.ubuntu.com/
 
     SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.5.2
+    SYSTEM_SINGULARITY_VERSION 2.6.1
     SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
 
     SINGULARITY_IMAGE_SIZE 2048
@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20181003
+    LAST_UPDATED 20190812
 
 %setup
 
@@ -25,6 +25,9 @@ OSVersion: xenial
 
     # Set system locale
     export LC_ALL=C
+
+    # Set default miniconda environment
+    export PATH="/opt/miniconda3/bin:${PATH}"
 
 %post -c /bin/bash
 
@@ -65,8 +68,9 @@ OSVersion: xenial
     apt-get -y install build-essential
     apt-get -y install cmake
     apt-get -y install libtool
-    apt-get -y install pkg-config
     apt-get -y install gfortran
+    apt-get -y install pkg-config
+    apt-get -y install wget
     apt-get -y install zip
 
     # Install expect to automate responses for interactive build questions
