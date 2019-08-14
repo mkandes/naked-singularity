@@ -18,7 +18,7 @@ Include: yum
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20190514
+    LAST_UPDATED 20190814
 
 %setup
 
@@ -30,6 +30,9 @@ Include: yum
     # Set paths to OpenMPI binaries and libraries
     export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
     export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
+
+    # Set default miniconda environment
+    export PATH="/opt/miniconda3/bin:${PATH}"
 
 %post -c /bin/bash
 
@@ -121,15 +124,19 @@ Include: yum
     ./configure --prefix=/opt/openmpi-1.8.4
     make all install
 
-    # Set paths to OpenMPI binaries and libraries
-    export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
-    
     # Update database for mlocate
     updatedb
 
 %files
 
 %runscript
+
+    echo "                                                "
+    echo "      __________________  __  _______________   "
+    echo "    -----/ ____/ __ \/  |/  / ____/_  __/       "
+    echo "      --/ /   / / / / /|_/ / __/   / /          "
+    echo "       / /___/ /_/ / /  / / /___  / /           "
+    echo "       \____/\____/_/  /_/_____/ /_/            "
+    echo "                                                "
 
 %test

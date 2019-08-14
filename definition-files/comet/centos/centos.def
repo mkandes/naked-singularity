@@ -18,7 +18,7 @@ Include: yum
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20190513
+    LAST_UPDATED 20190814
 
 %setup
 
@@ -26,6 +26,9 @@ Include: yum
 
     # Set system locale
     export LC_ALL=C
+
+    # Set default miniconda environment
+    export PATH="/opt/miniconda3/bin:${PATH}"
 
 %post -c /bin/bash
 
