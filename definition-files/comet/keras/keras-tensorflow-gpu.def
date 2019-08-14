@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20190416
+    LAST_UPDATED 20190814
 
 %setup
 
@@ -25,9 +25,13 @@ OSVersion: xenial
 
     # Set system locale
     export LC_ALL=C
+
+    # Set paths to CUDA binaries and libraries
     export PATH="/usr/local/cuda-9.2/bin${PATH:+:${PATH}}"
     export LD_LIBRARY_PATH="/usr/local/cuda-9.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
     export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/extras/CUPTI/lib64"
+
+    # Set paths to OpenMPI binaries and libraries
     export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
     export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
 
@@ -70,8 +74,9 @@ OSVersion: xenial
     apt-get -y install build-essential
     apt-get -y install cmake
     apt-get -y install libtool
-    apt-get -y install pkg-config
     apt-get -y install gfortran
+    apt-get -y install pkg-config
+    apt-get -y install wget
     apt-get -y install zip
 
     # Install expect to automate responses for interactive build questions
@@ -407,8 +412,9 @@ OSVersion: xenial
     apt-get -y install python-scipy
     apt-get -y install python-pandas
     apt-get -y install python-matplotlib
-    apt-get -y install ipython
-    apt-get -y install ipython-notebook
+    #apt-get -y install ipython
+    #apt-get -y install ipython-notebook
+    python -m pip install jupyter
     apt-get -y install python-sympy
     apt-get -y install python-nose
     apt-get -y install python-sklearn
@@ -509,8 +515,9 @@ OSVersion: xenial
     apt-get -y install python3-scipy
     apt-get -y install python3-pandas
     apt-get -y install python3-matplotlib
-    apt-get -y install ipython3
-    apt-get -y install ipython3-notebook
+    #apt-get -y install ipython3
+    #apt-get -y install ipython3-notebook
+    python3 -m pip install jupyter
     apt-get -y install python3-sympy
     apt-get -y install python3-nose
     apt-get -y install python3-sklearn
