@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20190814
+    LAST_UPDATED 20190912
 
 %setup
 
@@ -194,11 +194,11 @@ OSVersion: xenial
     wget --wait=10 "${CUDA_REPO_URL}/cuda-runtime-9-2_9.2.88-1_amd64.deb"
     wget --wait=10 "${CUDA_REPO_URL}/cuda-demo-suite-9-2_9.2.88-1_amd64.deb"
 
-    wget --wait=10 "${ML_REPO_URL}/libcudnn7_7.2.1.38-1+cuda9.2_amd64.deb"
-    wget --wait=10 "${ML_REPO_URL}/libcudnn7-dev_7.2.1.38-1+cuda9.2_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libcudnn7_7.6.2.24-1+cuda9.2_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libcudnn7-dev_7.6.2.24-1+cuda9.2_amd64.deb"
 
-    wget --wait=10 "${ML_REPO_URL}/libnccl2_2.3.4-1+cuda9.2_amd64.deb"
-    wget --wait=10 "${ML_REPO_URL}/libnccl-dev_2.3.4-1+cuda9.2_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libnccl2_2.4.8-1+cuda9.2_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libnccl-dev_2.4.8-1+cuda9.2_amd64.deb"
 
     # Fix for "update-alternatives: error: error creating symbolic link '/usr/lib/nvidia/alternate-install-present.dpkg-tmp': No such file or directory"
     mkdir -p /usr/lib/nvidia
@@ -261,11 +261,30 @@ OSVersion: xenial
     dpkg -i cuda-runtime-9-2_9.2.88-1_amd64.deb
     dpkg -i cuda-demo-suite-9-2_9.2.88-1_amd64.deb
 
-    dpkg -i libcudnn7_7.2.1.38-1+cuda9.2_amd64.deb
-    dpkg -i libcudnn7-dev_7.2.1.38-1+cuda9.2_amd64.deb
+    dpkg -i libcudnn7_7.6.2.24-1+cuda9.2_amd64.deb
+    dpkg -i libcudnn7-dev_7.6.2.24-1+cuda9.2_amd64.deb
 
-    dpkg -i libnccl2_2.3.4-1+cuda9.2_amd64.deb
-    dpkg -i libnccl-dev_2.3.4-1+cuda9.2_amd64.deb
+    dpkg -i libnccl2_2.4.8-1+cuda9.2_amd64.deb
+    dpkg -i libnccl-dev_2.4.8-1+cuda9.2_amd64.deb
+
+    # Fixing some path-related issues associated with deb-based install of libcudnn and libnccl ...
+    mv /usr/lib/x86_64-linux-gnu/libcudnn_static.a /usr/local/cuda-9.2/lib64/libcudnn_static.a
+    mv /usr/lib/x86_64-linux-gnu/libcudnn_static_v7.a /usr/local/cuda-9.2/lib64/libcudnn_static_v7.a
+    mv /usr/lib/x86_64-linux-gnu/libcudnn.so.7.6.2 /usr/local/cuda-9.2/lib64/libcudnn.so.7.6.2
+    ln -s /usr/local/cuda-9.2/lib64/libcudnn.so.7.6.2 /usr/local/cuda-9.2/lib64/libcudnn.so.7
+    ln -s /usr/local/cuda-9.2/lib64/libcudnn.so.7 /usr/local/cuda-9.2/lib64/libcudnn.so
+    mv /usr/lib/x86_64-linux-gnu/libnccl_static.a /usr/local/cuda-9.2/lib64/libnccl_static.a
+    mv /usr/lib/x86_64-linux-gnu/libnccl.so.2.4.8 /usr/local/cuda-9.2/lib64/libnccl.so.2.4.8
+    ln -s /usr/local/cuda-9.2/lib64/libnccl.so.2.4.8 /usr/local/cuda-9.2/lib64/libnccl.so.2
+    ln -s /usr/local/cuda-9.2/lib64/libnccl.so.2 /usr/local/cuda-9.2/lib64/libnccl.so
+    mv /usr/include/nccl.h /usr/local/cuda-9.2/include/nccl.h
+    ln -s /usr/local/cuda-9.2/lib64 /usr/local/cuda-9.2/lib
+    mv /usr/share/doc/libnccl2/NCCL-SLA.txt.gz /usr/local/cuda-9.2/NCCL-SLA.txt
+
+    # Set paths to CUDA binaries and libraries
+    export PATH="/usr/local/cuda-9.2/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="/usr/local/cuda-9.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+    export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/extras/CUPTI/lib64"
 
     # Update database for mlocate
     updatedb
