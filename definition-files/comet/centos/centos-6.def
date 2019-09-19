@@ -1,6 +1,6 @@
 Bootstrap: yum 
 OSVersion: 6
-MirrorURL: http://mirror.centos.org/centos-6/6.10/os/x86_64/
+MirrorURL: http://mirror.centos.org/centos-6/6/os/x86_64/
 Include: yum
 
 %labels

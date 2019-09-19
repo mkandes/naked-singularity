@@ -1,12 +1,12 @@
 Bootstrap: yum 
 OSVersion: 7
-MirrorURL: http://mirror.centos.org/centos-7/7.6.1810/os/x86_64/
+MirrorURL: http://mirror.centos.org/centos-7/7/os/x86_64/
 Include: yum
 
 %labels
 
     APPLICATION_NAME centos + openmpi
-    APPLICATION_VERSION 7.6.1810 + 1.8.4
+    APPLICATION_VERSION 7.7.1908 + 1.8.4
     APPLICATION_URL https://www.open-mpi.org/
 
     SYSTEM_NAME comet
@@ -18,7 +18,7 @@ Include: yum
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20190814
+    LAST_UPDATED 20190919
 
 %setup
 

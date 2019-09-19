@@ -1,13 +1,13 @@
 Bootstrap: yum 
 OSVersion: 6
-MirrorURL: http://mirror.centos.org/centos-6/6.10/os/x86_64/
+MirrorURL: http://mirror.centos.org/centos-6/6/os/x86_64/
 Include: yum
 
 %labels
 
-    APPLICATION_NAME centos
-    APPLICATION_VERSION 6.10
-    APPLICATION_URL https://www.centos.org
+    APPLICATION_NAME centos + cuda
+    APPLICATION_VERSION 6.10 + 7.0
+    APPLICATION_URL https://developer.nvidia.com/cuda-zone
 
     SYSTEM_NAME comet
     SYSTEM_SINGULARITY_VERSION 2.6.1
@@ -18,7 +18,7 @@ Include: yum
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20190918
+    LAST_UPDATED 20190919
 
 %setup
 
@@ -91,10 +91,10 @@ Include: yum
     wget --wait=10 "${CUDA_REPO_URL}/nvidia-kmod-396.26-2.el6.x86_64.rpm"
     wget --wait=10 "${CUDA_REPO_URL}/xorg-x11-drv-nvidia-396.26-1.el6.x86_64.rpm"
     wget --wait=10 "${CUDA_REPO_URL}/xorg-x11-drv-nvidia-libs-396.26-1.el6.x86_64.rpm"
-    wget --wait=10 "${CUDA_REPO_URL}/xorg-x11-drv-nvidia-gl-396.26-1.el6.x86_64.rpm
+    wget --wait=10 "${CUDA_REPO_URL}/xorg-x11-drv-nvidia-gl-396.26-1.el6.x86_64.rpm"
     wget --wait=10 "${CUDA_REPO_URL}/xorg-x11-drv-nvidia-devel-396.26-1.el6.x86_64.rpm"
     wget --wait=10 "${CUDA_REPO_URL}/xorg-x11-drv-nvidia-diagnostic-396.26-1.el6.x86_64.rpm"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-drivers-396.26-1.x86_64.rpm
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-drivers-396.26-1.x86_64.rpm"
     wget --wait=10 "${CUDA_REPO_URL}/cuda-license-7-0-7.0-28.x86_64.rpm"
     wget --wait=10 "${CUDA_REPO_URL}/cuda-misc-headers-7-0-7.0-28.x86_64.rpm"
     wget --wait=10 "${CUDA_REPO_URL}/cuda-drivers-diagnostic-396.26-1.x86_64.rpm"
@@ -112,7 +112,7 @@ Include: yum
     wget --wait=10 "${CUDA_REPO_URL}/cuda-cublas-dev-7-0-7.0-28.x86_64.rpm"
     wget --wait=10 "${CUDA_REPO_URL}/cuda-cufft-7-0-7.0-28.x86_64.rpm"
     wget --wait=10 "${CUDA_REPO_URL}/cuda-cufft-dev-7-0-7.0-28.x86_64.rpm"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-curand-7-0-7.0-28.x86_64"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-curand-7-0-7.0-28.x86_64.rpm"
     wget --wait=10 "${CUDA_REPO_URL}/cuda-curand-dev-7-0-7.0-28.x86_64.rpm"
     wget --wait=10 "${CUDA_REPO_URL}/cuda-cusparse-7-0-7.0-28.x86_64.rpm"
     wget --wait=10 "${CUDA_REPO_URL}/cuda-cusparse-dev-7-0-7.0-28.x86_64.rpm"
@@ -148,7 +148,7 @@ Include: yum
     rpm -i cuda-cublas-dev-7-0-7.0-28.x86_64.rpm
     rpm -i cuda-cufft-7-0-7.0-28.x86_64.rpm
     rpm -i cuda-cufft-dev-7-0-7.0-28.x86_64.rpm
-    rpm -i cuda-curand-7-0-7.0-28.x86_64
+    rpm -i cuda-curand-7-0-7.0-28.x86_64.rpm
     rpm -i cuda-curand-dev-7-0-7.0-28.x86_64.rpm
     rpm -i cuda-cusparse-7-0-7.0-28.x86_64.rpm
     rpm -i cuda-cusparse-dev-7-0-7.0-28.x86_64.rpm

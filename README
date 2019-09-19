@@ -4,10 +4,9 @@ README
 
 DESCRIPTION
 
-    A repository of definition (or recipe) files for building 
-    Singularity* containers around the software applications, 
-    frameworks, and libraries you need to run on high-performance 
-    computing systems.
+    A repository of definition for building Singularity* containers 
+    around the software applications, frameworks, and libraries you need
+    to run on high-performance computing systems.
 
     * http://singularity.lbl.gov/
 
@@ -41,13 +40,14 @@ AUTHOR
 
     Marty Kandes, Ph.D.
     Computational & Data Science Research Specialist
-    HPC User Services Group, San Diego Supercomputer Center
+    High-Performance Computing User Services Group
+    San Diego Supercomputer Center
     University of California, San Diego
 
 VERSION
 
-    0.8.1
+    0.8.2
 
 LAST UPDATED
 
-    Wednesday, September 18th, 2019
+    Thursday, September 19th, 2019
