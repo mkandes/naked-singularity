@@ -1,0 +1,181 @@
+Bootstrap: yum 
+OSVersion: 6
+MirrorURL: http://mirror.centos.org/centos-6/6.10/os/x86_64/
+Include: yum
+
+%labels
+
+    APPLICATION_NAME centos
+    APPLICATION_VERSION 6.10
+    APPLICATION_URL https://www.centos.org
+
+    SYSTEM_NAME comet
+    SYSTEM_SINGULARITY_VERSION 2.6.1
+    SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
+
+    SINGULARITY_IMAGE_SIZE 8192
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20190918
+
+%setup
+
+%environment
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Set paths to CUDA binaries and libraries
+    export PATH="/usr/local/cuda-7.0/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="/usr/local/cuda-7.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+
+    # Set default miniconda environment
+    export PATH="/opt/miniconda3/bin:${PATH}"
+
+%post -c /bin/bash
+    
+    # Set system locale
+    export LC_ALL=C
+
+    # https://forums.fedoraforum.org/showthread.php?281978-yum-failed-unexpected-file-type-or-format
+    rpm -vv --rebuilddb
+    yum -y update
+
+    # Add repositories
+    yum -y install epel-release
+
+    # Install system metapackages
+    yum -y groupinstall "Development Tools"
+    yum -y groupinstall "Additional Development"
+    yum -y groupinstall "Compatibility Libraries"
+
+    # Update all packages to their latest versions
+    yum -y update
+
+    # Install common packages
+    yum -y install bc
+    yum -y install cmake
+    yum -y install curl
+    yum -y install mlocate
+    yum -y install rsync
+    yum -y install time
+    yum -y install wget
+    yum -y install which
+
+    # Install expect to automate responses for interactive build questions
+    yum -y install expect
+
+    # Make filesystem mount points
+    mkdir /cvmfs /oasis /projects /scratch
+
+    # Use /tmp to store temporary files within the container during the
+    # bootstraping process
+    cd /tmp
+
+    # Location of NVIDIA repositories
+    declare -r NVIDIA_ROOT_URL='http://developer.download.nvidia.com/compute'
+    declare -r CUDA_REPO_URL="${NVIDIA_ROOT_URL}/cuda/repos/rhel6/x86_64"
+    #declare -r ML_REPO_URL="${NVIDIA_ROOT_URL}/machine-learning/repos/rhel7/x86_64/"
+
+    # Install NVIDIA package dependencies
+    yum -y install dkms
+    yum -y install grub
+    yum -y install dracut
+    yum -y install libvdpau
+    yum -y install freeglut-devel
+    yum -y install libXmu-devel
+
+    # Download NVIDIA drivers, libraries, and packages
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-kmod-396.26-2.el6.x86_64.rpm"
+    wget --wait=10 "${CUDA_REPO_URL}/xorg-x11-drv-nvidia-396.26-1.el6.x86_64.rpm"
+    wget --wait=10 "${CUDA_REPO_URL}/xorg-x11-drv-nvidia-libs-396.26-1.el6.x86_64.rpm"
+    wget --wait=10 "${CUDA_REPO_URL}/xorg-x11-drv-nvidia-gl-396.26-1.el6.x86_64.rpm
+    wget --wait=10 "${CUDA_REPO_URL}/xorg-x11-drv-nvidia-devel-396.26-1.el6.x86_64.rpm"
+    wget --wait=10 "${CUDA_REPO_URL}/xorg-x11-drv-nvidia-diagnostic-396.26-1.el6.x86_64.rpm"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-drivers-396.26-1.x86_64.rpm
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-license-7-0-7.0-28.x86_64.rpm"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-misc-headers-7-0-7.0-28.x86_64.rpm"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-drivers-diagnostic-396.26-1.x86_64.rpm"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-core-7-0-7.0-28.x86_64.rpm"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cudart-7-0-7.0-28.x86_64.rpm"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-driver-dev-7-0-7.0-28.x86_64.rpm"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cudart-dev-7-0-7.0-28.x86_64.rpm"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-gdb-src-7-0-7.0-28.x86_64.rpm"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-command-line-tools-7-0-7.0-28.x86_64.rpm"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvrtc-7-0-7.0-28.x86_64.rpm"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvrtc-dev-7-0-7.0-28.x86_64.rpm"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusolver-7-0-7.0-28.x86_64.rpm"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusolver-dev-7-0-7.0-28.x86_64.rpm"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cublas-7-0-7.0-28.x86_64.rpm"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cublas-dev-7-0-7.0-28.x86_64.rpm"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cufft-7-0-7.0-28.x86_64.rpm"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cufft-dev-7-0-7.0-28.x86_64.rpm"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-curand-7-0-7.0-28.x86_64"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-curand-dev-7-0-7.0-28.x86_64.rpm"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusparse-7-0-7.0-28.x86_64.rpm"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusparse-dev-7-0-7.0-28.x86_64.rpm"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-npp-7-0-7.0-28.x86_64.rpm"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-npp-dev-7-0-7.0-28.x86_64.rpm"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-samples-7-0-7.0-28.x86_64.rpm"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-documentation-7-0-7.0-28.x86_64.rpm"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-visual-tools-7-0-7.0-28.x86_64.rpm"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-runtime-7-0-7.0-28.x86_64.rpm"
+
+    # Install NVIDIA drivers, libraries, and packages
+    rpm -i nvidia-kmod-396.26-2.el6.x86_64.rpm
+    rpm -i xorg-x11-drv-nvidia-396.26-1.el6.x86_64.rpm
+    rpm -i xorg-x11-drv-nvidia-libs-396.26-1.el6.x86_64.rpm
+    rpm -i xorg-x11-drv-nvidia-gl-396.26-1.el6.x86_64.rpm
+    rpm -i xorg-x11-drv-nvidia-devel-396.26-1.el6.x86_64.rpm
+    rpm -i xorg-x11-drv-nvidia-diagnostic-396.26-1.el6.x86_64.rpm
+    rpm -i cuda-drivers-396.26-1.x86_64.rpm
+    rpm -i cuda-license-7-0-7.0-28.x86_64.rpm
+    rpm -i cuda-misc-headers-7-0-7.0-28.x86_64.rpm
+    rpm -i cuda-drivers-diagnostic-396.26-1.x86_64.rpm
+    rpm -i cuda-core-7-0-7.0-28.x86_64.rpm
+    rpm -i cuda-cudart-7-0-7.0-28.x86_64.rpm
+    rpm -i cuda-driver-dev-7-0-7.0-28.x86_64.rpm
+    rpm -i cuda-cudart-dev-7-0-7.0-28.x86_64.rpm
+    rpm -i cuda-gdb-src-7-0-7.0-28.x86_64.rpm
+    rpm -i cuda-command-line-tools-7-0-7.0-28.x86_64.rpm
+    rpm -i cuda-nvrtc-7-0-7.0-28.x86_64.rpm
+    rpm -i cuda-nvrtc-dev-7-0-7.0-28.x86_64.rpm
+    rpm -i cuda-cusolver-7-0-7.0-28.x86_64.rpm
+    rpm -i cuda-cusolver-dev-7-0-7.0-28.x86_64.rpm
+    rpm -i cuda-cublas-7-0-7.0-28.x86_64.rpm
+    rpm -i cuda-cublas-dev-7-0-7.0-28.x86_64.rpm
+    rpm -i cuda-cufft-7-0-7.0-28.x86_64.rpm
+    rpm -i cuda-cufft-dev-7-0-7.0-28.x86_64.rpm
+    rpm -i cuda-curand-7-0-7.0-28.x86_64
+    rpm -i cuda-curand-dev-7-0-7.0-28.x86_64.rpm
+    rpm -i cuda-cusparse-7-0-7.0-28.x86_64.rpm
+    rpm -i cuda-cusparse-dev-7-0-7.0-28.x86_64.rpm
+    rpm -i cuda-npp-7-0-7.0-28.x86_64.rpm
+    rpm -i cuda-npp-dev-7-0-7.0-28.x86_64.rpm
+    rpm -i cuda-samples-7-0-7.0-28.x86_64.rpm
+    rpm -i cuda-documentation-7-0-7.0-28.x86_64.rpm
+    rpm -i cuda-visual-tools-7-0-7.0-28.x86_64.rpm
+    rpm -i cuda-runtime-7-0-7.0-28.x86_64.rpm
+
+    # Set paths to CUDA binaries and libraries
+    export PATH="/usr/local/cuda-7.0/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="/usr/local/cuda-7.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+    echo "                                                "
+    echo "      __________________  __  _______________   "
+    echo "    -----/ ____/ __ \/  |/  / ____/_  __/       "
+    echo "      --/ /   / / / / /|_/ / __/   / /          "
+    echo "       / /___/ /_/ / /  / / /___  / /           "
+    echo "       \____/\____/_/  /_/_____/ /_/            "
+    echo "                                                "
+
+%test
