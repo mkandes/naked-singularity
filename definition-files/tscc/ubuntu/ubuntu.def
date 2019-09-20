@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20180726
+    LAST_UPDATED 20190920
 
 %setup
 
@@ -25,6 +25,9 @@ OSVersion: xenial
 
     # Set system locale
     export LC_ALL=C
+
+    # Set default miniconda environment
+    export PATH="/opt/miniconda3/bin:${PATH}"
 
 %post -c /bin/bash
 
@@ -66,6 +69,7 @@ OSVersion: xenial
     apt-get -y install cmake
     apt-get -y install libtool
     apt-get -y install pkg-config
+    apt-get -y install wget
     apt-get -y install gfortran
     apt-get -y install zip
 
@@ -89,9 +93,6 @@ OSVersion: xenial
     chmod +x Miniconda3-latest-Linux-x86_64.sh
     ./Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda3
     
-    # Set container environment variables
-    cd /.singularity.d/env
-
     # Update database for mlocate
     updatedb
 

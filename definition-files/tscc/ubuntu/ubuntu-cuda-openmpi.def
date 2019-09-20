@@ -4,9 +4,9 @@ OSVersion: xenial
 
 %labels
 
-    APPLICATION_NAME ubuntu + cuda
-    APPLICATION_VERSION 16.04 + 8.0.44
-    APPLICATION_URL https://developer.nvidia.com/cuda-zone
+    APPLICATION_NAME ubuntu + cuda + openmpi
+    APPLICATION_VERSION 16.04 + 8.0.44 + 1.8.4
+    APPLICATION_URL https://www.open-mpi.org/faq/?category=runcuda
 
     SYSTEM_NAME tscc
     SYSTEM_SINGULARITY_VERSION 2.5.2
@@ -30,6 +30,10 @@ OSVersion: xenial
     export PATH="/usr/local/cuda-8.0/bin${PATH:+:${PATH}}"
     export LD_LIBRARY_PATH="/usr/local/cuda-8.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
     export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/extras/CUPTI/lib64"
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
 
     # Set default miniconda environment
     export PATH="/opt/miniconda3/bin:${PATH}"
@@ -239,6 +243,50 @@ OSVersion: xenial
     export PATH="/usr/local/cuda-8.0/bin${PATH:+:${PATH}}"
     export LD_LIBRARY_PATH="/usr/local/cuda-8.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
     export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/extras/CUPTI/lib64"
+
+    # Install basic drivers for user space access to Ethernet, RDMA,
+    # and Infiniband. See https://community.mellanox.com/docs/DOC-2431
+    apt-get -y install dkms
+    apt-get -y install infiniband-diags
+    apt-get -y install libibverbs-dev
+    apt-get -y install ibacm
+    apt-get -y install librdmacm-dev
+    apt-get -y install libmlx4-dev
+    apt-get -y install libmlx5-dev
+    apt-get -y install mstflint
+    apt-get -y install libibcm-dev
+    apt-get -y install libibmad-dev
+    apt-get -y install libibumad-dev
+    apt-get -y install opensm
+    apt-get -y install srptools
+
+    # Install additional tools
+    apt-get -y install ibutils
+    apt-get -y install ibverbs-utils
+    apt-get -y install rdmacm-utils
+    apt-get -y install perftest
+    apt-get -y install numactl
+    apt-get -y install libnuma-dev
+
+    # Install libnl
+    apt-get -y install libnl-3-200
+    apt-get -y install libnl-route-3-200
+    apt-get -y install libnl-route-3-dev
+    apt-get -y install libnl-utils
+
+    # Install OpenMPI dependencies
+    apt-get -y install zlib1g-dev
+
+    # Download, build, and install CUDA-aware OpenMPI
+    wget https://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.4.tar.gz
+    tar -xzvf openmpi-1.8.4.tar.gz
+    cd openmpi-1.8.4
+    ./configure --prefix=/opt/openmpi-1.8.4 --with-cuda
+    make all install
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
 
     # Update database for mlocate
     updatedb
