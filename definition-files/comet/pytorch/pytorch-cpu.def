@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20190520
+    LAST_UPDATED 20190927
 
 %setup
 
@@ -73,6 +73,7 @@ OSVersion: xenial
     apt-get -y install cmake
     apt-get -y install libtool
     apt-get -y install pkg-config
+    apt-get -y install wget
     apt-get -y install gfortran
     apt-get -y install zip
 
@@ -144,6 +145,7 @@ OSVersion: xenial
     export PATH="/opt/miniconda2/bin:${PATH}"
     export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
     conda install -y numpy
+    conda install -y ninja
     conda install -y pyyaml
     conda install -y mkl
     conda install -y mkl-include
@@ -158,7 +160,6 @@ OSVersion: xenial
     conda install -y pandas
     conda install -y matplotlib
     conda install -y ipython
-    conda install -y ipython-notebook
     conda install -y jupyter
     conda install -y sympy
     conda install -y nose
@@ -170,7 +171,7 @@ OSVersion: xenial
 
     cd /opt
 
-    # Download, build, and install PyTorch for python2
+    # Download, build, and install PyTorch for python(2)
     export CC='mpicc'
     export CXX='mpicxx'
     export CFLAGS='-march=haswell -mmmx -mno-3dnow -msse -msse2 -msse3 -mssse3 -mno-sse4a -mcx16 -msahf -mmovbe -maes -mno-sha -mpclmul -mpopcnt -mabm -mno-lwp -mfma -mno-fma4 -mno-xop -mbmi -mbmi2 -mno-tbm -mavx -mavx2 -msse4.2 -msse4.1 -mlzcnt -mno-rtm -mno-hle -mrdrnd -mf16c -mfsgsbase -mno-rdseed -mno-prfchw -mno-adx -mfxsr -mxsave -mxsaveopt -mno-avx512f -mno-avx512er -mno-avx512cd -mno-avx512pf -mno-prefetchwt1 -mtune=haswell'
@@ -181,28 +182,33 @@ OSVersion: xenial
     export USE_DISTRIBUTED=1
     export USE_GLOO=1
     export USE_GLOO_IBVERBS=1
+    export USE_IBVERBS=1
     export USE_MPI=1
     export USE_C10D_MPI=1
     export USE_CUDA=0
     export USE_CUDNN=0
     export USE_NCCL=0
     export USE_OPENCV=1
+    export USE_FBGEMM=0
     export TORCH_CUDA_ARCH_LIST="NONE"
     git clone --recursive https://github.com/pytorch/pytorch
     cd /opt/pytorch
     git checkout v1.1.0
+    git submodule sync
     git submodule update --init
     python setup.py install
 
-    # Download and install PyTorch Vision package for python2
+    # Download and install PyTorch Vision package for python(2)
     git clone https://github.com/pytorch/vision.git
     cd /opt/pytorch/vision
+    git checkout v0.3.0
     python setup.py install
 
     # Install PyTorch dependencies for python3
     export PATH="/opt/miniconda3/bin:${PATH}"
     xport CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
     conda install -y numpy
+    conda install -y ninja
     conda install -y pyyaml
     conda install -y mkl
     conda install -y mkl-include

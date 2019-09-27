@@ -8,9 +8,9 @@ OSVersion: xenial
     APPLICATION_VERSION 1.1.0
     APPLICATION_URL http://pytorch.org/
 
-    SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.6.1
-    SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
+    SYSTEM_NAME tscc
+    SYSTEM_SINGULARITY_VERSION 2.5.2
+    SYSTEM_URL https://www.sdsc.edu/support/user_guides/tscc.html
 
     SINGULARITY_IMAGE_SIZE 32768
 
@@ -370,7 +370,7 @@ OSVersion: xenial
     # Download, build, and install PyTorch for python(2)
     export CC='mpicc'
     export CXX='mpicxx'
-    export CFLAGS='-march=haswell -mmmx -mno-3dnow -msse -msse2 -msse3 -mssse3 -mno-sse4a -mcx16 -msahf -mmovbe -maes -mno-sha -mpclmul -mpopcnt -mabm -mno-lwp -mfma -mno-fma4 -mno-xop -mbmi -mbmi2 -mno-tbm -mavx -mavx2 -msse4.2 -msse4.1 -mlzcnt -mno-rtm -mno-hle -mrdrnd -mf16c -mfsgsbase -mno-rdseed -mno-prfchw -mno-adx -mfxsr -mxsave -mxsaveopt -mno-avx512f -mno-avx512er -mno-avx512cd -mno-avx512pf -mno-prefetchwt1 -mtune=haswell'
+    export CFLAGS='-march=sandybridge -mmmx -mno-3dnow -msse -msse2 -msse3 -mssse3 -mno-sse4a -mcx16 -msahf -mno-movbe -maes -mno-sha -mpclmul -mpopcnt -mno-abm -mno-lwp -mno-fma -mno-fma4 -mno-xop -mno-bmi -mno-bmi2 -mno-tbm -mavx -mno-avx2 -msse4.2 -msse4.1 -mno-lzcnt -mno-rtm -mno-hle -mno-rdrnd -mno-f16c -mno-fsgsbase -mno-rdseed -mno-prfchw -mno-adx -mfxsr -mxsave -mxsaveopt -mno-avx512f -mno-avx512er -mno-avx512cd -mno-avx512pf -mno-prefetchwt1 -mtune=sandybridge'
     export USE_OPENMP=1
     export USE_NNPACK=1
     export USE_QNNPACK=1
@@ -386,7 +386,7 @@ OSVersion: xenial
     export USE_NCCL=1
     export USE_OPENCV=1
     export USE_FBGEMM=0
-    export TORCH_CUDA_ARCH_LIST='3.7;6.0;7.0'
+    export TORCH_CUDA_ARCH_LIST='3.0;3.5;3.7;5.2;6.1'
     git clone --recursive https://github.com/pytorch/pytorch
     cd /opt/pytorch
     git checkout v1.1.0
@@ -452,12 +452,10 @@ OSVersion: xenial
 
 %runscript
 
-    echo "                                                "
-    echo "      __________________  __  _______________   "
-    echo "    -----/ ____/ __ \/  |/  / ____/_  __/       "
-    echo "      --/ /   / / / / /|_/ / __/   / /          "
-    echo "       / /___/ /_/ / /  / / /___  / /           "
-    echo "       \____/\____/_/  /_/_____/ /_/            "
-    echo "                                                "
+    echo "    ______ ____ _____ _____   "
+    echo "   /_  __// __// ___// ___/   "
+    echo "    / /  _\ \ / /__ / /__     "
+    echo "   /_/  /___/ \___/ \___/     "
+    echo "                              "
 
 %test
