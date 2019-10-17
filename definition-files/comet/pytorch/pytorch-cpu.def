@@ -5,7 +5,7 @@ OSVersion: xenial
 %labels
 
     APPLICATION_NAME pytorch
-    APPLICATION_VERSION 1.1.0
+    APPLICATION_VERSION 1.2.0
     APPLICATION_URL http://pytorch.org/
 
     SYSTEM_NAME comet
@@ -17,7 +17,7 @@ OSVersion: xenial
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20190927
+    LAST_UPDATED 20191015
 
 %setup
 
@@ -154,6 +154,7 @@ OSVersion: xenial
     conda install -y cffi
     conda install -y typing
     conda install -y mkldnn -c mingfeima
+    conda install -y future
 
     # Install common python packages for data science and machine
     # learning applications
@@ -193,7 +194,7 @@ OSVersion: xenial
     export TORCH_CUDA_ARCH_LIST="NONE"
     git clone --recursive https://github.com/pytorch/pytorch
     cd /opt/pytorch
-    git checkout v1.1.0
+    git checkout v1.2.0
     git submodule sync
     git submodule update --init
     python setup.py install
@@ -206,7 +207,7 @@ OSVersion: xenial
 
     # Install PyTorch dependencies for python3
     export PATH="/opt/miniconda3/bin:${PATH}"
-    xport CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
+    export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
     conda install -y numpy
     conda install -y ninja
     conda install -y pyyaml
@@ -217,6 +218,7 @@ OSVersion: xenial
     conda install -y cffi
     conda install -y typing
     conda install -y mkldnn -c mingfeima
+    conda install -y future
 
     # Install common python3 packages for data science and machine
     # learning applications
@@ -252,5 +254,13 @@ OSVersion: xenial
 %files
 
 %runscript
+
+    echo "                                                "
+    echo "      __________________  __  _______________   "
+    echo "    -----/ ____/ __ \/  |/  / ____/_  __/       "
+    echo "      --/ /   / / / / /|_/ / __/   / /          "
+    echo "       / /___/ /_/ / /  / / /___  / /           "
+    echo "       \____/\____/_/  /_/_____/ /_/            "
+    echo "                                                "
 
 %test
