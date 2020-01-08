@@ -1,23 +1,20 @@
 Bootstrap: debootstrap
 MirrorURL: http://us.archive.ubuntu.com/ubuntu
-OSVersion: xenial
+OSVersion: bionic
 
 %labels
 
     APPLICATION_NAME ubuntu + openmpi
-    APPLICATION_VERSION 16.04 + 1.8.4
+    APPLICATION_VERSION 18.04 + 3.1.4
     APPLICATION_URL https://www.open-mpi.org/
 
-    SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.6.1
-    SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
-
+    SINGULARITY_VERSION 2.6.1
     SINGULARITY_IMAGE_SIZE 2048
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20190814
+    LAST_UPDATED 20200107
 
 %setup
 
@@ -27,8 +24,8 @@ OSVersion: xenial
     export LC_ALL=C
 
     # Set paths to OpenMPI binaries and libraries
-    export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/openmpi-3.1.4/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/openmpi-3.1.4/lib:${LD_LIBRARY_PATH}"
 
     # Set default miniconda environment
     export PATH="/opt/miniconda3/bin:${PATH}"
@@ -80,9 +77,6 @@ OSVersion: xenial
     # Install expect to automate responses for interactive build questions
     apt-get -y install expect
 
-    # Make filesystem mount points
-    mkdir /cvmfs /oasis /projects /scratch
-
     # Use /tmp to store temporary files within the container during the
     # bootstraping process
     cd /tmp
@@ -131,15 +125,15 @@ OSVersion: xenial
     apt-get -y install zlib1g-dev
 
     # Download, build, and install OpenMPI
-    wget https://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.4.tar.gz
-    tar -xzvf openmpi-1.8.4.tar.gz
-    cd openmpi-1.8.4
-    ./configure --prefix=/opt/openmpi-1.8.4
+    wget https://download.open-mpi.org/release/open-mpi/v3.1/openmpi-3.1.4.tar.gz
+    tar -xzvf openmpi-3.1.4.tar.gz
+    cd openmpi-3.1.4
+    ./configure --prefix=/opt/openmpi-3.1.4
     make all install
 
     # Set paths to OpenMPI binaries and libraries
-    export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/openmpi-3.1.4/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/openmpi-3.1.4/lib:${LD_LIBRARY_PATH}"
 
     # Update database for mlocate
     updatedb
@@ -147,13 +141,5 @@ OSVersion: xenial
 %files
 
 %runscript
-
-    echo "                                                "
-    echo "      __________________  __  _______________   "
-    echo "    -----/ ____/ __ \/  |/  / ____/_  __/       "
-    echo "      --/ /   / / / / /|_/ / __/   / /          "
-    echo "       / /___/ /_/ / /  / / /___  / /           "
-    echo "       \____/\____/_/  /_/_____/ /_/            "
-    echo "                                                "
 
 %test

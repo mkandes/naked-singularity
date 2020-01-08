@@ -1,23 +1,20 @@
 Bootstrap: debootstrap
 MirrorURL: http://us.archive.ubuntu.com/ubuntu
-OSVersion: xenial
+OSVersion: bionic
 
 %labels
 
     APPLICATION_NAME ubuntu
-    APPLICATION_VERSION 16.04
+    APPLICATION_VERSION 18.04
     APPLICATION_URL https://www.ubuntu.com/
 
-    SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.6.1
-    SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
-
+    SINGULARITY_VERSION 2.6.1
     SINGULARITY_IMAGE_SIZE 2048
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20190812
+    LAST_UPDATED 20191214
 
 %setup
 
@@ -76,9 +73,6 @@ OSVersion: xenial
     # Install expect to automate responses for interactive build questions
     apt-get -y install expect
 
-    # Make filesystem mount points
-    mkdir /cvmfs /oasis /projects /scratch
-
     # Use /tmp to store temporary files within the container during the
     # bootstraping process
     cd /tmp
@@ -99,13 +93,5 @@ OSVersion: xenial
 %files
 
 %runscript
-
-    echo "                                                "
-    echo "      __________________  __  _______________   "
-    echo "    -----/ ____/ __ \/  |/  / ____/_  __/       "
-    echo "      --/ /   / / / / /|_/ / __/   / /          "
-    echo "       / /___/ /_/ / /  / / /___  / /           "
-    echo "       \____/\____/_/  /_/_____/ /_/            "
-    echo "                                                "
 
 %test

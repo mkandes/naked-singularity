@@ -1,23 +1,20 @@
 Bootstrap: debootstrap
 MirrorURL: http://us.archive.ubuntu.com/ubuntu
-OSVersion: xenial
+OSVersion: bionic
 
 %labels
 
     APPLICATION_NAME ubuntu + mvapich2
-    APPLICATION_VERSION 16.04 + 2.1
+    APPLICATION_VERSION 18.04 + 2.3.2
     APPLICATION_URL http://mvapich.cse.ohio-state.edu/
 
-    SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.6.1
-    SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
-
+    SINGULARITY_VERSION 2.6.1
     SINGULARITY_IMAGE_SIZE 2048
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20190814
+    LAST_UPDATED 20200107
 
 %setup
 
@@ -80,9 +77,6 @@ OSVersion: xenial
     # Install expect to automate responses for interactive build questions
     apt-get -y install expect
 
-    # Make filesystem mount points
-    mkdir /cvmfs /oasis /projects /scratch
-
     # Use /tmp to store temporary files within the container during the
     # bootstraping process
     cd /tmp
@@ -131,9 +125,9 @@ OSVersion: xenial
     apt-get -y install bison
 
     # Download, build, and install mvapich2
-    wget http://mvapich.cse.ohio-state.edu/download/mvapich/mv2/mvapich2-2.1.tar.gz
-    tar -xzvf mvapich2-2.1.tar.gz
-    cd mvapich2-2.1
+    wget http://mvapich.cse.ohio-state.edu/download/mvapich/mv2/mvapich2-2.3.2.tar.gz
+    tar -xzvf mvapich2-2.3.2.tar.gz
+    cd mvapich2-2.3.2
     ./configure --prefix=/opt/mvapich2
     make
     make install
@@ -144,13 +138,5 @@ OSVersion: xenial
 %files
 
 %runscript
-
-    echo "                                                "
-    echo "      __________________  __  _______________   "
-    echo "    -----/ ____/ __ \/  |/  / ____/_  __/       "
-    echo "      --/ /   / / / / /|_/ / __/   / /          "
-    echo "       / /___/ /_/ / /  / / /___  / /           "
-    echo "       \____/\____/_/  /_/_____/ /_/            "
-    echo "                                                "
 
 %test
