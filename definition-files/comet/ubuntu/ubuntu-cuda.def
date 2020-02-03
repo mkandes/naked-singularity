@@ -1,23 +1,20 @@
 Bootstrap: debootstrap
 MirrorURL: http://us.archive.ubuntu.com/ubuntu
-OSVersion: xenial
+OSVersion: bionic
 
 %labels
 
     APPLICATION_NAME ubuntu + cuda
-    APPLICATION_VERSION 16.04 + 9.2.88
+    APPLICATION_VERSION 18.04 + 10.1.168
     APPLICATION_URL https://developer.nvidia.com/cuda-zone
 
-    SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.6.1
-    SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
-
+    SINGULARITY_VERSION 2.6.1
     SINGULARITY_IMAGE_SIZE 8192
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20190912
+    LAST_UPDATED 20200112
 
 %setup
 
@@ -27,8 +24,8 @@ OSVersion: xenial
     export LC_ALL=C
 
     # Set paths to CUDA binaries and libraries
-    export PATH="/usr/local/cuda-9.2/bin${PATH:+:${PATH}}"
-    export LD_LIBRARY_PATH="/usr/local/cuda-9.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+    export PATH="/usr/local/cuda-10.1/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="/usr/local/cuda-10.1/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
     export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/extras/CUPTI/lib64"
 
     # Set default miniconda environment
@@ -81,9 +78,6 @@ OSVersion: xenial
     # Install expect to automate responses for interactive build questions
     apt-get -y install expect
 
-    # Make filesystem mount points
-    mkdir /cvmfs /oasis /projects /scratch
-
     # Use /tmp to store temporary files within the container during the
     # bootstraping process
     cd /tmp
@@ -100,8 +94,8 @@ OSVersion: xenial
 
     # Location of NVIDIA repositories
     declare -r NVIDIA_ROOT_URL='http://developer.download.nvidia.com/compute'
-    declare -r CUDA_REPO_URL="${NVIDIA_ROOT_URL}/cuda/repos/ubuntu1604/x86_64"
-    declare -r ML_REPO_URL="${NVIDIA_ROOT_URL}/machine-learning/repos/ubuntu1604/x86_64/"
+    declare -r CUDA_REPO_URL="${NVIDIA_ROOT_URL}/cuda/repos/ubuntu1804/x86_64"
+    declare -r ML_REPO_URL="${NVIDIA_ROOT_URL}/machine-learning/repos/ubuntu1804/x86_64"
 
     # Install NVIDIA package dependencies
     apt-get -y install x11-common
@@ -137,153 +131,200 @@ OSVersion: xenial
     apt-get -y install default-jre
 
     # Download NVIDIA drivers, libraries, and packages
-    wget --wait=10 "${CUDA_REPO_URL}/nvidia-396_396.26-0ubuntu1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/nvidia-396-dev_396.26-0ubuntu1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/nvidia-modprobe_396.26-0ubuntu1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/libcuda1-396_396.26-0ubuntu1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/nvidia-libopencl1-396_396.26-0ubuntu1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/nvidia-opencl-icd-396_396.26-0ubuntu1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/libxnvctrl0_396.26-0ubuntu1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/nvidia-settings_396.26-0ubuntu1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-drivers_396.26-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/libnvidia-common-418_418.67-0ubuntu1_all.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/libnvidia-compute-418_418.67-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/libnvidia-cfg1-418_418.67-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/libnvidia-decode-418_418.67-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/libnvidia-encode-418_418.67-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/libnvidia-fbc1-418_418.67-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/libnvidia-gl-418_418.67-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/libnvidia-ifr1-418_418.67-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/libxnvctrl0_418.67-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/libxnvctrl-dev_418.67-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-kernel-source-418_418.67-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-kernel-common-418_418.67-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-dkms-418_418.67-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-compute-utils-418_418.67-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-utils-418_418.67-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/xserver-xorg-video-nvidia-418_418.67-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-driver-418_418.67-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/libnvidia-diagnostic-418_418.67-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-modprobe_418.67-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/nvidia-settings_418.67-0ubuntu1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/libnvidia-diagnostic-418_418.67-0ubuntu1_amd64.deb"
 
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-license-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-misc-headers-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvcc-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-cuobjdump-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvprune-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-compiler-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-core-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-cudart-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-driver-dev-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-cudart-dev-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvdisasm-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-gdb-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvprof-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-memcheck-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-cupti-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-gpu-library-advisor-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvtx-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-command-line-tools-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvrtc-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvrtc-dev-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvml-dev-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvgraph-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvgraph-dev-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusolver-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusolver-dev-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-cublas-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-cublas-dev-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-cufft-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-cufft-dev-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-curand-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-curand-dev-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusparse-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusparse-dev-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-npp-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-npp-dev-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-samples-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-documentation-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-nsight-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvvp-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-visual-tools-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-tools-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-libraries-dev-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-toolkit-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-libraries-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-runtime-9-2_9.2.88-1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/cuda-demo-suite-9-2_9.2.88-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-drivers_418.67-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-drivers-diagnostic_418.67-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-compat-10-1_418.67-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-license-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-misc-headers-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvcc-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cuobjdump-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvprune-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-compiler-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cudart-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-driver-dev-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cudart-dev-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvdisasm-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-gdb-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvprof-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-memcheck-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cupti-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-gpu-library-advisor-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvtx-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-sanitizer-api-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-command-line-tools-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvrtc-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvrtc-dev-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvml-dev-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvgraph-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvgraph-dev-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvjpeg-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvjpeg-dev-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusolver-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusolver-dev-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/libcublas10_10.2.0.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/libcublas-dev_10.2.0.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cufft-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cufft-dev-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-curand-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-curand-dev-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusparse-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-cusparse-dev-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-npp-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-npp-dev-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-samples-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-documentation-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nsight-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nsight-compute-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nsight-systems-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-nvvp-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-visual-tools-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-tools-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-libraries-dev-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-toolkit-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-libraries-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-runtime-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-demo-suite-10-1_10.1.168-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/cuda-10-1_10.1.168-1_amd64.deb"
 
-    wget --wait=10 "${ML_REPO_URL}/libcudnn7_7.6.2.24-1+cuda9.2_amd64.deb"
-    wget --wait=10 "${ML_REPO_URL}/libcudnn7-dev_7.6.2.24-1+cuda9.2_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/libcutensor1_1.0.0-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/libcutensor-dev_1.0.0-1_amd64.deb"
+    wget --wait=10 "${CUDA_REPO_URL}/libcutensor-doc_1.0.0-1_amd64.deb"
 
-    wget --wait=10 "${ML_REPO_URL}/libnccl2_2.4.8-1+cuda9.2_amd64.deb"
-    wget --wait=10 "${ML_REPO_URL}/libnccl-dev_2.4.8-1+cuda9.2_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libcudnn7_7.6.5.32-1+cuda10.1_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libcudnn7-dev_7.6.5.32-1+cuda10.1_amd64.deb"
+
+    wget --wait=10 "${ML_REPO_URL}/libnccl2_2.5.6-1+cuda10.1_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libnccl-dev_2.5.6-1+cuda10.1_amd64.deb"
 
     # Fix for "update-alternatives: error: error creating symbolic link '/usr/lib/nvidia/alternate-install-present.dpkg-tmp': No such file or directory"
     mkdir -p /usr/lib/nvidia
 
     # Install NVIDIA drivers, libraries, and packages
-    dpkg -i nvidia-396_396.26-0ubuntu1_amd64.deb
-    dpkg -i nvidia-396-dev_396.26-0ubuntu1_amd64.deb
-    dpkg -i nvidia-modprobe_396.26-0ubuntu1_amd64.deb
-    dpkg -i libcuda1-396_396.26-0ubuntu1_amd64.deb
-    dpkg -i nvidia-libopencl1-396_396.26-0ubuntu1_amd64.deb
-    dpkg -i nvidia-opencl-icd-396_396.26-0ubuntu1_amd64.deb
-    dpkg -i libxnvctrl0_396.26-0ubuntu1_amd64.deb
-    dpkg -i nvidia-settings_396.26-0ubuntu1_amd64.deb
-    dpkg -i cuda-drivers_396.26-1_amd64.deb
+    dpkg -i libnvidia-common-418_418.67-0ubuntu1_all.deb
+    dpkg -i libnvidia-compute-418_418.67-0ubuntu1_amd64.deb
+    dpkg -i libnvidia-cfg1-418_418.67-0ubuntu1_amd64.deb
+    dpkg -i libnvidia-decode-418_418.67-0ubuntu1_amd64.deb
+    dpkg -i libnvidia-encode-418_418.67-0ubuntu1_amd64.deb
+    dpkg -i libnvidia-fbc1-418_418.67-0ubuntu1_amd64.deb
+    dpkg -i libnvidia-gl-418_418.67-0ubuntu1_amd64.deb
+    dpkg -i libnvidia-ifr1-418_418.67-0ubuntu1_amd64.deb
+    dpkg -i libxnvctrl0_418.67-0ubuntu1_amd64.deb
+    dpkg -i libxnvctrl-dev_418.67-0ubuntu1_amd64.deb
+    dpkg -i nvidia-kernel-source-418_418.67-0ubuntu1_amd64.deb
+    dpkg -i nvidia-kernel-common-418_418.67-0ubuntu1_amd64.deb
+    dpkg -i nvidia-dkms-418_418.67-0ubuntu1_amd64.deb
+    dpkg -i nvidia-compute-utils-418_418.67-0ubuntu1_amd64.deb
+    dpkg -i nvidia-utils-418_418.67-0ubuntu1_amd64.deb
+    dpkg -i xserver-xorg-video-nvidia-418_418.67-0ubuntu1_amd64.deb
+    dpkg -i nvidia-driver-418_418.67-0ubuntu1_amd64.deb
+    dpkg -i libnvidia-diagnostic-418_418.67-0ubuntu1_amd64.deb
+    dpkg -i nvidia-modprobe_418.67-0ubuntu1_amd64.deb
+    dpkg -i nvidia-settings_418.67-0ubuntu1_amd64.deb
 
-    dpkg -i cuda-license-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-misc-headers-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-nvcc-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-cuobjdump-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-nvprune-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-compiler-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-core-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-cudart-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-driver-dev-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-cudart-dev-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-nvdisasm-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-gdb-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-nvprof-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-memcheck-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-cupti-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-gpu-library-advisor-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-nvtx-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-command-line-tools-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-nvrtc-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-nvrtc-dev-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-nvml-dev-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-nvgraph-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-nvgraph-dev-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-cusolver-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-cusolver-dev-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-cublas-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-cublas-dev-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-cufft-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-cufft-dev-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-curand-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-curand-dev-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-cusparse-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-cusparse-dev-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-npp-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-npp-dev-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-samples-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-documentation-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-nsight-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-nvvp-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-visual-tools-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-tools-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-libraries-dev-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-toolkit-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-libraries-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-runtime-9-2_9.2.88-1_amd64.deb
-    dpkg -i cuda-demo-suite-9-2_9.2.88-1_amd64.deb
+    dpkg -i cuda-drivers_418.67-1_amd64.deb
+    dpkg -i cuda-drivers-diagnostic_418.67-1_amd64.deb
+    dpkg -i cuda-compat-10-1_418.67-1_amd64.deb
+    dpkg -i cuda-license-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-misc-headers-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-nvcc-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-cuobjdump-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-nvprune-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-compiler-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-cudart-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-driver-dev-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-cudart-dev-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-nvdisasm-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-gdb-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-nvprof-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-memcheck-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-cupti-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-gpu-library-advisor-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-nvtx-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-sanitizer-api-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-command-line-tools-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-nvrtc-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-nvrtc-dev-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-nvml-dev-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-nvgraph-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-nvgraph-dev-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-nvjpeg-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-nvjpeg-dev-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-cusolver-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-cusolver-dev-10-1_10.1.168-1_amd64.deb
+    dpkg -i libcublas10_10.2.0.168-1_amd64.deb
+    dpkg -i libcublas-dev_10.2.0.168-1_amd64.deb
+    dpkg -i cuda-cufft-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-cufft-dev-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-curand-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-curand-dev-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-cusparse-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-cusparse-dev-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-npp-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-npp-dev-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-samples-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-documentation-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-nsight-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-nsight-compute-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-nsight-systems-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-nvvp-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-visual-tools-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-tools-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-libraries-dev-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-toolkit-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-libraries-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-runtime-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-demo-suite-10-1_10.1.168-1_amd64.deb
+    dpkg -i cuda-10-1_10.1.168-1_amd64.deb
 
-    dpkg -i libcudnn7_7.6.2.24-1+cuda9.2_amd64.deb
-    dpkg -i libcudnn7-dev_7.6.2.24-1+cuda9.2_amd64.deb
+    dpkg -i libcutensor1_1.0.0-1_amd64.deb
+    dpkg -i libcutensor-dev_1.0.0-1_amd64.deb
+    dpkg -i libcutensor-doc_1.0.0-1_amd64.deb
 
-    dpkg -i libnccl2_2.4.8-1+cuda9.2_amd64.deb
-    dpkg -i libnccl-dev_2.4.8-1+cuda9.2_amd64.deb
+    dpkg -i libcudnn7_7.6.5.32-1+cuda10.1_amd64.deb
+    dpkg -i libcudnn7-dev_7.6.5.32-1+cuda10.1_amd64.deb
+
+    dpkg -i libnccl2_2.5.6-1+cuda10.1_amd64.deb
+    dpkg -i libnccl-dev_2.5.6-1+cuda10.1_amd64.deb
 
     # Fixing some path-related issues associated with deb-based install of libcudnn and libnccl ...
-    mv /usr/lib/x86_64-linux-gnu/libcudnn_static.a /usr/local/cuda-9.2/lib64/libcudnn_static.a
-    mv /usr/lib/x86_64-linux-gnu/libcudnn_static_v7.a /usr/local/cuda-9.2/lib64/libcudnn_static_v7.a
-    mv /usr/lib/x86_64-linux-gnu/libcudnn.so.7.6.2 /usr/local/cuda-9.2/lib64/libcudnn.so.7.6.2
-    ln -s /usr/local/cuda-9.2/lib64/libcudnn.so.7.6.2 /usr/local/cuda-9.2/lib64/libcudnn.so.7
-    ln -s /usr/local/cuda-9.2/lib64/libcudnn.so.7 /usr/local/cuda-9.2/lib64/libcudnn.so
-    mv /usr/lib/x86_64-linux-gnu/libnccl_static.a /usr/local/cuda-9.2/lib64/libnccl_static.a
-    mv /usr/lib/x86_64-linux-gnu/libnccl.so.2.4.8 /usr/local/cuda-9.2/lib64/libnccl.so.2.4.8
-    ln -s /usr/local/cuda-9.2/lib64/libnccl.so.2.4.8 /usr/local/cuda-9.2/lib64/libnccl.so.2
-    ln -s /usr/local/cuda-9.2/lib64/libnccl.so.2 /usr/local/cuda-9.2/lib64/libnccl.so
-    mv /usr/include/nccl.h /usr/local/cuda-9.2/include/nccl.h
-    ln -s /usr/local/cuda-9.2/lib64 /usr/local/cuda-9.2/lib
-    mv /usr/share/doc/libnccl2/NCCL-SLA.txt.gz /usr/local/cuda-9.2/NCCL-SLA.txt
+    mv /usr/lib/x86_64-linux-gnu/libcudnn_static.a /usr/local/cuda-10.1/lib64/libcudnn_static.a
+    mv /usr/lib/x86_64-linux-gnu/libcudnn_static_v7.a /usr/local/cuda-10.1/lib64/libcudnn_static_v7.a
+    mv /usr/lib/x86_64-linux-gnu/libcudnn.so.7.6.5 /usr/local/cuda-10.1/lib64/libcudnn.so.7.6.5
+    ln -s /usr/local/cuda-10.1/lib64/libcudnn.so.7.6.5 /usr/local/cuda-10.1/lib64/libcudnn.so.7
+    ln -s /usr/local/cuda-10.1/lib64/libcudnn.so.7 /usr/local/cuda-10.1/lib64/libcudnn.so
+    mv /usr/lib/x86_64-linux-gnu/libnccl_static.a /usr/local/cuda-10.1/lib64/libnccl_static.a
+    mv /usr/lib/x86_64-linux-gnu/libnccl.so.2.5.6 /usr/local/cuda-10.1/lib64/libnccl.so.2.5.6
+    ln -s /usr/local/cuda-10.1/lib64/libnccl.so.2.5.6 /usr/local/cuda-10.1/lib64/libnccl.so.2
+    ln -s /usr/local/cuda-10.1/lib64/libnccl.so.2 /usr/local/cuda-10.1/lib64/libnccl.so
+    mv /usr/include/nccl.h /usr/local/cuda-10.1/include/nccl.h
+    ln -s /usr/local/cuda-10.1/lib64 /usr/local/cuda-10.1/lib
+    mv /usr/share/doc/libnccl2/NCCL-SLA.txt.gz /usr/local/cuda-10.1/NCCL-SLA.txt
 
     # Set paths to CUDA binaries and libraries
-    export PATH="/usr/local/cuda-9.2/bin${PATH:+:${PATH}}"
-    export LD_LIBRARY_PATH="/usr/local/cuda-9.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+    export PATH="/usr/local/cuda-10.1/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="/usr/local/cuda-10.1/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
     export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/extras/CUPTI/lib64"
 
     # Update database for mlocate
@@ -292,13 +333,5 @@ OSVersion: xenial
 %files
 
 %runscript
-
-    echo "                                                "
-    echo "      __________________  __  _______________   "
-    echo "    -----/ ____/ __ \/  |/  / ____/_  __/       "
-    echo "      --/ /   / / / / /|_/ / __/   / /          "
-    echo "       / /___/ /_/ / /  / / /___  / /           "
-    echo "       \____/\____/_/  /_/_____/ /_/            "
-    echo "                                                "
 
 %test

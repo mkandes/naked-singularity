@@ -9,16 +9,13 @@ Include: yum
     APPLICATION_VERSION 7.7.1908
     APPLICATION_URL https://www.centos.org
 
-    SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.6.1
-    SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
-
+    SINGULARITY_VERSION 2.6.1
     SINGULARITY_IMAGE_SIZE 4096
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20190919
+    LAST_UPDATED 20200129
 
 %setup
 
@@ -59,17 +56,9 @@ Include: yum
     # Install expect to automate responses for interactive build questions
     yum -y install expect
 
-    # Make filesystem mount points
-    mkdir /cvmfs /oasis /projects /scratch
-
     # Use /tmp to store temporary files within the container during the
     # bootstraping process
     cd /tmp
-
-    # Install miniconda2
-    wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
-    chmod +x Miniconda2-latest-Linux-x86_64.sh
-    ./Miniconda2-latest-Linux-x86_64.sh -b -p /opt/miniconda2
 
     # Install miniconda3
     wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
@@ -82,13 +71,5 @@ Include: yum
 %files
 
 %runscript
-
-    echo "                                                "
-    echo "      __________________  __  _______________   "
-    echo "    -----/ ____/ __ \/  |/  / ____/_  __/       "
-    echo "      --/ /   / / / / /|_/ / __/   / /          "
-    echo "       / /___/ /_/ / /  / / /___  / /           "
-    echo "       \____/\____/_/  /_/_____/ /_/            "
-    echo "                                                "
 
 %test
