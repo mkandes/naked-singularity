@@ -5,9 +5,9 @@ Include: yum
 
 %labels
 
-    APPLICATION_NAME beast
-    APPLICATION_VERSION 1.10.4
-    APPLICATION_URL http://beast.community/
+    APPLICATION_NAME beast2
+    APPLICATION_VERSION 2.6.1
+    APPLICATION_URL http://www.beast2.org
 
     SINGULARITY_VERSION 2.6.1
     SINGULARITY_IMAGE_SIZE 16384
@@ -15,7 +15,7 @@ Include: yum
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20200205
+    LAST_UPDATED 20200206
 
 %setup
 
@@ -31,8 +31,8 @@ Include: yum
     # Set LD_LIBRARY_PATH to beagle
     export LD_LIBRARY_PATH="/opt/beagle/lib:${LD_LIBRARY_PATH}"
 
-    # Set PATH to beast
-    export PATH="/opt/beast/bin:${PATH}"
+    # Set PATH to beast2
+    export PATH="/opt/beast2/bin:${PATH}"
 
     # Set PATH to tracer
     export PATH="/opt/tracer/bin:${PATH}"
@@ -352,18 +352,18 @@ Include: yum
 
     cd /tmp
 
-    # Download, build, and install beast
-    git clone https://github.com/beast-dev/beast-mcmc.git
-    cd /tmp/beast-mcmc
-    git checkout v1.10.4
+    # Download, build, and install beas2
+    git clone https://github.com/CompEvol/beast2.git
+    cd /tmp/beast2
+    git checkout v2.6.1
     export JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
     ant linux
-    mv /tmp/beast-mcmc/release/Linux/BEASTv1.10.4 /opt/beast
-    cd /opt/beast/bin
-    sed -i 's/-Xms64m -Xmx2048m/-Xms256m -Xmx10000m/' beast
+    mv /tmp/beast2/release/Linux/beast /opt/beast2
+    cd /opt/beast2/bin
+    sed -i 's/-Xms256m -Xmx8g/-Xms256m -Xmx15g/' beast
 
-    # Set PATH to beast
-    export PATH="/opt/beast/bin:${PATH}"
+    # Set PATH to beast2
+    export PATH="/opt/beast2/bin:${PATH}"
 
     cd /tmp
 
@@ -388,7 +388,7 @@ Include: yum
     mv /tmp/figtree/release/Linux/FigTree_v1.4.4 /opt/figtree
 
     # Set PATH to figtree
-    export PATH="/opt/figtree/bin:${PATH}" 
+    export PATH="/opt/figtree/bin:${PATH}"
 
     # Update database for mlocate
     updatedb
