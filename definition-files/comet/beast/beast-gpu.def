@@ -15,7 +15,7 @@ Include: yum
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20200205
+    LAST_UPDATED 20200209
 
 %setup
 
@@ -129,8 +129,8 @@ Include: yum
     yum -y install libXi-devel
     yum -y install mesa-libGLU
     yum -y install mesa-libGLU-devel
-    yum -y install java-latest-openjdk
-    yum -y install java-latest-openjdk-devel
+    yum -y install java-1.8.0-openjdk
+    yum -y install java-1.8.0-openjdk-devel
 
     yum -y install grubby
     yum -y install libtirpc
@@ -386,6 +386,9 @@ Include: yum
     sed -i 's/linux_unix_Release/linux/g' build.xml
     ant linux
     mv /tmp/figtree/release/Linux/FigTree_v1.4.4 /opt/figtree
+    cd /opt/figtree/bin
+    sed -i "s/lib/\/opt\/figtree\/lib/g" figtree
+    chmod +x figtree
 
     # Set PATH to figtree
     export PATH="/opt/figtree/bin:${PATH}" 
