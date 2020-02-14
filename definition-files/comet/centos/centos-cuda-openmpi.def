@@ -5,9 +5,9 @@ Include: yum
 
 %labels
 
-    APPLICATION_NAME centos + cuda
-    APPLICATION_VERSION 7.7.1908 + 10.1.168
-    APPLICATION_URL https://developer.nvidia.com/cuda-zone
+    APPLICATION_NAME centos + cuda + openmpi
+    APPLICATION_VERSION 7.7.1908 + 10.1.168 + 3.1.4
+    APPLICATION_URL https://www.open-mpi.org/faq/?category=runcuda
 
     SINGULARITY_VERSION 2.6.1
     SINGULARITY_IMAGE_SIZE 16384
@@ -15,7 +15,7 @@ Include: yum
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20200213
+    LAST_UPDATED 20200212
 
 %setup
 
@@ -27,6 +27,10 @@ Include: yum
     # Set paths to CUDA binaries and libraries
     export PATH="/usr/local/cuda-10.1/bin${PATH:+:${PATH}}"
     export LD_LIBRARY_PATH="/usr/local/cuda-10.1/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="/opt/openmpi-3.1.4/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/openmpi-3.1.4/lib:${LD_LIBRARY_PATH}"
 
     # Set default miniconda environment
     export PATH="/opt/miniconda3/bin:${PATH}"
@@ -230,9 +234,6 @@ Include: yum
     wget --wait=10 "${ML_REPO_URL}/python3-libnvinfer-6.0.1-1.cuda10.1.x86_64.rpm"
     wget --wait=10 "${ML_REPO_URL}/python3-libnvinfer-devel-6.0.1-1.cuda10.1.x86_64.rpm"
 
-    wget --wait=10 "${ML_REPO_URL}/python-libnvinfer-6.0.1-1.cuda10.1.x86_64.rpm"
-    wget --wait=10 "${ML_REPO_URL}/python-libnvinfer-devel-6.0.1-1.cuda10.1.x86_64.rpm" 
-
     # Install NVIDIA drivers, libraries, and packages
     rpm -i nvidia-driver-cuda-libs-418.67-4.el7.x86_64.rpm
     rpm -i nvidia-driver-libs-418.67-4.el7.x86_64.rpm
@@ -316,20 +317,70 @@ Include: yum
 
     rpm -i libnvinfer6-6.0.1-1.cuda10.1.x86_64.rpm
     rpm -i libnvinfer-devel-6.0.1-1.cuda10.1.x86_64.rpm
+
     rpm -i libnvinfer-plugin6-6.0.1-1.cuda10.1.x86_64.rpm
     rpm -i libnvinfer-plugin-devel-6.0.1-1.cuda10.1.x86_64.rpm
+
     rpm -i libnvonnxparsers6-6.0.1-1.cuda10.1.x86_64.rpm
     rpm -i libnvonnxparsers-devel-6.0.1-1.cuda10.1.x86_64.rpm
+
     rpm -i libnvparsers6-6.0.1-1.cuda10.1.x86_64.rpm
     rpm -i libnvparsers-devel-6.0.1-1.cuda10.1.x86_64.rpm
+
     rpm -i python3-libnvinfer-6.0.1-1.cuda10.1.x86_64.rpm
     rpm -i python3-libnvinfer-devel-6.0.1-1.cuda10.1.x86_64.rpm
-    rpm -i python-libnvinfer-6.0.1-1.cuda10.1.x86_64.rpm
-    rpm -i python-libnvinfer-devel-6.0.1-1.cuda10.1.x86_64.rpm
 
     # Set paths to CUDA binaries and libraries
     export PATH="/usr/local/cuda-10.1/bin${PATH:+:${PATH}}"
     export LD_LIBRARY_PATH="/usr/local/cuda-10.1/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+
+    # Install basic drivers for user space access to Ethernet, RDMA,
+    # and Infiniband. See https://community.mellanox.com/docs/DOC-2431
+    yum -y install dkms
+    yum -y install infiniband-diags
+    yum -y install infiniband-diags-devel
+    yum -y install libibverbs
+    yum -y install libibverbs-devel
+    yum -y install ibacm
+    yum -y install librdmacm
+    yum -y install librdmacm-devel
+    yum -y install libmlx4
+    yum -y install libmlx5
+    yum -y install msflint
+    yum -y install libibcm
+    yum -y install libibmad
+    yum -y install libibmad-devel
+    yum -y install libibumad
+    yum -y install libibumad-devel
+    yum -y install opensm
+    yum -y install srptools
+
+    # Install additional tools
+    yum -y install ibutils
+    yum -y install libibverbs-utils
+    yum -y install rdmacm-utils
+    yum -y install librdmacm-utils
+    yum -y install perftest
+    yum -y install numactl
+
+    # Install libnl
+    yum -y install libnl3
+    yum -y install libnl3-devel
+
+    # Install OpenMPI dependencies
+    yum -y install zlib
+    yum -y install zlib-devel
+
+    # Download, build, and install OpenMPI
+    wget https://download.open-mpi.org/release/open-mpi/v3.1/openmpi-3.1.4.tar.gz
+    tar -xzvf openmpi-3.1.4.tar.gz
+    cd openmpi-3.1.4
+    ./configure --prefix=/opt/openmpi-3.1.4
+    make all install
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="/opt/openmpi-3.1.4/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/openmpi-3.1.4/lib:${LD_LIBRARY_PATH}"
 
     # Update database for mlocate
     updatedb
