@@ -14,7 +14,7 @@ OSVersion: bionic
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20200112
+    LAST_UPDATED 20200210
 
 %setup
 
@@ -81,11 +81,6 @@ OSVersion: bionic
     # Use /tmp to store temporary files within the container during the
     # bootstraping process
     cd /tmp
-
-    # Install miniconda2
-    wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
-    chmod +x Miniconda2-latest-Linux-x86_64.sh
-    ./Miniconda2-latest-Linux-x86_64.sh -b -p /opt/miniconda2
 
     # Install miniconda3
     wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
@@ -218,6 +213,21 @@ OSVersion: bionic
     wget --wait=10 "${ML_REPO_URL}/libnccl2_2.5.6-1+cuda10.1_amd64.deb"
     wget --wait=10 "${ML_REPO_URL}/libnccl-dev_2.5.6-1+cuda10.1_amd64.deb"
 
+    wget --wait=10 "${ML_REPO_URL}/libnvinfer6_6.0.1-1+cuda10.1_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libnvinfer-dev_6.0.1-1+cuda10.1_amd64.deb"
+
+    wget --wait=10 "${ML_REPO_URL}/libnvinfer-plugin6_6.0.1-1+cuda10.1_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libnvinfer-plugin-dev_6.0.1-1+cuda10.1_amd64.deb"
+
+    wget --wait=10 "${ML_REPO_URL}/libnvonnxparsers6_6.0.1-1+cuda10.1_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libnvonnxparsers-dev_6.0.1-1+cuda10.1_amd64.deb"
+
+    wget --wait=10 "${ML_REPO_URL}/libnvparsers6_6.0.1-1+cuda10.1_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/libnvparsers-dev_6.0.1-1+cuda10.1_amd64.deb"
+
+    wget --wait=10 "${ML_REPO_URL}/python3-libnvinfer_6.0.1-1+cuda10.1_amd64.deb"
+    wget --wait=10 "${ML_REPO_URL}/python3-libnvinfer-dev_6.0.1-1+cuda10.1_amd64.deb"
+
     # Fix for "update-alternatives: error: error creating symbolic link '/usr/lib/nvidia/alternate-install-present.dpkg-tmp': No such file or directory"
     mkdir -p /usr/lib/nvidia
 
@@ -307,6 +317,21 @@ OSVersion: bionic
 
     dpkg -i libnccl2_2.5.6-1+cuda10.1_amd64.deb
     dpkg -i libnccl-dev_2.5.6-1+cuda10.1_amd64.deb
+
+    dpkg -i libnvinfer6_6.0.1-1+cuda10.1_amd64.deb
+    dpkg -i libnvinfer-dev_6.0.1-1+cuda10.1_amd64.deb
+
+    dpkg -i libnvinfer-plugin6_6.0.1-1+cuda10.1_amd64.deb
+    dpkg -i libnvinfer-plugin-dev_6.0.1-1+cuda10.1_amd64.deb
+
+    dpkg -i libnvonnxparsers6_6.0.1-1+cuda10.1_amd64.deb
+    dpkg -i libnvonnxparsers-dev_6.0.1-1+cuda10.1_amd64.deb
+
+    dpkg -i libnvparsers6_6.0.1-1+cuda10.1_amd64.deb
+    dpkg -i libnvparsers-dev_6.0.1-1+cuda10.1_amd64.deb
+
+    dpkg -i python3-libnvinfer_6.0.1-1+cuda10.1_amd64.deb
+    dpkg -i python3-libnvinfer-dev_6.0.1-1+cuda10.1_amd64.deb
 
     # Fixing some path-related issues associated with deb-based install of libcudnn and libnccl ...
     mv /usr/lib/x86_64-linux-gnu/libcudnn_static.a /usr/local/cuda-10.1/lib64/libcudnn_static.a
