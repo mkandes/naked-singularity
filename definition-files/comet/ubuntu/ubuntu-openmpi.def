@@ -14,7 +14,7 @@ OSVersion: bionic
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20200213
+    LAST_UPDATED 20200225
 
 %setup
 
@@ -129,6 +129,12 @@ OSVersion: bionic
     # Set paths to OpenMPI binaries and libraries
     export PATH="/opt/openmpi-3.1.4/bin:${PATH}"
     export LD_LIBRARY_PATH="/opt/openmpi-3.1.4/lib:${LD_LIBRARY_PATH}"
+
+    # Clean up /tmp directory
+    cd /tmp
+    rm Miniconda3-latest-Linux-x86_64.sh
+    rm *.deb
+    rm -rf openmpi-3.1.4*
 
     # Update database for mlocate
     updatedb

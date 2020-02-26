@@ -14,7 +14,7 @@ OSVersion: bionic
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20200211
+    LAST_UPDATED 20200225
 
 %setup
 
@@ -26,7 +26,6 @@ OSVersion: bionic
     # Set paths to CUDA binaries and libraries
     export PATH="/usr/local/cuda-10.1/bin${PATH:+:${PATH}}"
     export LD_LIBRARY_PATH="/usr/local/cuda-10.1/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
-    export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/extras/CUPTI/lib64"
 
     # Set paths to OpenMPI binaries and libraries
     export PATH="/opt/openmpi-3.1.4/bin:${PATH}"
@@ -337,24 +336,9 @@ OSVersion: bionic
     dpkg -i python3-libnvinfer_6.0.1-1+cuda10.1_amd64.deb
     dpkg -i python3-libnvinfer-dev_6.0.1-1+cuda10.1_amd64.deb
 
-    # Fixing some path-related issues associated with deb-based install of libcudnn and libnccl ...
-    mv /usr/lib/x86_64-linux-gnu/libcudnn_static.a /usr/local/cuda-10.1/lib64/libcudnn_static.a
-    mv /usr/lib/x86_64-linux-gnu/libcudnn_static_v7.a /usr/local/cuda-10.1/lib64/libcudnn_static_v7.a
-    mv /usr/lib/x86_64-linux-gnu/libcudnn.so.7.6.5 /usr/local/cuda-10.1/lib64/libcudnn.so.7.6.5
-    ln -s /usr/local/cuda-10.1/lib64/libcudnn.so.7.6.5 /usr/local/cuda-10.1/lib64/libcudnn.so.7
-    ln -s /usr/local/cuda-10.1/lib64/libcudnn.so.7 /usr/local/cuda-10.1/lib64/libcudnn.so
-    mv /usr/lib/x86_64-linux-gnu/libnccl_static.a /usr/local/cuda-10.1/lib64/libnccl_static.a
-    mv /usr/lib/x86_64-linux-gnu/libnccl.so.2.5.6 /usr/local/cuda-10.1/lib64/libnccl.so.2.5.6
-    ln -s /usr/local/cuda-10.1/lib64/libnccl.so.2.5.6 /usr/local/cuda-10.1/lib64/libnccl.so.2
-    ln -s /usr/local/cuda-10.1/lib64/libnccl.so.2 /usr/local/cuda-10.1/lib64/libnccl.so
-    mv /usr/include/nccl.h /usr/local/cuda-10.1/include/nccl.h
-    ln -s /usr/local/cuda-10.1/lib64 /usr/local/cuda-10.1/lib
-    mv /usr/share/doc/libnccl2/NCCL-SLA.txt.gz /usr/local/cuda-10.1/NCCL-SLA.txt
-
     # Set paths to CUDA binaries and libraries
     export PATH="/usr/local/cuda-10.1/bin${PATH:+:${PATH}}"
     export LD_LIBRARY_PATH="/usr/local/cuda-10.1/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
-    export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/cuda/extras/CUPTI/lib64"
 
     # Install basic drivers for user space access to Ethernet, RDMA,
     # and Infiniband. See https://community.mellanox.com/docs/DOC-2431

@@ -14,7 +14,7 @@ OSVersion: bionic
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20200210
+    LAST_UPDATED 20200225
 
 %setup
 
@@ -81,6 +81,10 @@ OSVersion: bionic
     wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
     chmod +x Miniconda3-latest-Linux-x86_64.sh
     ./Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda3
+
+    # Clean up /tmp directory
+    cd /tmp
+    rm Miniconda3-latest-Linux-x86_64.sh
     
     # Update database for mlocate
     updatedb
