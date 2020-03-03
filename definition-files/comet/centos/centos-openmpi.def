@@ -15,7 +15,7 @@ Include: yum
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20200211
+    LAST_UPDATED 20200228
 
 %setup
 
@@ -27,6 +27,12 @@ Include: yum
     # Set paths to OpenMPI binaries and libraries
     export PATH="/opt/openmpi-3.1.4/bin:${PATH}"
     export LD_LIBRARY_PATH="/opt/openmpi-3.1.4/lib:${LD_LIBRARY_PATH}"
+
+    # Set paths to OSU Microbenchmarks binaries
+    export PATH="/opt/omb-5.6.2/collective:${PATH}"
+    export PATH="/opt/omb-5.6.2/one-sided:${PATH}"
+    export PATH="/opt/omb-5.6.2/pt2pt:${PATH}"
+    export PATH="/opt/omb-5.6.2/startup:${PATH}"
 
     # Set default miniconda environment
     export PATH="/opt/miniconda3/bin:${PATH}"
@@ -116,6 +122,37 @@ Include: yum
     # Set paths to OpenMPI binaries and libraries
     export PATH="/opt/openmpi-3.1.4/bin:${PATH}"
     export LD_LIBRARY_PATH="/opt/openmpi-3.1.4/lib:${LD_LIBRARY_PATH}"
+
+    cd /tmp
+
+    # Download, build, and install OSU Microbenchmarks
+    wget http://mvapich.cse.ohio-state.edu/download/mvapich/osu-micro-benchmarks-5.6.2.tar.gz
+    tar -xzvf osu-micro-benchmarks-5.6.2.tar.gz
+    cd osu-micro-benchmarks-5.6.2
+    ./configure --prefix='/opt/omb-5.6.2' CC='mpicc' CXX='mpicxx'
+    make
+    make install
+
+    # Reorganize OSU Microbenchmarks directory structure
+    cd /opt/omb-5.6.2
+    mv libexec/osu-micro-benchmarks/mpi/collective ./
+    mv libexec/osu-micro-benchmarks/mpi/one-sided ./
+    mv libexec/osu-micro-benchmarks/mpi/pt2pt ./
+    mv libexec/osu-micro-benchmarks/mpi/startup ./
+    rm -rf libexec
+
+    # Set paths to OSU Microbenchmarks binaries
+    export PATH="/opt/omb-5.6.2/collective:${PATH}"
+    export PATH="/opt/omb-5.6.2/one-sided:${PATH}"
+    export PATH="/opt/omb-5.6.2/pt2pt:${PATH}"
+    export PATH="/opt/omb-5.6.2/startup:${PATH}"
+
+    # Clean up /tmp directory
+    cd /tmp
+    rm Miniconda3-latest-Linux-x86_64.sh
+    rm *.deb
+    rm -rf openmpi-3.1.4*
+    rm -rf osu-micro-benchmarks-5.6.2*
 
     # Update database for mlocate
     updatedb
