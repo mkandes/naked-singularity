@@ -14,7 +14,7 @@ OSVersion: bionic
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20200225
+    LAST_UPDATED 20200303
 
 %setup
 
@@ -145,7 +145,6 @@ OSVersion: bionic
     wget --wait=10 "${CUDA_REPO_URL}/libnvidia-diagnostic-418_418.67-0ubuntu1_amd64.deb"
     wget --wait=10 "${CUDA_REPO_URL}/nvidia-modprobe_418.67-0ubuntu1_amd64.deb"
     wget --wait=10 "${CUDA_REPO_URL}/nvidia-settings_418.67-0ubuntu1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/libnvidia-diagnostic-418_418.67-0ubuntu1_amd64.deb"
 
     wget --wait=10 "${CUDA_REPO_URL}/cuda-drivers_418.67-1_amd64.deb"
     wget --wait=10 "${CUDA_REPO_URL}/cuda-drivers-diagnostic_418.67-1_amd64.deb"
@@ -226,6 +225,8 @@ OSVersion: bionic
 
     wget --wait=10 "${ML_REPO_URL}/python3-libnvinfer_6.0.1-1+cuda10.1_amd64.deb"
     wget --wait=10 "${ML_REPO_URL}/python3-libnvinfer-dev_6.0.1-1+cuda10.1_amd64.deb"
+
+    #https://developer.nvidia.com/compute/machine-learning/tensorrt/secure/7.0/7.0.0.11/local_repo/nv-tensorrt-repo-ubuntu1804-cuda10.0-trt7.0.0.11-ga-20191216_1-1_amd64.deb
 
     # Fix for "update-alternatives: error: error creating symbolic link '/usr/lib/nvidia/alternate-install-present.dpkg-tmp': No such file or directory"
     mkdir -p /usr/lib/nvidia

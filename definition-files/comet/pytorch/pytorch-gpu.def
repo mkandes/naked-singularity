@@ -14,7 +14,7 @@ OSVersion: bionic
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20200225
+    LAST_UPDATED 20200303
 
 %setup
 
@@ -149,7 +149,6 @@ OSVersion: bionic
     wget --wait=10 "${CUDA_REPO_URL}/libnvidia-diagnostic-418_418.67-0ubuntu1_amd64.deb"
     wget --wait=10 "${CUDA_REPO_URL}/nvidia-modprobe_418.67-0ubuntu1_amd64.deb"
     wget --wait=10 "${CUDA_REPO_URL}/nvidia-settings_418.67-0ubuntu1_amd64.deb"
-    wget --wait=10 "${CUDA_REPO_URL}/libnvidia-diagnostic-418_418.67-0ubuntu1_amd64.deb"
 
     wget --wait=10 "${CUDA_REPO_URL}/cuda-drivers_418.67-1_amd64.deb"
     wget --wait=10 "${CUDA_REPO_URL}/cuda-drivers-diagnostic_418.67-1_amd64.deb"
