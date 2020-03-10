@@ -1,23 +1,20 @@
 Bootstrap: debootstrap
 MirrorURL: http://us.archive.ubuntu.com/ubuntu
-OSVersion: xenial
+OSVersion: bionic
 
 %labels
 
     APPLICATION_NAME meep
-    APPLICATION_VERSION 1.6.0*
-    APPLICATION_URL https://meep.readthedocs.io/en/latest/
+    APPLICATION_VERSION 1.13.1
+    APPLICATION_URL https://www.open-mpi.org/
 
-    SYSTEM_NAME comet
-    SYSTEM_SINGULARITY_VERSION 2.5.2
-    SYSTEM_URL http://www.sdsc.edu/support/user_guides/comet.html
-
-    SINGULARITY_IMAGE_SIZE 4092
+    SINGULARITY_VERSION 2.6.1
+    SINGULARITY_IMAGE_SIZE 2048
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20181106
+    LAST_UPDATED 20200309
 
 %setup
 
@@ -25,22 +22,33 @@ OSVersion: xenial
 
     # Set system locale
     export LC_ALL=C
-    export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="/opt/openmpi-3.1.4/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/openmpi-3.1.4/lib:${LD_LIBRARY_PATH}"
+
+    # Set paths to OSU Microbenchmarks binaries
+    export PATH="/opt/omb-5.6.2/collective:${PATH}"
+    export PATH="/opt/omb-5.6.2/one-sided:${PATH}"
+    export PATH="/opt/omb-5.6.2/pt2pt:${PATH}"
+    export PATH="/opt/omb-5.6.2/startup:${PATH}"
+
+    # Set paths to MEEP and its dependencies
     export PATH="/opt/harminv-1.4.1/bin:${PATH}"
     export LD_LIBRARY_PATH="/opt/harminv-1.4.1/lib:${LD_LIBRARY_PATH}"
-    export PATH="/opt/libctl-4.1.3/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/libctl-4.1.3/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/libctl-4.5.0/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/libctl-4.5.0/lib:${LD_LIBRARY_PATH}"
     export LD_LIBRARY_PATH="/opt/zlib-1.2.11/lib:${LD_LIBRARY_PATH}"
     export PATH="/opt/hdf5-1.10.1/hdf5/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/hdf5-1.10.1/hdf5/lib:${LD_LIBRARY_PATH}"
-    export PATH="/opt/h5utils-1.13/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/hdf5-1.10.1/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/h5utils-1.13.1/bin:${PATH}"
     export PATH="/opt/fftw-3.3.7/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/fftw-3.3.7/lib:{LD_LIBRARY_PATH}"
-    export PATH="/opt/mpb-1.6.2/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/mpb-1.6.2/lib:${LD_LIBRARY_PATH}"
-    export PATH="/opt/meep-1.6.0/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/meep-1.6.0/lib:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="/opt/fftw-3.3.7/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/mpb-1.10.0/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/mpb-1.10.0/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/meep-1.13.1/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/meep-1.13.1/lib:${LD_LIBRARY_PATH}"
+    export PYTHONPATH='/opt/meep-1.13.1/lib/python3.6/site-packages'
 
 %post -c /bin/bash
 
@@ -79,16 +87,15 @@ OSVersion: xenial
     apt-get -y install autoconf
     apt-get -y install automake
     apt-get -y install build-essential
+    apt-get -y install cmake
     apt-get -y install libtool
-    apt-get -y install pkg-config
     apt-get -y install gfortran
+    apt-get -y install pkg-config
+    apt-get -y install wget
     apt-get -y install zip
 
     # Install expect to automate responses for interactive build questions
     apt-get -y install expect
-
-    # Make filesystem mount points
-    mkdir /cvmfs /oasis /projects /scratch
 
     # Use /tmp to store temporary files within the container during the
     # bootstraping process
@@ -124,61 +131,92 @@ OSVersion: xenial
     apt-get -y install libnl-route-3-dev
     apt-get -y install libnl-utils
 
-    cd /opt
+    # Install OpenMPI dependencies
+    apt-get -y install zlib1g-dev
 
-    # Download, build, and install openmpi
-    wget https://www.open-mpi.org/software/ompi/v1.8/downloads/openmpi-1.8.4.tar.gz
-    tar -xzvf openmpi-1.8.4.tar.gz
-    cd openmpi-1.8.4
-    ./configure --prefix=/opt/openmpi-1.8.4
+    # Download, build, and install OpenMPI
+    wget https://download.open-mpi.org/release/open-mpi/v3.1/openmpi-3.1.4.tar.gz
+    tar -xzvf openmpi-3.1.4.tar.gz
+    cd openmpi-3.1.4
+    ./configure --prefix=/opt/openmpi-3.1.4
     make all install
 
-    export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="/opt/openmpi-3.1.4/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/openmpi-3.1.4/lib:${LD_LIBRARY_PATH}"
+
+    cd /tmp
+w
+    # Download, build, and install OSU Microbenchmarks
+    wget http://mvapich.cse.ohio-state.edu/download/mvapich/osu-micro-benchmarks-5.6.2.tar.gz
+    tar -xzvf osu-micro-benchmarks-5.6.2.tar.gz
+    cd osu-micro-benchmarks-5.6.2
+    ./configure --prefix='/opt/omb-5.6.2' CC='mpicc' CXX='mpicxx'
+    make
+    make install
+
+    # Reorganize OSU Microbenchmarks directory structure
+    cd /opt/omb-5.6.2
+    mv libexec/osu-micro-benchmarks/mpi/collective ./
+    mv libexec/osu-micro-benchmarks/mpi/one-sided ./
+    mv libexec/osu-micro-benchmarks/mpi/pt2pt ./
+    mv libexec/osu-micro-benchmarks/mpi/startup ./
+    rm -rf libexec
+
+    # Set paths to OSU Microbenchmarks binaries
+    export PATH="/opt/omb-5.6.2/collective:${PATH}"
+    export PATH="/opt/omb-5.6.2/one-sided:${PATH}"
+    export PATH="/opt/omb-5.6.2/pt2pt:${PATH}"
+    export PATH="/opt/omb-5.6.2/startup:${PATH}"
 
     # Install MEEP dependencies
     apt-get -y install libopenblas-base
     apt-get -y install libopenblas-dev
     apt-get -y install libgmp-dev
     apt-get -y install libgsl-dev
-    apt-get -y install libpng16-dev
+    apt-get -y install libpng-dev
     apt-get -y install swig
     apt-get -y install guile-2.0-dev
-    apt-get -y install python-dev
-    apt-get -y intaall python-pip
-    apt-get -y install python-pkgconfig
-    apt-get -y install python-numpy
-    apt-get -y install python-scipy
-    apt-get -y install cython
+    apt-get -y install python3-dev
+    apt-get -y install python3-pip
+    apt-get -y install python3-pkgconfig
+    apt-get -y install python3-numpy
+    apt-get -y install python3-scipy
+    apt-get -y install python3-matplotlib
+    apt-get -y install cython3
+    apt-get -y install ffmpeg
 
     cd /opt
 
-    wget https://github.com/stevengj/harminv/archive/v1.4.1.tar.gz
-    tar -xzvf v1.4.1.tar.gz
+    # Download, build, and install Harminv
+    wget https://github.com/NanoComp/harminv/releases/download/v1.4.1/harminv-1.4.1.tar.gz
+    tar -xf harminv-1.4.1.tar.gz
     cd harminv-1.4.1
-    sh autogen.sh --prefix='/opt/harminv-1.4.1' --enable-shared
+    ./configure --prefix='/opt/harminv-1.4.1' --enable-shared
     make
     make install
-
+  
     export PATH="/opt/harminv-1.4.1/bin:${PATH}"
     export LD_LIBRARY_PATH="/opt/harminv-1.4.1/lib:${LD_LIBRARY_PATH}"
 
-    cd ../
+    cd /opt
 
-    wget https://github.com/stevengj/libctl/archive/v4.1.3.tar.gz
-    tar -xzvf v4.1.3.tar.gz
-    cd libctl-4.1.3
-    sh autogen.sh --prefix='/opt/libctl-4.1.3' --enable-shared
+    # Download, build, and install libctl
+    wget https://github.com/NanoComp/libctl/releases/download/v4.5.0/libctl-4.5.0.tar.gz
+    tar -xf libctl-4.5.0.tar.gz
+    cd libctl-4.5.0
+    ./configure --prefix='/opt/libctl-4.5.0' --enable-shared
     make
     make install
 
-    export PATH="/opt/libctl-4.1.3/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/libctl-4.1.3/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/libctl-4.5.0/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/libctl-4.5.0/lib:${LD_LIBRARY_PATH}"
 
-    cd ../
+    cd /tmp
 
+    # Download, build and install zlib
     wget http://zlib.net/zlib-1.2.11.tar.gz
-    tar -xzvf zlib-1.2.11.tar.gz
+    tar -xf zlib-1.2.11.tar.gz
     cd zlib-1.2.11
     ./configure --prefix='/opt/zlib-1.2.11'
     make
@@ -186,96 +224,101 @@ OSVersion: xenial
 
     export LD_LIBRARY_PATH="/opt/zlib-1.2.11/lib:${LD_LIBRARY_PATH}"
 
-    cd ../
+    cd /tmp
 
+    # Download, build, and install HDF5
     wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.1/src/hdf5-1.10.1.tar.gz
-    tar -xzvf hdf5-1.10.1.tar.gz
+    tar -xf hdf5-1.10.1.tar.gz
     cd hdf5-1.10.1
-    ./configure CC=mpicc CXX=mpic++ --enable-parallel --enable-fortran --enable-shared --with-zlib='/opt/zlib-1.2.11'
+    ./configure CC=mpicc CXX=mpic++ --prefix='/opt/hdf5-1.10.1' --enable-parallel --enable-fortran --enable-shared --with-zlib='/opt/zlib-1.2.11'
     make
     make install
 
     export PATH="/opt/hdf5-1.10.1/hdf5/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/hdf5-1.10.1/hdf5/lib:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="/opt/hdf5-1.10.1/lib:${LD_LIBRARY_PATH}"
 
-    cd ../
+    cd /tmp
 
-    wget https://github.com/stevengj/h5utils/releases/download/1.13/h5utils-1.13.tar.gz
-    tar -xzvf h5utils-1.13.tar.gz
-    cd h5utils-1.13
-    ./configure CC='mpicc' CPPFLAGS='-I/opt/hdf5-1.10.1/hdf5/include' LDFLAGS='-L/opt/hdf5-1.10.1/hdf5/lib' --prefix='/opt/h5utils-1.13'
+    # Download, build, and install h5utils
+    wget https://github.com/NanoComp/h5utils/releases/download/1.13.1/h5utils-1.13.1.tar.gz
+    tar -xf h5utils-1.13.1.tar.gz
+    cd h5utils-1.13.1
+    ./configure CC='mpicc' CPPFLAGS='-I/opt/hdf5-1.10.1/include' LDFLAGS='-L/opt/hdf5-1.10.1/lib' --prefix='/opt/h5utils-1.13.1'
     make
     make install
 
-    export PATH="/opt/h5utils-1.13/bin:${PATH}"
+    export PATH="/opt/h5utils-1.13.1/bin:${PATH}"
 
-    cd ../
+    cd /tmp
 
+    # Download, build, and install FFTW3
     wget http://www.fftw.org/fftw-3.3.7.tar.gz
-    tar -xzvf fftw-3.3.7.tar.gz
+    tar -xf fftw-3.3.7.tar.gz
     cd fftw-3.3.7
     ./configure CC='mpicc' CFLAGS='-fPIC' --prefix='/opt/fftw-3.3.7' --enable-avx2 --enable-threads --enable-openmp --enable-mpi
     make
     make install
-
+    
     export PATH="/opt/fftw-3.3.7/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/fftw-3.3.7/lib:{LD_LIBRARY_PATH}"
-
-    cd ../
-
-    #wget https://github.com/stevengj/mpb/archive/v1.6.2.tar.gz
-    #tar -xzvf v1.6.2.tar.gz
-    #cd mpb-1.6.2
-    git clone https://github.com/stevengj/mpb.git
-    cd mpb
-    sh autogen.sh CC='mpicc' CXX='mpic++' CPPFLAGS='-I/opt/hdf5-1.10.1/hdf5/include -I/opt/libctl-4.1.3/include -I/opt/fftw-3.3.7/include' LDFLAGS='-L/opt/hdf5-1.10.1/hdf5/lib -L/opt/libctl-4.1.3/lib -L/opt/fftw-3.3.7/lib' --prefix='/opt/mpb-1.6.2' --with-libctl='/opt/libctl-4.1.3' --enable-shared --with-openmp
-    make
-    make install
-    make distclean
-    sh autogen.sh CC='mpicc' CXX='mpic++' CPPFLAGS='-I/opt/hdf5-1.10.1/hdf5/include -I/opt/libctl-4.1.3/include -I/opt/fftw-3.3.7/include' LDFLAGS='-L/opt/hdf5-1.10.1/hdf5/lib -L/opt/libctl-4.1.3/lib -L/opt/fftw-3.3.7/lib' --prefix='/opt/mpb-1.6.2' --with-libctl='/opt/libctl-4.1.3' --enable-shared --with-mpi
-    make
-    make install
-
-    #cd /opt/mpb-1.6.2/include
-    #ln -s mpb_mpi.h mpb.h
-
-    #cd /opt/mpb-1.6.2/lib
-    #ln -s libmpb_mpi.so.1.0.0 libmpb.so.1
-    #ln -s libmpb_mpi.so.1.0.0 libmpb.so
-    #ln -s libmpb_mpi.la libmpb.la
-    #ln -s libmpb_mpi.a libmpb.a
-
-    export PATH="/opt/mpb-1.6.2/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/mpb-1.6.2/lib:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="/opt/fftw-3.3.7/lib:${LD_LIBRARY_PATH}"
 
     cd /opt
 
-    wget https://bitbucket.org/mpi4py/mpi4py/downloads/mpi4py-3.0.0.tar.gz
-    tar -xzvf mpi4py-3.0.0.tar.gz
-    cd mpi4py-3.0.0
-    python setup.py build
-    python setup.py install
-
-    cd ../ 
-
-    wget https://github.com/h5py/h5py/archive/2.7.1.tar.gz
-    tar -xzvf 2.7.1.tar.gz
-    cd h5py-2.7.1
-    export CC='mpicc'
-    python setup.py configure --hdf5='/opt/hdf5-1.10.1/hdf5' --hdf5-version='1.10.1' --mpi
-    python setup.py build
-    python setup.py install
-
-    cd ../
-
-    #wget https://github.com/stevengj/meep/archive/v1.6.0.tar.gz
-    #tar -xzvf v1.6.0.tar.gz
-    #cd meep-1.6.0
-    git clone https://github.com/stevengj/meep.git
-    cd meep
-    sh autogen.sh CC='mpicc' CXX='mpic++' CPPFLAGS='-I/opt/harminv-1.4.1/include -I/opt/hdf5-1.10.1/hdf5/include -I/opt/libctl-4.1.3/include -I/opt/fftw-3.3.7/include -I/opt/mpb-1.6.2/include' LDFLAGS='-L/opt/harminv-1.4.1/lib -L/opt/hdf5-1.10.1/hdf5/lib -L/opt/libctl-4.1.3/lib -L/opt/fftw-3.3.7/lib -L/opt/mpb-1.6.2/lib' --prefix='/opt/meep-1.6.0' --with-libctl='/opt/libctl-4.1.3' --enable-shared --with-mpi
+    # Download, build, and install mpb
+    wget https://github.com/NanoComp/mpb/releases/download/v1.10.0/mpb-1.10.0.tar.gz
+    tar -xf mpb-1.10.0.tar.gz
+    cd mpb-1.10.0
+    ./configure CC='mpicc' CXX='mpic++' CPPFLAGS='-I/opt/hdf5-1.10.1/hdf5/include -I/opt/libctl-4.5.0/include -I/opt/fftw-3.3.7/include' LDFLAGS='-L/opt/hdf5-1.10.1/hdf5/lib -L/opt/libctl-4.5.0/lib -L/opt/fftw-3.3.7/lib' --prefix='/opt/mpb-1.10.0' --with-libctl='/opt/libctl-4.5.0' --enable-shared --with-openmp
     make
     make install
+    make distclean
+    ./configure CC='mpicc' CXX='mpic++' CPPFLAGS='-I/opt/hdf5-1.10.1/hdf5/include -I/opt/libctl-4.5.0/include -I/opt/fftw-3.3.7/include' LDFLAGS='-L/opt/hdf5-1.10.1/hdf5/lib -L/opt/libctl-4.5.0/lib -L/opt/fftw-3.3.7/lib' --prefix='/opt/mpb-1.10.0' --with-libctl='/opt/libctl-4.5.0' --enable-shared --with-mpi
+    make
+    make install
+
+    export PATH="/opt/mpb-1.10.0/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/mpb-1.10.0/lib:${LD_LIBRARY_PATH}"
+
+    cd /tmp
+
+    # Download, build, and install mpi4py
+    wget https://bitbucket.org/mpi4py/mpi4py/downloads/mpi4py-3.0.3.tar.gz
+    tar -xf mpi4py-3.0.3.tar.gz
+    cd mpi4py-3.0.3
+    python3 setup.py build
+    python3 setup.py install
+
+    cd /tmp
+
+    # Download, build, and install h5py
+    wget https://github.com/h5py/h5py/releases/download/2.10.0/h5py-2.10.0.tar.gz
+    tar -xf h5py-2.10.0.tar.gz
+    cd h5py-2.10.0
+    export CC='mpicc'
+    python setup.py configure --hdf5='/opt/hdf5-1.10.1' --hdf5-version='1.10.1' --mpi
+    python3 setup.py build
+    python3 setup.py install
+
+    cd /opt
+
+    # Dowload, build, and install MEEP
+    wget https://github.com/NanoComp/meep/releases/download/v1.13.1/meep-1.13.1.tar.gz
+    tar -xf meep-1.13.1.tar.gz
+    cd meep-1.13.1
+    ./configure CC='mpicc' CXX='mpic++' PYTHON='python3' CPPFLAGS='-I/opt/harminv-1.4.1/include -I/opt/hdf5-1.10.1/include -I/opt/libctl-4.5.0/include -I/opt/fftw-3.3.7/include -I/opt/mpb-1.10.0/include' LDFLAGS='-L/opt/harminv-1.4.1/lib -L/opt/hdf5-1.10.1/lib -L/opt/libctl-4.5.0/lib -L/opt/fftw-3.3.7/lib -L/opt/mpb-1.10.0/lib' --prefix='/opt/meep-1.13.1' --with-libctl='/opt/libctl-4.5.0' --enable-shared --with-mpi
+    make
+    make install
+
+    export PATH="/opt/meep-1.13.1/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/meep-1.13.1/lib:${LD_LIBRARY_PATH}"
+    export PYTHONPATH='/opt/meep-1.13.1/lib/python3.6/site-packages'
+
+    # Clean up /tmp directory
+    cd /tmp
+    rm Miniconda3-latest-Linux-x86_64.sh
+    rm *.deb
+    rm -rf openmpi-3.1.4*
+    rm -rf osu-micro-benchmarks-5.6.2*
 
     # Update database for mlocate
     updatedb
@@ -285,25 +328,3 @@ OSVersion: xenial
 %runscript
 
 %test
-    
-    # Test MEEP (and MPB) with an example calculation
-
-    #export PATH="/opt/openmpi-1.8.4/bin:${PATH}"
-    #export LD_LIBRARY_PATH="/opt/openmpi-1.8.4/lib:${LD_LIBRARY_PATH}"
-    #export PATH="/opt/harminv-1.4.1/bin:${PATH}"
-    #export LD_LIBRARY_PATH="/opt/harminv-1.4.1/lib:${LD_LIBRARY_PATH}"
-    #export PATH="/opt/libctl-4.1.3/bin:${PATH}"
-    #export LD_LIBRARY_PATH="/opt/libctl-4.1.3/lib:${LD_LIBRARY_PATH}"
-    #export LD_LIBRARY_PATH="/opt/zlib-1.2.11/lib:${LD_LIBRARY_PATH}"
-    #export PATH="/opt/hdf5-1.10.1/hdf5/bin:${PATH}"
-    #export LD_LIBRARY_PATH="/opt/hdf5-1.10.1/hdf5/lib:${LD_LIBRARY_PATH}"
-    #export PATH="/opt/h5utils-1.13/bin:${PATH}"
-    #export PATH="/opt/fftw-3.3.7/bin:${PATH}"
-    #export LD_LIBRARY_PATH="/opt/fftw-3.3.7/lib:{LD_LIBRARY_PATH}"
-    #export PATH="/opt/mpb-1.6.2/bin:${PATH}"
-    #export LD_LIBRARY_PATH="/opt/mpb-1.6.2/lib:${LD_LIBRARY_PATH}"
-    #export PATH="/opt/meep-1.6.0/bin:${PATH}"
-    #export LD_LIBRARY_PATH="/opt/meep-1.6.0/lib:${LD_LIBRARY_PATH}"
-
-    #time -p meep /opt/meep-1.6.0/scheme/examples/parallel-wvgs-force.ctl
-    #time -p mpirun -np 2 meep /opt/meep-1.6.0/scheme/examples/parallel-wvgs-force.ctl
