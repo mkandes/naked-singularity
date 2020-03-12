@@ -14,7 +14,7 @@ OSVersion: bionic
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20200309
+    LAST_UPDATED 20200312
 
 %setup
 
@@ -295,7 +295,7 @@ w
     tar -xf h5py-2.10.0.tar.gz
     cd h5py-2.10.0
     export CC='mpicc'
-    python setup.py configure --hdf5='/opt/hdf5-1.10.1' --hdf5-version='1.10.1' --mpi
+    python3 setup.py configure --hdf5='/opt/hdf5-1.10.1' --hdf5-version='1.10.1' --mpi
     python3 setup.py build
     python3 setup.py install
 
