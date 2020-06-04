@@ -28,3 +28,21 @@
 [submodule "ubuntu-openmpi"]
 	path = ubuntu-openmpi
 	url = https://github.com/mkandes/ubuntu-openmpi.git
+[submodule "beast"]
+	path = beast
+	url = https://github.com/mkandes/beast.git
+[submodule "beast2"]
+	path = beast2
+	url = https://github.com/mkandes/beast2.git
+[submodule "fenics"]
+	path = fenics
+	url = https://github.com/mkandes/fenics.git
+[submodule "mxnet"]
+	path = mxnet
+	url = https://github.com/mkandes/mxnet.git
+[submodule "pytorch"]
+	path = pytorch
+	url = https://github.com/mkandes/pytorch.git
+[submodule "tensorflow"]
+	path = tensorflow
+	url = https://github.com/mkandes/tensorflow.git

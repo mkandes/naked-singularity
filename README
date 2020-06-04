@@ -8,18 +8,33 @@ DESCRIPTION
     around the software applications, frameworks, and libraries you need
     to run on high-performance computing systems.
 
-    * http://singularity.lbl.gov/
+    * https://sylabs.io/guides/latest/user-guide/
 
 USAGE
 
      1. Install Singularity on your local desktop, laptop, or virtual 
-        machine.
+        machine. 
 
             ./naked-singularity.sh install
 
-     2. Build a simple Ubuntu Singularity container.
+        Note, however, this install command and the uninstall command 
+        below are currently only vaild for Singularity v2.6.1 or less.
+        An update for the Singularity v3.X.X series is in progress.
+
+     2. Build a simple Ubuntu Singularity container. 
 
             ./naked-singularity.sh build -s comet -a ubuntu -d ubuntu.def 
+
+        This build command is currently only valid for the older 
+        versions of the repository's definition files. All new 
+        definition files hosted as git submodules should be built 
+        directly using Singularity.
+
+            sudo singularity build ubuntu.sif ubuntu/Singularity
+
+        A number of the containers are also now hosted at Singularity Hub.
+
+            singularity pull shub://mkandes/ubuntu
 
      3. Uninstall Singularity from your local desktop, laptop, or 
         virtual machine.
@@ -28,7 +43,11 @@ USAGE
 
 STATUS
 
-    A work in progress. 
+    A work in progress.
+
+    IMPORTANT: The repository is currently undergoing a restructuring. 
+               All new definition files will be hosted as git submodules 
+               of the main repository here.
 
 CONTRIBUTE
 
@@ -46,8 +65,8 @@ AUTHOR
 
 VERSION
 
-    0.9.9
+    1.0.0
 
 LAST UPDATED
 
-    Wednesday, June 3rd, 2020
+    Thursday, June 4th, 2020
