@@ -1,5 +1,5 @@
 Bootstrap: shub
-From: mkandes/ubuntu:ubuntu-18.04
+From: mkandes/naked-singularity:ubuntu-18.04
 
 %labels
 
@@ -10,7 +10,7 @@ From: mkandes/ubuntu:ubuntu-18.04
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20200714
+    LAST_UPDATED 20201226
 
 %setup
 
