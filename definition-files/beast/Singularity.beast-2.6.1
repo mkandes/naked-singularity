@@ -1,0 +1,127 @@
+Bootstrap: shub
+From: mkandes/ubuntu-cuda:latest
+
+%labels
+
+    APPLICATION_NAME beast2
+    APPLICATION_VERSION 2.6.1
+    APPLICATION_URL https://www.beast2.org
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20200520
+
+%setup
+
+%environment
+
+    # Set LD_LIBRARY_PATH to beagle
+    export LD_LIBRARY_PATH="/opt/beagle/lib:${LD_LIBRARY_PATH}"
+
+    # Set PATH to beast2
+    export PATH="/opt/beast2/bin:${PATH}"
+
+    # Set PATH to tracer
+    export PATH="/opt/tracer/bin:${PATH}"
+
+    # Set PATH to figtree
+    export PATH="/opt/figtree/bin:${PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='bionic'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set path to miniconda
+    export PATH="/opt/miniconda3/bin:${PATH}"
+  
+    # Set paths to CUDA binaries and libraries
+    export CUDA_HOME='/usr/local/cuda-10.1'
+    export PATH="${CUDA_HOME}/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="${CUDA_HOME}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+
+    # Upgrade all packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    # Install beast dependencies
+    apt-get -y install default-jdk
+    apt-get -y install default-jdk-doc
+    apt-get -y install ant
+
+    cd /tmp
+
+    # Download, build, and install beagle library
+    git clone https://github.com/beagle-dev/beagle-lib.git
+    cd /tmp/beagle-lib
+    git checkout v3.1.2
+    ./autogen.sh
+    ./configure --prefix=/opt/beagle
+    make install
+    export LD_LIBRARY_PATH="/opt/beagle/lib:${LD_LIBRARY_PATH}"
+    make check
+
+    cd /tmp 
+
+    # Download, build, and install beast2
+    git clone https://github.com/CompEvol/beast2.git
+    cd /tmp/beast2
+    git checkout v2.6.1
+    export JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
+    ant linux
+    mv /tmp/beast2/release/Linux/beast /opt/beast2
+    cd /opt/beast2/bin
+    sed -i 's/-Xms256m -Xmx8g/-Xms256m -Xmx15g/' beast
+
+    # Set PATH to beast
+    export PATH="/opt/beast2/bin:${PATH}"
+
+    cd /tmp
+
+    # Download, build, and install tracer
+    git clone https://github.com/beast-dev/tracer.git
+    cd /tmp/tracer
+    git checkout v1.7.1
+    ant linux
+    mv /tmp/tracer/release/Linux/Tracer_v1.7.1 /opt/tracer
+
+    # Set PATH to tracer
+    export PATH="/opt/tracer/bin:${PATH}"
+
+    cd /tmp
+
+    # Download, build, and install figtree
+    git clone https://github.com/rambaut/figtree.git
+    cd /tmp/figtree
+    git checkout v1.4.4
+    sed -i 's/linux_unix_Release/linux/g' build.xml
+    ant linux
+    mv /tmp/figtree/release/Linux/FigTree_v1.4.4 /opt/figtree
+    cd /opt/figtree/bin
+    sed -i "s/lib/\/opt\/figtree\/lib/g" figtree
+    chmod +x figtree
+
+    # Set PATH to figtree
+    export PATH="/opt/figtree/bin:${PATH}"
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test

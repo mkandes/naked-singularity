@@ -1,0 +1,77 @@
+Bootstrap: shub
+From: mkandes/ubuntu-openmpi:ubuntu-18.04-openmpi-3.1.4
+
+%labels
+
+    APPLICATION_NAME IOR
+    APPLICATION_VERSION 3.3.0rc1
+    APPLICATION_URL https://ior.readthedocs.io
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20200805
+
+%setup
+
+%environment
+
+    # Set IOR version number, root and installation directories
+    export IOR_VERSION='3.3.0rc1'
+    export IOR_ROOT_DIR='/opt/ior'
+    export IOR_INSTALL_DIR="${IOR_ROOT_DIR}/${IOR_VERSION}"
+
+    # Set path to IOR binary and libraries
+    export PATH="${IOR_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${IOR_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='bionic'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="/opt/openmpi-3.1.4/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/openmpi-3.1.4/lib:${LD_LIBRARY_PATH}"
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    cd /tmp
+
+    # Set IOR version number, root and installation directories
+    export IOR_VERSION='3.3.0rc1'
+    export IOR_ROOT_DIR='/opt/ior'
+    export IOR_INSTALL_DIR="${IOR_ROOT_DIR}/${IOR_VERSION}"
+
+    # Download, build, and install IOR
+    git clone https://github.com/hpc/ior.git
+    cd ior 
+    git checkout "${IOR_VERSION}"
+    ./bootstrap
+    ./configure --prefix="${IOR_INSTALL_DIR}"
+    make
+    make install
+
+    # Cleanup
+    rm -rf /tmp/ior
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test

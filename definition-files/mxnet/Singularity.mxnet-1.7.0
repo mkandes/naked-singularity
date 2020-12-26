@@ -1,0 +1,110 @@
+Bootstrap: shub
+From: mkandes/ubuntu-cuda-openmpi:latest
+
+%labels
+
+    APPLICATION_NAME mxnet
+    APPLICATION_VERSION 1.7.0
+    APPLICATION_URL https://mxnet.io
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20200915
+
+%setup
+
+%environment
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='bionic'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set paths to CUDA binaries and libraries
+    export CUDA_HOME='/usr/local/cuda-10.1'
+    export PATH="${CUDA_HOME}/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="${CUDA_HOME}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="/opt/openmpi-3.1.4/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/openmpi-3.1.4/lib:${LD_LIBRARY_PATH}"
+
+    # Upgrade all packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    # Install python3 and some common core packages 
+    apt-get -y install python3-dev
+    apt-get -y install python3-pip
+    apt-get -y install python3-setuptools
+    apt-get -y install python3-virtualenv
+
+    # Install MXNet dependencies and prerequisites
+    apt-get -y install build-essential
+    apt-get -y install ccache
+    apt-get -y install cmake
+    apt-get -y install git
+    apt-get -y install ninja-build
+    apt-get -y install libopenblas-dev
+    apt-get -y install liblapack-dev
+    apt-get -y install libopencv-dev
+    apt-get -y install python3-opencv
+    apt-get -y install libjemalloc-dev
+    
+    cd /opt
+
+    # Download, build, and install MXNet core (shared) library
+    git clone --recursive https://github.com/apache/incubator-mxnet.git
+    mv incubator-mxnet mxnet-1.7.0
+    cd mxnet-1.7.0
+    git checkout 1.7.0
+    git submodule sync
+    git submodule update --init --recursive
+    sed -i 's/KNOWN_CUDA_ARCHS := 30 35 50 52 60 61 70 75/KNOWN_CUDA_ARCHS := 30 35 37 50 52 60 61 70 75/g' Makefile
+    make USE_BLAS='openblas' USE_LAPACK_PATH='/usr/lib/x86_64-linux-gnu' USE_OPENMP=1 USE_JEMALLOC=0 USE_CUDA=1 USE_CUDA_PATH=/usr/local/cuda USE_CUDNN=1 USE_NCCL=1 USE_MKLDNN=0 USE_OPENCV=1 USE_DIST_KVSTORE=1
+
+    # Install common mathematical and scientific python3 packages
+    apt-get -y install python3-numpy
+    apt-get -y install python3-scipy
+    apt-get -y install python3-pandas
+    apt-get -y install python3-sklearn
+    apt-get -y install python3-skimage
+    apt-get -y install python3-statsmodels
+    apt-get -y install python3-matplotlib
+    apt-get -y install python3-plotly
+    apt-get -y install python3-seaborn
+    apt-get -y install python3-astropy
+    apt-get -y install python3-biopython
+    apt-get -y install python3-h5py
+    apt-get -y install python3-nltk
+    apt-get -y install python3-sympy
+
+    # Install JupyterLab
+    apt-get -y install jupyter
+    pip3 install jupyterlab
+
+    # Install MXNet python3 bindings
+    cd python
+    python3 setup.py install
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test

@@ -1,0 +1,90 @@
+Bootstrap: shub
+From: mkandes/ubuntu-openmpi:ubuntu-18.04-openmpi-3.1.6
+
+%labels
+
+    APPLICATION_NAME OSU Microbenchmarks
+    APPLICATION_VERSION 5.6.3
+    APPLICATION_URL http://mvapich.cse.ohio-state.edu/benchmarks
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20200711
+
+%setup
+
+%environment
+
+    # Set paths to OSU Microbenchmarks binaries
+    export PATH="/opt/omb-5.6.3/collective:${PATH}"
+    export PATH="/opt/omb-5.6.3/one-sided:${PATH}"
+    export PATH="/opt/omb-5.6.3/pt2pt:${PATH}"
+    export PATH="/opt/omb-5.6.3/startup:${PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='bionic'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set Mellanox OFED version number, operating system, and hardware
+    # platform
+    export MLNX_OFED_VERSION='4.7-3.2.9.0'
+    export MLNX_OS_VERSION='ubuntu18.04'
+    export MLNX_PLATFORM='x86_64'
+
+    # Set OpenMPI major, minor, and revision versions, root and
+    # installation directories
+    export OPENMPI_MAJOR_VERSION=3
+    export OPENMPI_MINOR_VERSION=1
+    export OPENMPI_REVISION_VERSION=6
+    export OPENMPI_VERSION="${OPENMPI_MAJOR_VERSION}.${OPENMPI_MINOR_VERSION}.${OPENMPI_REVISION_VERSION}"
+    export OPENMPI_ROOT_DIR='/opt/openmpi'
+    export OPENMPI_INSTALL_DIR="${OPENMPI_ROOT_DIR}/${OPENMPI_VERSION}"
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="${OPENMPI_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${OPENMPI_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    cd /tmp
+
+    # Download, build, and install OSU Microbenchmarks
+    wget http://mvapich.cse.ohio-state.edu/download/mvapich/osu-micro-benchmarks-5.6.3.tar.gz
+    tar -xf osu-micro-benchmarks-5.6.3.tar.gz
+    cd osu-micro-benchmarks-5.6.3
+    ./configure --prefix='/opt/omb-5.6.3' CC='mpicc' CXX='mpicxx'
+    make
+    make install
+
+    # Reorganize OSU Microbenchmarks directory structure
+    cd /opt/omb-5.6.3
+    mv libexec/osu-micro-benchmarks/mpi/collective ./
+    mv libexec/osu-micro-benchmarks/mpi/one-sided ./
+    mv libexec/osu-micro-benchmarks/mpi/pt2pt ./
+    mv libexec/osu-micro-benchmarks/mpi/startup ./
+    rm -rf libexec
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test

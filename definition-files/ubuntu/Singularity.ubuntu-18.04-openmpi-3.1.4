@@ -1,0 +1,94 @@
+Bootstrap: shub
+From: mkandes/ubuntu:ubuntu-18.04
+
+%labels
+
+    APPLICATION_NAME ubuntu + openmpi
+    APPLICATION_VERSION 18.04 + 3.1.4
+    APPLICATION_URL https://www.open-mpi.org
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20200809
+
+%setup
+
+%environment
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="/opt/openmpi-3.1.4/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/openmpi-3.1.4/lib:${LD_LIBRARY_PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='bionic'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    # Install basic drivers for user space access to Ethernet, RDMA,
+    # and Infiniband. See https://community.mellanox.com/docs/DOC-2431
+    apt-get -y install dkms
+
+    apt-get -y install infiniband-diags
+    apt-get -y install libibverbs-dev
+    apt-get -y install ibacm
+    apt-get -y install librdmacm-dev
+    #apt-get -y install libmlx4-dev
+    #apt-get -y install libmlx5-dev
+    apt-get -y install mstflint
+    #apt-get -y install libibcm-dev
+    apt-get -y install libibmad-dev
+    apt-get -y install libibumad-dev
+    apt-get -y install opensm
+    apt-get -y install srptools
+
+    # Install additional tools
+    apt-get -y install ibutils
+    apt-get -y install ibverbs-utils
+    apt-get -y install rdmacm-utils
+    apt-get -y install perftest
+    apt-get -y install numactl
+    apt-get -y install libnuma-dev
+
+    # Install libnl
+    apt-get -y install libnl-3-200
+    apt-get -y install libnl-route-3-200
+    apt-get -y install libnl-route-3-dev
+    apt-get -y install libnl-utils
+
+    # Install OpenMPI dependencies
+    apt-get -y install zlib1g-dev
+
+    cd /tmp
+
+    # Download, build, and install OpenMPI
+    wget https://download.open-mpi.org/release/open-mpi/v3.1/openmpi-3.1.4.tar.gz
+    tar -xf openmpi-3.1.4.tar.gz
+    cd openmpi-3.1.4
+    ./configure --prefix=/opt/openmpi-3.1.4
+    make all install
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test

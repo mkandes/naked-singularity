@@ -1,0 +1,104 @@
+Bootstrap: shub
+From: mkandes/ubuntu-cuda:ubuntu-18.04-cuda-10.1.168
+
+%labels
+
+    APPLICATION_NAME gromacs
+    APPLICATION_VERSION 2020.3
+    APPLICATION_URL http://www.gromacs.org
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20200919
+
+%setup
+
+%environment
+
+    # Set GROMACS version number, build type, root and installation
+    # directories as well as its source repository URL
+    export GROMACS_VERSION='2020.3'
+    export GROMACS_BUILD='tmpi-cuda'
+    export GROMACS_ROOT_DIR='/opt/gromacs'
+    export GROMACS_INSTALL_DIR="${GROMACS_ROOT_DIR}/${GROMACS_VERSION}"
+    export GROMACS_ROOT_URL='http://ftp.gromacs.org/pub'
+
+    # Source GROMACS environment script
+    . "${GROMACS_INSTALL_DIR}/bin/GMXRC" 
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='bionic'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set paths to CUDA binaries and libraries
+    export CUDA_HOME='/usr/local/cuda-10.1'
+    export PATH="${CUDA_HOME}/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="${CUDA_HOME}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    # Set GROMACS version number, build type, root and installation 
+    # directories as well as its source repository URL
+    export GROMACS_VERSION='2020.3'
+    export GROMACS_BUILD='tmpi-cuda'
+    export GROMACS_ROOT_DIR='/opt/gromacs'
+    export GROMACS_INSTALL_DIR="${GROMACS_ROOT_DIR}/${GROMACS_VERSION}"
+    export GROMACS_ROOT_URL='http://ftp.gromacs.org/pub'
+
+    cd /tmp
+
+    # Download, build, and install GROMACS
+    wget "${GROMACS_ROOT_URL}/gromacs/gromacs-${GROMACS_VERSION}.tar.gz"
+    tar -xf "gromacs-${GROMACS_VERSION}.tar.gz"
+    cd "gromacs-${GROMACS_VERSION}"
+    mkdir -p build
+    cd build
+    cmake .. \
+      -DCMAKE_C_COMPILER=gcc \
+      -DCMAKE_CXX_COMPILER=g++ \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_INSTALL_PREFIX="${GROMACS_INSTALL_DIR}" \
+      -DGMX_PREFER_STATIC_LIBS=ON \
+      -DBUILD_SHARED_LIBS=OFF \
+      -DGMX_EXTERNAL_BLAS=OFF \
+      -DGMX_EXTERNAL_BOOST=OFF \
+      -DGMX_EXTERNAL_LAPACK=OFF \
+      -DGMX_FFT_LIBRARY=fftw3 \
+      -DGMX_BUILD_OWN_FFTW=ON \
+      -DGMX_DOUBLE=OFF \
+      -DGMX_SIMD=AVX_512 \
+      -DGMX_MPI=OFF \
+      -DGMX_OPENMP=OFF \
+      -DGMX_GPU=ON \
+      -DGMX_CUDA_TARGET_COMPUTE='70' \
+      -DGMX_CUDA_TARGET_SM='70' \
+      -DREGRESSIONTEST_DOWNLOAD=OFF
+    make
+    make install
+
+    # Cleanup
+    rm -rf "/tmp/gromacs-${GROMACS_VERSION}"
+    rm "gromacs-${GROMACS_VERSION}.tar.gz"
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test

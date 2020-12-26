@@ -1,0 +1,80 @@
+Bootstrap: shub
+From: mkandes/ubuntu:latest
+
+%labels
+
+    APPLICATION_NAME xcrysden
+    APPLICATION_VERSION 1.6.2
+    APPLICATION_URL http://www.xcrysden.org
+
+    SINGULARITY_VERSION 2.6.1
+    SINGULARITY_IMAGE_SIZE 2048
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20200413
+
+%setup
+
+%environment
+ 
+    # Set path to XCrySDen
+    export PATH="/opt/xcrysden-1.6.2:${PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='bionic'
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set path to miniconda
+    export PATH="/opt/miniconda3/bin:${PATH}"
+
+    # Install XCrySDen dependencies
+    apt-get -y install xorg
+    apt-get -y install xorg-dev
+    apt-get -y install xorg-docs
+    apt-get -y install xorg-docs-core
+    apt-get -y install tcl
+    apt-get -y install tcl-dev
+    apt-get -y install tcl-doc
+    apt-get -y install tk
+    apt-get -y install tk-dev
+    apt-get -y install tk-doc 
+    apt-get -y install libtogl-dev
+    apt-get -y install bwidget
+    apt-get -y install libfftw3-dev
+    apt-get -y install freeglut3-dev
+
+    cd /opt
+
+    # Download, build, and install XCrySDen
+    wget http://www.xcrysden.org/download/xcrysden-1.6.2.tar.gz
+    tar -xf xcrysden-1.6.2.tar.gz
+    cd xcrysden-1.6.2
+    cp system/Make.sys-shared Make.sys
+    make all
+    cd ../
+    rm xcrysden-1.6.2.tar.gz
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test

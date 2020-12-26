@@ -1,0 +1,190 @@
+Bootstrap: shub
+From: mkandes/ubuntu-cuda-openmpi:latest
+
+%labels
+
+    APPLICATION_NAME pytorch
+    APPLICATION_VERSION 1.5.0
+    APPLICATION_URL https://pytorch.org
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20200511
+
+%setup
+
+%environment
+
+    # Set default miniconda environment
+    export PATH="/opt/miniconda3/bin:${PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='bionic'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set paths to CUDA binaries and libraries
+    export CUDA_HOME='/usr/local/cuda-10.1'
+    export PATH="${CUDA_HOME}/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="${CUDA_HOME}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="/opt/openmpi-3.1.4/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/openmpi-3.1.4/lib:${LD_LIBRARY_PATH}"
+
+    # Set paths to OSU Microbenchmarks binaries
+    export PATH="/opt/omb-5.6.2/collective:${PATH}"
+    export PATH="/opt/omb-5.6.2/one-sided:${PATH}"
+    export PATH="/opt/omb-5.6.2/pt2pt:${PATH}"
+    export PATH="/opt/omb-5.6.2/startup:${PATH}"
+
+    # Upgrade all packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    # Install miniconda3
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    chmod +x Miniconda3-latest-Linux-x86_64.sh
+    ./Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda3
+
+    # Setup conda environment
+    export PATH="/opt/miniconda3/bin:${PATH}"
+    export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
+
+    # Install common python packages 
+    conda install -y jupyterlab
+    conda install -y numpy
+    conda install -y matplotlib
+    conda install -y pandas
+    conda install -y plotly
+    conda install -y scipy
+    conda install -y scikit-learn
+    conda install -y scikit-image
+    conda install -y seaborn
+    conda install -y statsmodels
+    conda install -y opencv
+
+    # Install GPU-accelerated python packages
+    conda install -y numba
+
+    # Install additional python packages
+    conda install -y astropy
+    conda install -y biopython
+    conda install -y h5py
+    conda install -y nltk
+    conda install -y sympy
+
+    # Install PyTorch dependencies 
+    conda install -y numpy
+    conda install -y ninja
+    conda install -y pyyaml
+    conda install -y mkl
+    conda install -y mkl-include
+    conda install -y setuptools
+    conda install -y cmake
+    conda install -y cffi
+    conda install -y spacy -c conda-forge
+    #conda install -y sox -c conda-forge
+    apt-get -y install libsox-dev
+
+    # Add LAPACK support for the GPU
+    conda install -y magma-cuda101 -c pytorch
+
+    cd /opt
+
+    # Download, build, and install PyTorch
+    git clone --recursive https://github.com/pytorch/pytorch
+    mv pytorch pytorch-1.5.0
+    cd pytorch-1.5.0
+    git checkout v1.5.0
+    git submodule sync
+    git submodule update --init --recursive
+
+    export CC='mpicc'
+    export CXX='mpicxx'
+    export CFLAGS='-mtune=generic'
+
+    export BLAS='MKL'
+    export USE_FBGEMM=1
+    export USE_MKLDNN=1
+    export USE_NNPACK=1
+    export USE_NUMPY=1
+    export USE_QNNPACK=1
+
+    export USE_DISTRIBUTED=1
+    export USE_IBVERBS=1
+    export USE_GLOO=1
+    export USE_MPI=1
+    export USE_C10D_MPI=1
+    export USE_NCCL=1
+    export USE_SYSTEM_NCCL=1
+    sed -i '77,80 s/^/#/' cmake/Modules/FindNCCL.cmake
+
+    export USE_OPENMP=1
+    export ATEN_THREADING='OMP'
+    export MKL_THREADING='OMP'
+
+    export TORCH_CUDA_ARCH_LIST='3.0;3.5;3.7;5.2;6.0;6.1;7.0;7.5'
+    export USE_CUDA=1
+    export USE_CUDNN=1
+
+    export USE_FFMPEG=0
+    export USE_OPENCV=1
+
+    python setup.py install
+
+    # Download and install vision package for PyTorch
+    git clone https://github.com/pytorch/vision.git
+    cd vision
+    git checkout v0.6.0
+    python setup.py install
+
+    cd ../
+
+    # Download and install text package for PyTorch
+    git clone https://github.com/pytorch/text.git
+    cd text
+    git checkout 0.6.0
+    python setup.py install
+
+    cd ../
+
+    # Download and install audio package for PyTorch
+    git clone https://github.com/pytorch/audio.git
+    cd audio
+    git checkout v0.5.0
+    python setup.py install
+
+    cd ../
+
+    # Download examples for PyTorch
+    git clone https://github.com/pytorch/examples.git
+
+    # Install fastai for PyTorch
+    git clone https://github.com/fastai/fastai
+    cd fastai
+    git checkout 1.0.61
+    tools/run-after-git-clone
+    pip install -e ".[dev]"
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test

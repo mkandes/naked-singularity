@@ -1,0 +1,94 @@
+Bootstrap: shub
+From: mkandes/ubuntu:ubuntu-18.04
+
+%labels
+
+    APPLICATION_NAME ubuntu + mvapich
+    APPLICATION_VERSION 18.04 + 2.3.2
+    APPLICATION_URL https://mvapich.cse.ohio-state.edu
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20200714
+
+%setup
+
+%environment
+
+    # Set paths to MVAPICH2 binaries and libraries
+    export PATH="/opt/mvapich2-2.3.2/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/mvapich2-2.3.2/lib:${LD_LIBRARY_PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='bionic'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    # Install basic drivers for user space access to Ethernet, RDMA,
+    # and Infiniband. See https://community.mellanox.com/docs/DOC-2431
+    apt-get -y install dkms
+    apt-get -y install infiniband-diags
+    apt-get -y install libibverbs-dev
+    apt-get -y install ibacm
+    apt-get -y install librdmacm-dev
+    #apt-get -y install libmlx4-dev
+    #apt-get -y install libmlx5-dev
+    apt-get -y install mstflint
+    #apt-get -y install libibcm-dev
+    apt-get -y install libibmad-dev
+    apt-get -y install libibumad-dev
+    apt-get -y install opensm
+    apt-get -y install srptools
+
+    # Install additional tools
+    apt-get -y install ibutils
+    apt-get -y install ibverbs-utils
+    apt-get -y install rdmacm-utils
+    apt-get -y install perftest
+    apt-get -y install numactl
+    apt-get -y install libnuma-dev
+
+    # Install libnl
+    apt-get -y install libnl-3-200
+    apt-get -y install libnl-route-3-200
+    apt-get -y install libnl-route-3-dev
+    apt-get -y install libnl-utils
+
+    # Install mvapich2 (build) dependencies
+    apt-get -y install bison
+
+    cd /tmp
+
+    # Download, build, and install mvapich2
+    wget http://mvapich.cse.ohio-state.edu/download/mvapich/mv2/mvapich2-2.3.2.tar.gz
+    tar -xzvf mvapich2-2.3.2.tar.gz
+    cd mvapich2-2.3.2
+    ./configure --prefix=/opt/mvapich2-2.3.2
+    make
+    make install
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test

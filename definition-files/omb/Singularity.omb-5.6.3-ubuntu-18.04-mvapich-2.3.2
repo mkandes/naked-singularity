@@ -1,0 +1,75 @@
+Bootstrap: shub
+From: mkandes/ubuntu-mvapich:ubuntu-18.04-mvapich-2.3.2
+
+%labels
+
+    APPLICATION_NAME OSU Microbenchmarks
+    APPLICATION_VERSION 5.6.3
+    APPLICATION_URL http://mvapich.cse.ohio-state.edu/benchmarks
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20200714
+
+%setup
+
+%environment
+
+    # Set paths to OSU Microbenchmarks binaries
+    export PATH="/opt/omb-5.6.3/collective:${PATH}"
+    export PATH="/opt/omb-5.6.3/one-sided:${PATH}"
+    export PATH="/opt/omb-5.6.3/pt2pt:${PATH}"
+    export PATH="/opt/omb-5.6.3/startup:${PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='bionic'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set paths to MVAPICH2 binaries and libraries
+    export PATH="/opt/mvapich2-2.3.2/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/mvapich2-2.3.2/lib:${LD_LIBRARY_PATH}"
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    cd /tmp
+
+    # Download, build, and install OSU Microbenchmarks
+    wget http://mvapich.cse.ohio-state.edu/download/mvapich/osu-micro-benchmarks-5.6.3.tar.gz
+    tar -xf osu-micro-benchmarks-5.6.3.tar.gz
+    cd osu-micro-benchmarks-5.6.3
+    ./configure --prefix='/opt/omb-5.6.3' CC='mpicc' CXX='mpicxx'
+    make
+    make install
+
+    # Reorganize OSU Microbenchmarks directory structure
+    cd /opt/omb-5.6.3
+    mv libexec/osu-micro-benchmarks/mpi/collective ./
+    mv libexec/osu-micro-benchmarks/mpi/one-sided ./
+    mv libexec/osu-micro-benchmarks/mpi/pt2pt ./
+    mv libexec/osu-micro-benchmarks/mpi/startup ./
+    rm -rf libexec
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test

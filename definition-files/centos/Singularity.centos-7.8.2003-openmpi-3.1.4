@@ -1,0 +1,93 @@
+Bootstrap: shub
+From: mkandes/centos:centos-7.8.2003
+
+%labels
+
+    APPLICATION_NAME centos + openmpi
+    APPLICATION_VERSION 7.8.2003 + 3.1.4
+    APPLICATION_URL https://www.open-mpi.org
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20200715
+
+%setup
+
+%environment
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="/opt/openmpi-3.1.4/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/openmpi-3.1.4/lib:${LD_LIBRARY_PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://mirror.centos.org/centos-7/7.8.2003/os/x86_64'
+
+    # Set operating system version
+    export OSVERSION='7'
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Update all software packages to their latest versions
+    yum -y check-update && yum -y update
+
+    # Install basic drivers for user space access to Ethernet, RDMA,
+    # and Infiniband. See https://community.mellanox.com/docs/DOC-2431
+    yum -y install dkms
+    yum -y install infiniband-diags
+    yum -y install infiniband-diags-devel
+    yum -y install libibverbs
+    yum -y install libibverbs-devel
+    yum -y install ibacm
+    yum -y install librdmacm
+    yum -y install librdmacm-devel
+    yum -y install libmlx4
+    yum -y install libmlx5
+    yum -y install mstflint
+    yum -y install libibcm
+    yum -y install libibmad
+    yum -y install libibmad-devel
+    yum -y install libibumad
+    yum -y install libibumad-devel
+    yum -y install opensm
+    yum -y install srptools
+
+    # Install additional tools
+    yum -y install ibutils
+    yum -y install libibverbs-utils
+    yum -y install librdmacm-utils
+    yum -y install perftest
+    yum -y install numactl
+
+    # Install libnl
+    yum -y install libnl3
+    yum -y install libnl3-devel
+
+    # Install OpenMPI dependencies
+    yum -y install zlib
+    yum -y install zlib-devel
+
+    cd /tmp
+
+    # Download, build, and install OpenMPI
+    wget https://download.open-mpi.org/release/open-mpi/v3.1/openmpi-3.1.4.tar.gz
+    tar -xzvf openmpi-3.1.4.tar.gz
+    cd openmpi-3.1.4
+    ./configure --prefix=/opt/openmpi-3.1.4
+    make all install
+
+    # Cleanup
+    package-cleanup -q --leaves | xargs -l1 yum -y remove
+    yum -y clean all
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test

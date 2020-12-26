@@ -1,0 +1,72 @@
+Bootstrap: shub
+From: mkandes/centos-mvapich:centos-7.8.2003-mvapich-2.3.2
+
+%labels
+
+    APPLICATION_NAME OSU Microbenchmarks
+    APPLICATION_VERSION 5.6.3
+    APPLICATION_URL http://mvapich.cse.ohio-state.edu/benchmarks
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20200716
+
+%setup
+
+%environment
+
+    # Set paths to OSU Microbenchmarks binaries
+    export PATH="/opt/omb-5.6.3/collective:${PATH}"
+    export PATH="/opt/omb-5.6.3/one-sided:${PATH}"
+    export PATH="/opt/omb-5.6.3/pt2pt:${PATH}"
+    export PATH="/opt/omb-5.6.3/startup:${PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://mirror.centos.org/centos-7/7.8.2003/os/x86_64'
+
+    # Set operating system version
+    export OSVERSION='7'
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Set paths to MVAPICH2 binaries and libraries
+    export PATH="/opt/mvapich2-2.3.2/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/mvapich2-2.3.2/lib:${LD_LIBRARY_PATH}"
+
+    # Update all software packages to their latest versions
+    yum -y check-update && yum -y update
+
+    cd /tmp
+
+    # Download, build, and install OSU Microbenchmarks
+    wget http://mvapich.cse.ohio-state.edu/download/mvapich/osu-micro-benchmarks-5.6.3.tar.gz
+    tar -xf osu-micro-benchmarks-5.6.3.tar.gz
+    cd osu-micro-benchmarks-5.6.3
+    ./configure --prefix='/opt/omb-5.6.3' CC='mpicc' CXX='mpicxx'
+    make
+    make install
+
+    # Reorganize OSU Microbenchmarks directory structure
+    cd /opt/omb-5.6.3
+    mv libexec/osu-micro-benchmarks/mpi/collective ./
+    mv libexec/osu-micro-benchmarks/mpi/one-sided ./
+    mv libexec/osu-micro-benchmarks/mpi/pt2pt ./
+    mv libexec/osu-micro-benchmarks/mpi/startup ./
+    rm -rf libexec
+
+    # Cleanup
+    package-cleanup -q --leaves | xargs -l1 yum -y remove
+    yum -y clean all
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test

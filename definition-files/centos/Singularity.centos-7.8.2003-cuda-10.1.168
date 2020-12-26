@@ -1,0 +1,468 @@
+Bootstrap: shub
+From: mkandes/centos:centos-7.8.2003
+
+%labels
+
+    APPLICATION_NAME centos + cuda
+    APPLICATION_VERSION 7.8.2003 + 10.1.168
+    APPLICATION_URL https://developer.nvidia.com/cuda-zone
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20201016
+
+%setup
+
+%environment
+
+    # Set paths to CUDA binaries and libraries
+    export CUDA_HOME='/usr/local/cuda-10.1'
+    export PATH="${CUDA_HOME}/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="${CUDA_HOME}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://mirror.centos.org/centos-7/7/os/x86_64'
+
+    # Set operating system version
+    export OSVERSION='7'
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Update all software packages to their latest versions
+    yum -y check-update && yum -y update
+
+    # Location of NVIDIA repositories
+    export NVIDIA_ROOT_URL='http://developer.download.nvidia.com/compute'
+    export CUDA_REPO_URL="${NVIDIA_ROOT_URL}/cuda/repos/rhel7/x86_64"
+    export ML_REPO_URL="${NVIDIA_ROOT_URL}/machine-learning/repos/rhel7/x86_64"
+
+    # Install NVIDIA package dependencies
+    yum -y install xorg-x11-server-Xorg
+    yum -y install xorg-x11-server-common
+    yum -y install xorg-x11-apps
+    yum -y install xorg-x11-utils
+    yum -y install xorg-x11-xauth
+    yum -y install xorg-x11-xkb-utils
+    yum -y install cmake
+    yum -y install make
+    yum -y install dkms
+    yum -y install kernel-headers
+    yum -y install glibc-devel
+    yum -y install glibc-headers
+    yum -y install glibc-utils
+    yum -y install libwayland-client
+    yum -y install libwayland-server
+    yum -y install pkgconfig
+    yum -y install libvdpau
+    yum -y install libva-vdpau-driver
+    yum -y install atk
+    yum -y install atk-devel
+    yum -y install cairo
+    yum -y install cairo-devel
+    yum -y install cairo-gobject
+    yum -y install cairo-gobject-devel
+    yum -y install cairo-tools
+    yum -y install fontconfig
+    yum -y install fontconfig-devel 
+    yum -y install gdk-pixbuf2
+    yum -y install gdk-pixbuf2-devel
+    yum -y install gtk3
+    yum -y install gtk3-devel
+    yum -y install gtk2
+    yum -y install gtk2-devel
+    yum -y install jansson
+    yum -y install freeglut
+    yum -y install freeglut-devel
+    yum -y install libX11
+    yum -y install libX11-devel
+    yum -y install libX11-common
+    yum -y install libXmu
+    yum -y install libXmu-devel
+    yum -y install libXi
+    yum -y install libXi-devel
+    yum -y install mesa-libGLU
+    yum -y install mesa-libGLU-devel
+    yum -y install java-latest-openjdk
+    yum -y install java-latest-openjdk-devel
+
+    yum -y install grubby
+    yum -y install libtirpc
+    yum -y install ocl-icd
+    yum -y install opencl-filesystem
+    yum -y install vulkan-filesystem
+
+    cd /tmp
+
+    # Download and install NVIDIA/CUDA drivers, libraries, and packages
+    wget -N --wait=10 "https://developer.nvidia.com/compute/cuda/10.1/Prod/local_installers/cuda-repo-rhel7-10-1-local-10.1.168-418.67-1.0-1.x86_64.rpm"
+    rpm -i cuda-repo-rhel7-10-1-local-10.1.168-418.67-1.0-1.x86_64.rpm
+    rm cuda-repo-rhel7-10-1-local-10.1.168-418.67-1.0-1.x86_64.rpm  
+  
+    yum clean all
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/nvidia-driver-cuda-libs-418.67-4.el7.x86_64.rpm"
+    rpm -i nvidia-driver-cuda-libs-418.67-4.el7.x86_64.rpm
+    rm nvidia-driver-cuda-libs-418.67-4.el7.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/nvidia-driver-libs-418.67-4.el7.x86_64.rpm"
+    rpm -i nvidia-driver-libs-418.67-4.el7.x86_64.rpm
+    rm nvidia-driver-libs-418.67-4.el7.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/dkms-nvidia-418.67-1.el7.x86_64.rpm"
+    rpm -i dkms-nvidia-418.67-1.el7.x86_64.rpm
+    yum -y install dkms-nvidia
+    rm dkms-nvidia-418.67-1.el7.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/nvidia-driver-418.67-4.el7.x86_64.rpm"
+    rpm -i nvidia-driver-418.67-4.el7.x86_64.rpm
+    yum -y install nvidia-driver
+    rm nvidia-driver-418.67-4.el7.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/nvidia-driver-devel-418.67-4.el7.x86_64.rpm"
+    rpm -i nvidia-driver-devel-418.67-4.el7.x86_64.rpm
+    rm nvidia-driver-devel-418.67-4.el7.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/nvidia-persistenced-418.67-1.el7.x86_64.rpm"
+    rpm -i nvidia-persistenced-418.67-1.el7.x86_64.rpm
+    rm nvidia-persistenced-418.67-1.el7.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/nvidia-driver-cuda-418.67-4.el7.x86_64.rpm"
+    rpm -i nvidia-driver-cuda-418.67-4.el7.x86_64.rpm
+    rm nvidia-driver-cuda-418.67-4.el7.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/nvidia-driver-diagnostic-418.67-4.el7.x86_64.rpm"
+    rpm -i nvidia-driver-diagnostic-418.67-4.el7.x86_64.rpm
+    rm nvidia-driver-diagnostic-418.67-4.el7.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/nvidia-driver-NVML-418.67-4.el7.x86_64.rpm"
+    rpm -i nvidia-driver-NVML-418.67-4.el7.x86_64.rpm
+    rm nvidia-driver-NVML-418.67-4.el7.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/nvidia-driver-NvFBCOpenGL-418.67-4.el7.x86_64.rpm"
+    rpm -i nvidia-driver-NvFBCOpenGL-418.67-4.el7.x86_64.rpm
+    rm nvidia-driver-NvFBCOpenGL-418.67-4.el7.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/nvidia-libXNVCtrl-418.67-1.el7.x86_64.rpm"
+    rpm -i nvidia-libXNVCtrl-418.67-1.el7.x86_64.rpm
+    rm nvidia-libXNVCtrl-418.67-1.el7.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/nvidia-libXNVCtrl-devel-418.67-1.el7.x86_64.rpm"
+    rpm -i nvidia-libXNVCtrl-devel-418.67-1.el7.x86_64.rpm
+    rm nvidia-libXNVCtrl-devel-418.67-1.el7.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/nvidia-modprobe-418.67-1.el7.x86_64.rpm"
+    rpm -i nvidia-modprobe-418.67-1.el7.x86_64.rpm
+    rm nvidia-modprobe-418.67-1.el7.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/nvidia-settings-418.67-1.el7.x86_64.rpm"
+    rpm -i nvidia-settings-418.67-1.el7.x86_64.rpm
+    rm nvidia-settings-418.67-1.el7.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/nvidia-xconfig-418.67-1.el7.x86_64.rpm"
+    rpm -i nvidia-xconfig-418.67-1.el7.x86_64.rpm
+    rm nvidia-xconfig-418.67-1.el7.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-compat-10-1-418.67-1.x86_64.rpm"
+    rpm -i cuda-compat-10-1-418.67-1.x86_64.rpm
+    rm cuda-compat-10-1-418.67-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-license-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-license-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-license-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-misc-headers-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-misc-headers-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-misc-headers-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-nvcc-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-nvcc-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-nvcc-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-cuobjdump-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-cuobjdump-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-cuobjdump-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-nvprune-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-nvprune-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-nvprune-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-compiler-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-compiler-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-compiler-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-cudart-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-cudart-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-cudart-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-driver-dev-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-driver-dev-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-driver-dev-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-cudart-dev-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-cudart-dev-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-cudart-dev-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-nvdisasm-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-nvdisasm-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-nvdisasm-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-gdb-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-gdb-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-gdb-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-nvprof-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-nvprof-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-nvprof-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-memcheck-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-memcheck-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-memcheck-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-cupti-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-cupti-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-cupti-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-gpu-library-advisor-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-gpu-library-advisor-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-gpu-library-advisor-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-nvtx-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-nvtx-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-nvtx-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-sanitizer-api-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-sanitizer-api-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-sanitizer-api-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-command-line-tools-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-command-line-tools-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-command-line-tools-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-nvrtc-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-nvrtc-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-nvrtc-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-nvrtc-dev-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-nvrtc-dev-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-nvrtc-dev-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-nvml-dev-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-nvml-dev-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-nvml-dev-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-nvgraph-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-nvgraph-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-nvgraph-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-nvgraph-dev-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-nvgraph-dev-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-nvgraph-dev-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-nvjpeg-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-nvjpeg-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-nvjpeg-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-nvjpeg-dev-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-nvjpeg-dev-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-nvjpeg-dev-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-cusolver-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-cusolver-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-cusolver-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-cusolver-dev-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-cusolver-dev-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-cusolver-dev-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/libcublas10-10.2.0.168-1.x86_64.rpm"
+    rpm -i libcublas10-10.2.0.168-1.x86_64.rpm
+    rm libcublas10-10.2.0.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/libcublas-devel-10.2.0.168-1.x86_64.rpm"
+    rpm -i libcublas-devel-10.2.0.168-1.x86_64.rpm
+    rm libcublas-devel-10.2.0.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-cufft-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-cufft-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-cufft-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-cufft-dev-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-cufft-dev-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-cufft-dev-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-curand-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-curand-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-curand-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-curand-dev-10-1-10.1.168-1.x86_64.rpm"    
+    rpm -i cuda-curand-dev-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-curand-dev-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-cusparse-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-cusparse-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-cusparse-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-cusparse-dev-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-cusparse-dev-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-cusparse-dev-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-npp-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-npp-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-npp-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-npp-dev-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-npp-dev-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-npp-dev-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-samples-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-samples-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-samples-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-documentation-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-documentation-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-documentation-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-nsight-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-nsight-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-nsight-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-nsight-compute-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-nsight-compute-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-nsight-compute-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-nsight-systems-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-nsight-systems-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-nsight-systems-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-nvvp-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-nvvp-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-nvvp-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-visual-tools-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-visual-tools-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-visual-tools-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-tools-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-tools-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-tools-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-libraries-dev-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-libraries-dev-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-libraries-dev-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-toolkit-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-toolkit-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-toolkit-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-libraries-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-libraries-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-libraries-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-drivers-418.67-1.x86_64.rpm"
+    rpm -i cuda-drivers-418.67-1.x86_64.rpm
+    rm cuda-drivers-418.67-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-runtime-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-runtime-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-runtime-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-demo-suite-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-demo-suite-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-demo-suite-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/cuda-10-1-10.1.168-1.x86_64.rpm"
+    rpm -i cuda-10-1-10.1.168-1.x86_64.rpm
+    rm cuda-10-1-10.1.168-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/libcutensor1-1.0.0-1.x86_64.rpm"
+    rpm -i libcutensor1-1.0.0-1.x86_64.rpm
+    rm libcutensor1-1.0.0-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/libcutensor-devel-1.0.0-1.x86_64.rpm"
+    rpm -i libcutensor-devel-1.0.0-1.x86_64.rpm
+    rm libcutensor-devel-1.0.0-1.x86_64.rpm
+
+    wget -N --wait=10 "${CUDA_REPO_URL}/libcutensor-doc-1.0.0-1.x86_64.rpm"
+    rpm -i libcutensor-doc-1.0.0-1.x86_64.rpm
+    rm libcutensor-doc-1.0.0-1.x86_64.rpm
+
+    wget -N --wait=10 "${ML_REPO_URL}/libcudnn7-7.6.5.32-1.cuda10.1.x86_64.rpm"
+    rpm -i libcudnn7-7.6.5.32-1.cuda10.1.x86_64.rpm
+    rm libcudnn7-7.6.5.32-1.cuda10.1.x86_64.rpm
+
+    wget -N --wait=10 "${ML_REPO_URL}/libcudnn7-devel-7.6.5.32-1.cuda10.1.x86_64.rpm"
+    rpm -i libcudnn7-devel-7.6.5.32-1.cuda10.1.x86_64.rpm
+    rm libcudnn7-devel-7.6.5.32-1.cuda10.1.x86_64.rpm
+
+    wget -N --wait=10 "${ML_REPO_URL}/libnccl-2.5.6-1+cuda10.1.x86_64.rpm"
+    rpm -i libnccl-2.5.6-1+cuda10.1.x86_64.rpm
+    rm libnccl-2.5.6-1+cuda10.1.x86_64.rpm
+
+    wget -N --wait=10 "${ML_REPO_URL}/libnccl-devel-2.5.6-1+cuda10.1.x86_64.rpm"
+    rpm -i libnccl-devel-2.5.6-1+cuda10.1.x86_64.rpm
+    rm libnccl-devel-2.5.6-1+cuda10.1.x86_64.rpm
+
+    wget -N --wait=10 "${ML_REPO_URL}/libnvinfer6-6.0.1-1.cuda10.1.x86_64.rpm"
+    rpm -i libnvinfer6-6.0.1-1.cuda10.1.x86_64.rpm
+    rm libnvinfer6-6.0.1-1.cuda10.1.x86_64.rpm
+
+    wget -N --wait=10 "${ML_REPO_URL}/libnvinfer-devel-6.0.1-1.cuda10.1.x86_64.rpm"
+    rpm -i libnvinfer-devel-6.0.1-1.cuda10.1.x86_64.rpm
+    rm libnvinfer-devel-6.0.1-1.cuda10.1.x86_64.rpm
+
+    wget -N --wait=10 "${ML_REPO_URL}/libnvinfer-plugin6-6.0.1-1.cuda10.1.x86_64.rpm"
+    rpm -i libnvinfer-plugin6-6.0.1-1.cuda10.1.x86_64.rpm
+    rm libnvinfer-plugin6-6.0.1-1.cuda10.1.x86_64.rpm
+
+    wget -N --wait=10 "${ML_REPO_URL}/libnvinfer-plugin-devel-6.0.1-1.cuda10.1.x86_64.rpm"
+    rpm -i libnvinfer-plugin-devel-6.0.1-1.cuda10.1.x86_64.rpm
+    rm libnvinfer-plugin-devel-6.0.1-1.cuda10.1.x86_64.rpm
+
+    wget -N --wait=10 "${ML_REPO_URL}/libnvonnxparsers6-6.0.1-1.cuda10.1.x86_64.rpm"
+    rpm -i libnvonnxparsers6-6.0.1-1.cuda10.1.x86_64.rpm
+    rm libnvonnxparsers6-6.0.1-1.cuda10.1.x86_64.rpm
+
+    wget -N --wait=10 "${ML_REPO_URL}/libnvonnxparsers-devel-6.0.1-1.cuda10.1.x86_64.rpm"
+    rpm -i libnvonnxparsers-devel-6.0.1-1.cuda10.1.x86_64.rpm
+    rm libnvonnxparsers-devel-6.0.1-1.cuda10.1.x86_64.rpm
+
+    wget -N --wait=10 "${ML_REPO_URL}/libnvparsers6-6.0.1-1.cuda10.1.x86_64.rpm"
+    rpm -i libnvparsers6-6.0.1-1.cuda10.1.x86_64.rpm
+    rm libnvparsers6-6.0.1-1.cuda10.1.x86_64.rpm
+
+    wget -N --wait=10 "${ML_REPO_URL}/libnvparsers-devel-6.0.1-1.cuda10.1.x86_64.rpm"
+    rpm -i libnvparsers-devel-6.0.1-1.cuda10.1.x86_64.rpm
+    rm libnvparsers-devel-6.0.1-1.cuda10.1.x86_64.rpm
+
+    wget -N --wait=10 "${ML_REPO_URL}/python3-libnvinfer-6.0.1-1.cuda10.1.x86_64.rpm"
+    rpm -i python3-libnvinfer-6.0.1-1.cuda10.1.x86_64.rpm
+    rm python3-libnvinfer-6.0.1-1.cuda10.1.x86_64.rpm
+
+    wget -N --wait=10 "${ML_REPO_URL}/python3-libnvinfer-devel-6.0.1-1.cuda10.1.x86_64.rpm"
+    rpm -i python3-libnvinfer-devel-6.0.1-1.cuda10.1.x86_64.rpm
+    rm python3-libnvinfer-devel-6.0.1-1.cuda10.1.x86_64.rpm
+
+    wget -N --wait=10 "${ML_REPO_URL}/python-libnvinfer-6.0.1-1.cuda10.1.x86_64.rpm"
+    rpm -i python-libnvinfer-6.0.1-1.cuda10.1.x86_64.rpm
+    rm python-libnvinfer-6.0.1-1.cuda10.1.x86_64.rpm
+
+    wget -N --wait=10 "${ML_REPO_URL}/python-libnvinfer-devel-6.0.1-1.cuda10.1.x86_64.rpm"
+    rpm -i python-libnvinfer-devel-6.0.1-1.cuda10.1.x86_64.rpm
+    rm python-libnvinfer-devel-6.0.1-1.cuda10.1.x86_64.rpm
+
+    # Cleanup
+    yum -y remove cuda-repo-rhel7-10-1-local-10.1.168-418.67-1.0-1.x86_64
+    yum -y clean all
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
