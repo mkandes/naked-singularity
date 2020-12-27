@@ -1,29 +1,29 @@
 Bootstrap: shub
-From: mkandes/centos:centos-7.8.2003
+From: mkandes/naked-singularity:centos-7.9.2009
 
 %labels
 
-    APPLICATION_NAME centos + openmpi
-    APPLICATION_VERSION 7.8.2003 + 3.1.4
-    APPLICATION_URL https://www.open-mpi.org
+    APPLICATION_NAME centos + mvapich
+    APPLICATION_VERSION 7.9.2009 + 2.3.2
+    APPLICATION_URL https://mvapich.cse.ohio-state.edu
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20200715
+    LAST_UPDATED 20201227
 
 %setup
 
 %environment
 
-    # Set paths to OpenMPI binaries and libraries
-    export PATH="/opt/openmpi-3.1.4/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/openmpi-3.1.4/lib:${LD_LIBRARY_PATH}"
+    # Set paths to MVAPICH2 binaries and libraries
+    export PATH="/opt/mvapich2-2.3.2/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/mvapich2-2.3.2/lib:${LD_LIBRARY_PATH}"
 
 %post -c /bin/bash
 
     # Set operating system mirror URL
-    export MIRRORURL='http://mirror.centos.org/centos-7/7.8.2003/os/x86_64'
+    export MIRRORURL='http://mirror.centos.org/centos-7/7.9.2009/os/x86_64'
 
     # Set operating system version
     export OSVERSION='7'
@@ -66,18 +66,18 @@ From: mkandes/centos:centos-7.8.2003
     yum -y install libnl3
     yum -y install libnl3-devel
 
-    # Install OpenMPI dependencies
-    yum -y install zlib
-    yum -y install zlib-devel
+    # Install mvapich2 (build) dependencies
+    yum -y install bison
 
     cd /tmp
 
-    # Download, build, and install OpenMPI
-    wget https://download.open-mpi.org/release/open-mpi/v3.1/openmpi-3.1.4.tar.gz
-    tar -xzvf openmpi-3.1.4.tar.gz
-    cd openmpi-3.1.4
-    ./configure --prefix=/opt/openmpi-3.1.4
-    make all install
+    # Download, build, and install mvapich2
+    wget http://mvapich.cse.ohio-state.edu/download/mvapich/mv2/mvapich2-2.3.2.tar.gz
+    tar -xzvf mvapich2-2.3.2.tar.gz
+    cd mvapich2-2.3.2
+    ./configure --prefix=/opt/mvapich2-2.3.2
+    make
+    make install
 
     # Cleanup
     package-cleanup -q --leaves | xargs -l1 yum -y remove
