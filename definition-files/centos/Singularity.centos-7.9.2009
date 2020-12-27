@@ -1,25 +1,25 @@
 Bootstrap: yum 
 OSVersion: 7
-MirrorURL: http://mirror.centos.org/centos-7/7.8.2003/os/x86_64
+MirrorURL: http://mirror.centos.org/centos-7/7.9.2009//os/x86_64
 Include: yum
 
 %labels
 
     APPLICATION_NAME centos
-    APPLICATION_VERSION 7.8.2003
+    APPLICATION_VERSION 7.9.2009
     APPLICATION_URL https://www.centos.org
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20200711
+    LAST_UPDATED 20201227
 
 %setup
 
 %environment
 
     # Set operating system mirror URL
-    export MIRRORURL='http://mirror.centos.org/centos-7/7.8.2003/os/x86_64'
+    export MIRRORURL='http://mirror.centos.org/centos-7/7.9.2009/os/x86_64'
 
     # Set operating system version
     export OSVERSION='7'
@@ -30,7 +30,7 @@ Include: yum
 %post -c /bin/bash
 
     # Set operating system mirror URL
-    export MIRRORURL='http://mirror.centos.org/centos-7/7/os/x86_64'
+    export MIRRORURL='http://mirror.centos.org/centos-7/7.9.2009/os/x86_64'
 
     # Set operating system version
     export OSVERSION='7'
