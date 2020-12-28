@@ -1,5 +1,5 @@
 Bootstrap: shub
-From: mkandes/centos-openmpi:centos-7.8.2003-openmpi-3.1.4
+From: mkandes/naked-singularity:centos-7.9.2009-mvapich-2.3.2
 
 %labels
 
@@ -10,7 +10,7 @@ From: mkandes/centos-openmpi:centos-7.8.2003-openmpi-3.1.4
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20200716
+    LAST_UPDATED 20201228
 
 %setup
 
@@ -25,7 +25,7 @@ From: mkandes/centos-openmpi:centos-7.8.2003-openmpi-3.1.4
 %post -c /bin/bash
 
     # Set operating system mirror URL
-    export MIRRORURL='http://mirror.centos.org/centos-7/7.8.2003/os/x86_64'
+    export MIRRORURL='http://mirror.centos.org/centos-7/7.9.2009/os/x86_64'
 
     # Set operating system version
     export OSVERSION='7'
@@ -33,9 +33,9 @@ From: mkandes/centos-openmpi:centos-7.8.2003-openmpi-3.1.4
     # Set system locale
     export LC_ALL=C
 
-    # Set paths to OpenMPI binaries and libraries
-    export PATH="/opt/openmpi-3.1.4/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/openmpi-3.1.4/lib:${LD_LIBRARY_PATH}"
+    # Set paths to MVAPICH2 binaries and libraries
+    export PATH="/opt/mvapich2-2.3.2/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/mvapich2-2.3.2/lib:${LD_LIBRARY_PATH}"
 
     # Update all software packages to their latest versions
     yum -y check-update && yum -y update
