@@ -1,5 +1,5 @@
 Bootstrap: shub
-From: mkandes/ubuntu-cuda-openmpi:latest
+From: mkandes/naked-singularity:ubuntu-18.04-cuda-10.1.168-openmpi-3.1.4
 
 %labels
 
@@ -10,7 +10,7 @@ From: mkandes/ubuntu-cuda-openmpi:latest
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20201202
+    LAST_UPDATED 20201231
 
 %setup
 
