@@ -33,9 +33,7 @@ singularity pull shub://mkandes/naked-singularity:ubuntu-18.04
    
 ## Status
 
-The naked-singularity project is currently undergoing a major 
-restructuring of the repository. Significant changes over the next few 
-weeks should be expected.
+A work in progress. 
 
 ## Contribute
 
@@ -53,8 +51,8 @@ University of California, San Diego
 
 ## Version
 
-1.2.3
+1.2.4
 
 ## Last Updated
 
-Thursday, December 31st, 2020
+Tuesday, January 12th, 2021
