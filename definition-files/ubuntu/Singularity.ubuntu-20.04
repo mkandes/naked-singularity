@@ -11,7 +11,7 @@ OSVersion: focal
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20200809
+    LAST_UPDATED 20210223
 
 %setup
 
@@ -76,6 +76,7 @@ OSVersion: focal
     apt-get -y install automake
     apt-get -y install build-essential
     apt-get -y install cmake
+    apt-get -y install evince
     apt-get -y install expect
     apt-get -y install gfortran
     apt-get -y install libtool
