@@ -17,7 +17,7 @@
 #
 # LAST UPDATED
 #
-#   Thursday, December 31st, 2020
+#   Tuesday, February 23rd, 2021
 #
 # ----------------------------------------------------------------------
 
@@ -45,7 +45,7 @@ source log.sh
 
 naked::install() {
 
-  local singularity_version='3.5.2'
+  local singularity_version='3.5.3'
   local go_version='1.15.6'
   local -i use_rpm=1
 
@@ -133,6 +133,7 @@ naked::install() {
     sudo yum -y install wget
     sudo yum -y install squashfs-tools
     sudo yum -y install cryptsetup
+    sudo yum -y install debootstrap
 
   elif [[ "${os_release_id}" = 'ubuntu' ]]; then
 
@@ -150,6 +151,7 @@ naked::install() {
     sudo apt-get -y install pkg-config
     sudo apt-get -y install git
     sudo apt-get -y install cryptsetup-bin
+    sudo apt-get -y install debootstrap
 
   else
 
