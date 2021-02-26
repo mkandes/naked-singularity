@@ -1,0 +1,145 @@
+Bootstrap: shub
+From: mkandes/naked-singularity:ubuntu-18.04
+
+%labels
+
+    APPLICATION_NAME ubuntu + cuda
+    APPLICATION_VERSION 18.04 + 10.2
+    APPLICATION_URL https://docs.nvidia.com/cuda
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20210225
+
+%setup
+
+%environment
+
+    # Location of NVIDIA/CUDA repositories
+    export CUDA_ROOT_URL='http://developer.download.nvidia.com/compute'
+    export CUDA_DISTRO='ubuntu1804'
+    export CUDA_ARCH='x86_64'
+    export CUDA_REPO_URL="${CUDA_ROOT_URL}/cuda/repos/${CUDA_DISTRO}/${CUDA_ARCH}"
+    export CUDA_GPG_PUBKEY='7fa2af80.pub'
+
+    # Set NVIDIA driver and CUDA versions
+    export CUDA_DRIVER_VERSION='460'
+    export CUDA_MAJOR='10'
+    export CUDA_MINOR='2' 
+    export CUDA_VERSION="${CUDA_MAJOR}.${CUDA_MINOR}"
+    export CUDNN_MAJOR='8'
+    export CUDNN_MINOR='1'
+    export CUDNN_REVISION='0.77'
+    export CUDNN_VERSION="${CUDNN_MAJOR}.${CUDA_MINOR}.${CUDNN_REVISION}"
+    export NCCL_MAJOR='2'
+    export NCCL_MINOR='8'
+    export NCCL_REVISION='4'
+    export NCCL_VERSION="${NCCL_MAJOR}.${NCCL_MINOR}.${NCCL_REVISION}"
+
+    # Set paths to CUDA binaries and libraries
+    export CUDA_HOME="/usr/local/cuda-${CUDA_VERSION}"
+    export PATH="${CUDA_HOME}/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="${CUDA_HOME}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='bionic'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    # Location of NVIDIA/CUDA repositories
+    export CUDA_ROOT_URL='http://developer.download.nvidia.com/compute'
+    export CUDA_DISTRO='ubuntu1804'
+    export CUDA_ARCH='x86_64'
+    export CUDA_REPO_URL="${CUDA_ROOT_URL}/cuda/repos/${CUDA_DISTRO}/${CUDA_ARCH}"
+    export CUDA_GPG_PUBKEY='7fa2af80.pub'
+
+    # Set NVIDIA driver and CUDA versions
+    export CUDA_DRIVER_VERSION='460'
+    export CUDA_MAJOR='10'
+    export CUDA_MINOR='2'
+    export CUDA_VERSION="${CUDA_MAJOR}.${CUDA_MINOR}"
+    export CUDNN_MAJOR='8'
+    export CUDNN_MINOR='1'
+    export CUDNN_REVISION='0.77'
+    export CUDNN_VERSION="${CUDNN_MAJOR}.${CUDNN_MINOR}.${CUDNN_REVISION}"
+    export NCCL_MAJOR='2'
+    export NCCL_MINOR='8'
+    export NCCL_REVISION='4'
+    export NCCL_VERSION="${NCCL_MAJOR}.${NCCL_MINOR}.${NCCL_REVISION}"
+
+    cd /tmp
+
+    # Install kernel headers and development packages
+    # https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#verify-kernel-packages
+    apt-get -y install "linux-headers-$(uname -r)"
+
+    # Install pin file to prioritize CUDA repo 
+    # https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#ubuntu-installation
+    wget "${CUDA_REPO_URL}/cuda-${CUDA_DISTRO}.pin"
+    mv "cuda-${CUDA_DISTRO}.pin" /etc/apt/preferences.d/cuda-repository-pin-600
+
+    # Install public GPG key for CUDA repo
+    apt-key adv --fetch-keys "${CUDA_REPO_URL}/${CUDA_GPG_PUBKEY}"
+
+    # Add CUDA repo
+    add-apt-repository -y "deb ${CUDA_REPO_URL} /"
+
+    # Update the apt repository cache
+    apt-get update
+
+    # Install NVIDIA driver meta-package
+    # https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#package-manager-metas
+    apt-get -y install "cuda-drivers-${CUDA_DRIVER_VERSION}"
+
+    # Install CUDA toolkit meta-package
+    apt-get -y install "cuda-toolkit-$(echo ${CUDA_VERSION} | sed 's/\./-/g')"
+
+    # Install the cuDNN library
+    apt-get -y install "libcudnn${CUDNN_MAJOR}=${CUDNN_VERSION}-1+cuda${CUDA_VERSION}"
+    apt-get -y install "libcudnn${CUDNN_MAJOR}-dev=${CUDNN_VERSION}-1+cuda${CUDA_VERSION}"
+
+    # Install NCCL
+    apt-get -y install "libnccl${NCCL_MAJOR}=${NCCL_VERSION}-1+cuda${CUDA_VERSION}"
+    apt-get -y install "libnccl-dev=${NCCL_VERSION}-1+cuda${CUDA_VERSION}"
+
+    # Install third-party libraries required for CUDA samples
+    # https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#install-libraries
+    apt-get -y install g++
+    apt-get -y install freeglut3-dev
+    apt-get -y build-essential
+    apt-get -y libx11-dev
+    apt-get -y libxmu-dev
+    apt-get -y libxi-dev
+    apt-get -y libglu1-mesa
+    apt-get -y libglu1-mesa-dev
+
+    # Set paths to CUDA binaries and libraries
+    export CUDA_HOME="/usr/local/cuda-${CUDA_VERSION}"
+    export PATH="${CUDA_HOME}/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="${CUDA_HOME}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
