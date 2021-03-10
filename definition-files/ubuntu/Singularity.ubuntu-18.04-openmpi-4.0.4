@@ -111,7 +111,7 @@ From: mkandes/naked-singularity:ubuntu-18.04
     wget "${OMPI_ROOT_URL}/v${OMPI_MAJOR}.${OMPI_MINOR}/openmpi-${OMPI_VERSION}.tar.gz"
     tar -xf "openmpi-${OMPI_VERSION}.tar.gz"
     cd "openmpi-${OMPI_VERSION}"
-    ./configure --prefix="${OMPI_INSTALL_DIR}"
+    ./configure --prefix="${OMPI_INSTALL_DIR}" --without-verbs
     make all install
 
     cd /tmp
