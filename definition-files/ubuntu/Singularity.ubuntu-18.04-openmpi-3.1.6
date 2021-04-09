@@ -10,30 +10,31 @@ From: mkandes/naked-singularity:ubuntu-18.04
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20201226
+    LAST_UPDATED 20210409
 
 %setup
 
 %environment
 
-    # Set Mellanox OFED version number, operating system, and hardware
-    # platform
+    # Set Mellanox OFED version, operating system, and hardware platform
+    export MLNX_ROOT_URL='http://www.mellanox.com/downloads/ofed'
     export MLNX_OFED_VERSION='4.7-3.2.9.0'
     export MLNX_OS_VERSION='ubuntu18.04'
     export MLNX_PLATFORM='x86_64'
 
-    # Set OpenMPI major, minor, and revision versions, root and
+    # Set OpenMPI major, minor, and revision numbers, root and
     # installation directories
-    export OPENMPI_MAJOR_VERSION=3
-    export OPENMPI_MINOR_VERSION=1
-    export OPENMPI_REVISION_VERSION=6
-    export OPENMPI_VERSION="${OPENMPI_MAJOR_VERSION}.${OPENMPI_MINOR_VERSION}.${OPENMPI_REVISION_VERSION}"
-    export OPENMPI_ROOT_DIR='/opt/openmpi'
-    export OPENMPI_INSTALL_DIR="${OPENMPI_ROOT_DIR}/${OPENMPI_VERSION}"
+    export OMPI_ROOT_URL='https://download.open-mpi.org/release/open-mpi'
+    export OMPI_MAJOR='3'
+    export OMPI_MINOR='1'
+    export OMPI_REVISION='6'
+    export OMPI_VERSION="${OMPI_MAJOR}.${OMPI_MINOR}.${OMPI_REVISION}"
+    export OMPI_ROOT_DIR='/opt/openmpi'
+    export OMPI_INSTALL_DIR="${OMPI_ROOT_DIR}/${OMPI_VERSION}"
 
     # Set paths to OpenMPI binaries and libraries
-    export PATH="${OPENMPI_INSTALL_DIR}/bin:${PATH}"
-    export LD_LIBRARY_PATH="${OPENMPI_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+    export PATH="${OMPI_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${OMPI_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
 
 %post -c /bin/bash
 
@@ -67,8 +68,8 @@ From: mkandes/naked-singularity:ubuntu-18.04
 
     cd /tmp
 
-    # Set Mellanox OFED version number, operating system, and hardware
-    # platform
+    # Set Mellanox OFED version, operating system, and hardware platform
+    export MLNX_ROOT_URL='http://www.mellanox.com/downloads/ofed'
     export MLNX_OFED_VERSION='4.7-3.2.9.0'
     export MLNX_OS_VERSION='ubuntu18.04'
     export MLNX_PLATFORM='x86_64'
@@ -76,7 +77,7 @@ From: mkandes/naked-singularity:ubuntu-18.04
     # Download and install Mellanox OFED drivers and supporting
     # libraries for userspace access to Ethernet, RDMA, and Infiniband. 
     # https://docs.mellanox.com/pages/releaseview.action?pageId=15049785
-    wget "http://www.mellanox.com/downloads/ofed/MLNX_OFED-${MLNX_OFED_VERSION}/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-${MLNX_OS_VERSION}-${MLNX_PLATFORM}.tgz"
+    wget "${MLNX_ROOT_URL}/MLNX_OFED-${MLNX_OFED_VERSION}/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-${MLNX_OS_VERSION}-${MLNX_PLATFORM}.tgz"
     tar -xf "MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-${MLNX_OS_VERSION}-${MLNX_PLATFORM}.tgz"
     cd "MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-${MLNX_OS_VERSION}-${MLNX_PLATFORM}"
     ./mlnxofedinstall --user-space-only --without-fw-update --force
@@ -96,27 +97,28 @@ From: mkandes/naked-singularity:ubuntu-18.04
 
     cd /tmp
 
-    # Set OpenMPI major, minor, and revision versions, root and
+    # Set OpenMPI major, minor, and revision numbers, root and
     # installation directories
-    export OPENMPI_MAJOR_VERSION=3
-    export OPENMPI_MINOR_VERSION=1
-    export OPENMPI_REVISION_VERSION=6
-    export OPENMPI_VERSION="${OPENMPI_MAJOR_VERSION}.${OPENMPI_MINOR_VERSION}.${OPENMPI_REVISION_VERSION}"
-    export OPENMPI_ROOT_DIR='/opt/openmpi'
-    export OPENMPI_INSTALL_DIR="${OPENMPI_ROOT_DIR}/${OPENMPI_VERSION}"
+    export OMPI_ROOT_URL='https://download.open-mpi.org/release/open-mpi'
+    export OMPI_MAJOR='3'
+    export OMPI_MINOR='1'
+    export OMPI_REVISION='6'
+    export OMPI_VERSION="${OMPI_MAJOR}.${OMPI_MINOR}.${OMPI_REVISION}"
+    export OMPI_ROOT_DIR='/opt/openmpi'
+    export OMPI_INSTALL_DIR="${OMPI_ROOT_DIR}/${OMPI_VERSION}"
 
     # Download, build, and install OpenMPI
-    wget "https://download.open-mpi.org/release/open-mpi/v${OPENMPI_MAJOR_VERSION}.${OPENMPI_MINOR_VERSION}/openmpi-${OPENMPI_VERSION}.tar.gz"
-    tar -xf "openmpi-${OPENMPI_VERSION}.tar.gz"
-    cd "openmpi-${OPENMPI_VERSION}"
-    ./configure --prefix="${OPENMPI_INSTALL_DIR}"
+    wget "${OMPI_ROOT_URL}/v${OMPI_MAJOR}.${OMPI_MINOR}/openmpi-${OMPI_VERSION}.tar.gz"
+    tar -xf "openmpi-${OMPI_VERSION}.tar.gz"
+    cd "openmpi-${OMPI_VERSION}"
+    ./configure --prefix="${OMPI_INSTALL_DIR}" --without-verbs
     make all install
 
     cd /tmp
 
     # Remove OpenMPI build directory and source tarball
-    rm -rf "openmpi-${OPENMPI_VERSION}"
-    rm "openmpi-${OPENMPI_VERSION}.tar.gz"
+    rm -rf "openmpi-${OMPI_VERSION}"
+    rm "openmpi-${OMPI_VERSION}.tar.gz"
 
     # Cleanup
     apt-get -y autoremove --purge
