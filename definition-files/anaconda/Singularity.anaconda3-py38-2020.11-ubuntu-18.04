@@ -10,7 +10,7 @@ From: mkandes/naked-singularity:ubuntu-18.04
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20210426
+    LAST_UPDATED 20210427
 
 %setup
 
@@ -25,8 +25,7 @@ From: mkandes/naked-singularity:ubuntu-18.04
     export CONDA_PYTHON_VERSION='py38'
     export CONDA_INSTALLER_VERSION='2020.11'
     export CONDA_ARCH='Linux-x86_64'
-    export CONDA_ROOT_DIR="/opt/${CONDA_DISTRIBUTION}/${CONDA_VERSION}"
-    export CONDA_INSTALL_DIR="${CONDA_ROOT_DIR}/${CONDA_ARCH}/${CONDA_INSTALLER_VERSION}"
+    export CONDA_INSTALL_DIR="/opt/${CONDA_DISTRIBUTION}${CONDA_VERSION}"
 
     # Set PATH to conda distribution
     export PATH="${CONDA_INSTALL_DIR}/bin:${PATH}"
@@ -60,8 +59,7 @@ From: mkandes/naked-singularity:ubuntu-18.04
     export CONDA_INSTALLER_VERSION='2020.11'
     export CONDA_ARCH='Linux-x86_64'
     export CONDA_INSTALLER="${CONDA_DISTRIBUTION^}${CONDA_VERSION}-${CONDA_INSTALLER_VERSION}-${CONDA_ARCH}.sh"
-    export CONDA_ROOT_DIR="/opt/${CONDA_DISTRIBUTION}/${CONDA_VERSION}"
-    export CONDA_INSTALL_DIR="${CONDA_ROOT_DIR}/${CONDA_ARCH}/${CONDA_INSTALLER_VERSION}"
+    export CONDA_INSTALL_DIR="/opt/${CONDA_DISTRIBUTION}${CONDA_VERSION}"
     export CONDA_ROOT_URL='https://repo.anaconda.com'
 
     # Download and install conda distribution
