@@ -1,0 +1,114 @@
+Bootstrap: shub
+From: mkandes/naked-singularity:ubuntu-18.04
+
+%labels
+
+    APPLICATION_NAME tape
+    APPLICATION_VERSION 0.4
+    APPLICATION_URL https://github.com/songlab-cal/tape
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20210427
+
+%setup
+
+%environment
+
+    # Set the conda distribution type, its version number, the python
+    # version it utilizes, the root and installation directories where
+    # the distribution will be installed within the container, and the
+    # root URL to the installer
+    export CONDA_DISTRIBUTION='miniconda'
+    export CONDA_VERSION='3'
+    export CONDA_PYTHON_VERSION='py37'
+    export CONDA_INSTALLER_VERSION='4.9.2'
+    export CONDA_ARCH='Linux-x86_64'
+    export CONDA_INSTALL_DIR="/opt/${CONDA_DISTRIBUTION}${CONDA_VERSION}"
+
+    # Set PATH to conda distribution
+    export PATH="${CONDA_INSTALL_DIR}/bin:${PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='bionic'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    cd /tmp
+
+    # Set the conda distribution type, its version number, the python
+    # version it utilizes, the root and installation directories where
+    # the distribution will be installed within the container, and the
+    # root URL to the installer
+    export CONDA_DISTRIBUTION='miniconda'
+    export CONDA_VERSION='3'
+    export CONDA_PYTHON_VERSION='py37'
+    export CONDA_INSTALLER_VERSION='4.9.2'
+    export CONDA_ARCH='Linux-x86_64'
+    export CONDA_INSTALLER="${CONDA_DISTRIBUTION^}${CONDA_VERSION}-${CONDA_PYTHON_VERSION}_${CONDA_INSTALLER_VERSION}-${CONDA_ARCH}.sh"
+    export CONDA_INSTALL_DIR="/opt/${CONDA_DISTRIBUTION}${CONDA_VERSION}"
+    export CONDA_ROOT_URL='https://repo.anaconda.com'
+
+    # Download and install conda distribution
+    wget "${CONDA_ROOT_URL}/${CONDA_DISTRIBUTION}/${CONDA_INSTALLER}"
+    chmod +x "${CONDA_INSTALLER}"
+    "./${CONDA_INSTALLER}" -b -p "${CONDA_INSTALL_DIR}"
+
+    # Remove conda installer
+    rm "${CONDA_INSTALLER}"
+
+    # Set PATH to conda distribution
+    export PATH="${CONDA_INSTALL_DIR}/bin:${PATH}"
+
+    # Install all TAPE dependencies
+    conda install -y pytorch=1.4.0=py3.7_cuda10.1.243_cudnn7.6.3_0 -c pytorch
+    conda install -y torchvision=0.5.0 -c pytorch
+    conda install -y jupyterlab=3.0.14
+    conda install -y numpy
+    conda install -y scipy
+    conda install -y pandas
+    conda install -y matplotlib
+    conda install -y sckit-learn
+    conda install -y seaborn=0.11.0
+    conda install -y biopython
+    conda install -y lmdb
+    conda install -y boto3
+    conda install -y requests
+    conda install -y filelock
+    conda install -y tqdm
+    conda install -y ipywidgets=7.6.2
+    conda install -y tensorboardX -c conda-forge
+
+    cd /opt
+
+    # Install TAPE
+    git clone https://github.com/songlab-cal/tape.git
+    cd tape
+    git checkout v0.4
+    pip install tape_proteins
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
