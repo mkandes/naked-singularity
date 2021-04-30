@@ -1,0 +1,120 @@
+Bootstrap: shub
+From: mkandes/naked-singularity:ubuntu-18.04-openmpi-3.1.6
+
+%labels
+
+    APPLICATION_NAME VisIt
+    APPLICATION_VERSION 3.1.4
+    APPLICATION_URL https://wci.llnl.gov/simulation/computer-codes/visit
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20210430
+
+%setup
+
+%environment
+
+    # Set VisIt version number, root and install directories
+    export VISIT_MAJOR='3'
+    export VISIT_MINOR='1'
+    export VISIT_REVISION='4'
+    export VISIT_VERSION="${VISIT_MAJOR}.${VISIT_MINOR}.${VISIT_REVISION}"
+    export VISIT_ROOT_DIR='/opt/visit'
+    export VISIT_INSTALL_DIR="${VISIT_ROOT_DIR}/${VISIT_VERSION}"
+
+    # Set path to VisIt binaries
+    export PATH="${VISIT_INSTALL_DIR}/bin:${PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='bionic'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set Mellanox OFED version, operating system, and hardware platform
+    export MLNX_ROOT_URL='http://www.mellanox.com/downloads/ofed'
+    export MLNX_OFED_VERSION='4.7-3.2.9.0'
+    export MLNX_OS_VERSION='ubuntu18.04'
+    export MLNX_PLATFORM='x86_64'
+
+    # Set OpenMPI major, minor, and revision numbers, root and
+    # install directories
+    export OMPI_ROOT_URL='https://download.open-mpi.org/release/open-mpi'
+    export OMPI_MAJOR='3'
+    export OMPI_MINOR='1'
+    export OMPI_REVISION='6'
+    export OMPI_VERSION="${OMPI_MAJOR}.${OMPI_MINOR}.${OMPI_REVISION}"
+    export OMPI_ROOT_DIR='/opt/openmpi'
+    export OMPI_INSTALL_DIR="${OMPI_ROOT_DIR}/${OMPI_VERSION}"
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    cd /tmp
+
+    # Set VisIt version number, root and install directories
+    export VISIT_MAJOR='3'
+    export VISIT_MINOR='1'
+    export VISIT_REVISION='4'
+    export VISIT_VERSION="${VISIT_MAJOR}.${VISIT_MINOR}.${VISIT_REVISION}"
+    export VISIT_ROOT_DIR='/opt/visit'
+    export VISIT_INSTALL_DIR="${VISIT_ROOT_DIR}/${VISIT_VERSION}"
+    export VISIT_REPO_URL='https://github.com/visit-dav/visit'
+
+    # Install dependencies and prerequisites for VisIt
+    apt-get -y install libffi-dev
+    apt-get -y install libx11-xcb-dev
+    apt-get -y install libx11-xcb1
+    apt-get -y install libxcb-dri2-0-dev
+    apt-get -y install libxcb-dri2-0
+    apt-get -y install libxcb-xfixes0-dev
+    apt-get -y install libxcb-xfixes0
+    apt-get -y install python
+    apt-get -y install python-dev
+    apt-get -y install python-pip
+    apt-get -y install python-setuptools
+    apt-get -y install python-wheel
+    apt-get -y install libpthread-stubs0-dev
+
+    cd /tmp
+
+    # Download, build, and install VisIt
+    wget "${VISIT_REPO_URL}/releases/download/v${VISIT_VERSION}/build_visit${VISIT_MAJOR}_${VISIT_MINOR}_${VISIT_REVISION}"
+    chmod +x "build_visit${VISIT_MAJOR}_${VISIT_MINOR}_${VISIT_REVISION}"
+    mkdir -p "${VISIT_INSTALL_DIR}/third-party"
+    echo 'yes' | env PAR_COMPILER="$(which mpicc)" PAR_COMPILER_CXX="$(which mpicxx)" PAR_INCLUDE="${OMPI_INSTALL_DIR}/include" ./build_visit3_1_4 --parallel --system-cmake --boost --boxlib --gdal --glu --hdf4 --h5part --hdf5 --llvm --mesagl --netcdf --no-icet --silo --vtk --xdmf --prefix "${VISIT_INSTALL_DIR}" --thirdparty-path "${VISIT_INSTALL_DIR}/third-party"; echo 'yes' | env PAR_COMPILER="$(which mpicc)" PAR_COMPILER_CXX="$(which mpicxx)" PAR_INCLUDE="${OMPI_INSTALL_DIR}/include" ./build_visit3_1_4 --parallel --system-cmake --boost --boxlib --gdal --glu --hdf4 --h5part --hdf5 --llvm --mesagl --netcdf --no-icet --silo --vtk --xdmf --prefix "${VISIT_INSTALL_DIR}" --thirdparty-path "${VISIT_INSTALL_DIR}/third-party"
+
+    # Remove VisIt build and source directories
+#    readarray -t targzs <<< "$(ls *.tar.gz)"
+#    for targz in "${targzs[@]}"; do
+#      rm -rf "$(basename ${targz} .tar.gz)"
+#      rm "${targz}"
+#    done
+#    readarray -t tarxzs <<< "$(ls *.tar.xz)"
+#    for tarxz in "${tarxzs[@]}"; do
+#      rm -rf "$(basename ${tarxz} .tar.xz)"
+#      rm "${tarxz}"
+#    done
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
