@@ -10,7 +10,7 @@ From: mkandes/naked-singularity:ubuntu-18.04-openmpi-3.1.6
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20210430
+    LAST_UPDATED 20210501
 
 %setup
 
@@ -57,6 +57,10 @@ From: mkandes/naked-singularity:ubuntu-18.04-openmpi-3.1.6
     export OMPI_ROOT_DIR='/opt/openmpi'
     export OMPI_INSTALL_DIR="${OMPI_ROOT_DIR}/${OMPI_VERSION}"
 
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="${OMPI_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${OMPI_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
     # Upgrade all software packages to their latest versions
     apt-get -y update && apt-get -y upgrade
 
@@ -88,23 +92,28 @@ From: mkandes/naked-singularity:ubuntu-18.04-openmpi-3.1.6
 
     cd /tmp
 
+    # Configure MPI-related environment variables for VisIt
+    export PAR_COMPILER="$(which mpicc)"
+    export PAR_COMPILER_CXX="$(which mpicxx)"
+    export PAR_INCLUDE="${OMPI_INSTALL_DIR}/include"
+
     # Download, build, and install VisIt
     wget "${VISIT_REPO_URL}/releases/download/v${VISIT_VERSION}/build_visit${VISIT_MAJOR}_${VISIT_MINOR}_${VISIT_REVISION}"
     chmod +x "build_visit${VISIT_MAJOR}_${VISIT_MINOR}_${VISIT_REVISION}"
     mkdir -p "${VISIT_INSTALL_DIR}/third-party"
-    echo 'yes' | env PAR_COMPILER="$(which mpicc)" PAR_COMPILER_CXX="$(which mpicxx)" PAR_INCLUDE="${OMPI_INSTALL_DIR}/include" ./build_visit3_1_4 --parallel --system-cmake --boost --boxlib --gdal --glu --hdf4 --h5part --hdf5 --llvm --mesagl --netcdf --no-icet --silo --vtk --xdmf --prefix "${VISIT_INSTALL_DIR}" --thirdparty-path "${VISIT_INSTALL_DIR}/third-party"; echo 'yes' | env PAR_COMPILER="$(which mpicc)" PAR_COMPILER_CXX="$(which mpicxx)" PAR_INCLUDE="${OMPI_INSTALL_DIR}/include" ./build_visit3_1_4 --parallel --system-cmake --boost --boxlib --gdal --glu --hdf4 --h5part --hdf5 --llvm --mesagl --netcdf --no-icet --silo --vtk --xdmf --prefix "${VISIT_INSTALL_DIR}" --thirdparty-path "${VISIT_INSTALL_DIR}/third-party"
+    echo 'yes' | ./build_visit3_1_4 --parallel --system-cmake --boost --boxlib --gdal --glu --hdf4 --h5part --hdf5 --llvm --mesagl --netcdf --no-icet --silo --vtk --xdmf --prefix "${VISIT_INSTALL_DIR}" --thirdparty-path "${VISIT_INSTALL_DIR}/third-party"; echo 'yes' | ./build_visit3_1_4 --parallel --system-cmake --boost --boxlib --gdal --glu --hdf4 --h5part --hdf5 --llvm --mesagl --netcdf --no-icet --silo --vtk --xdmf --prefix "${VISIT_INSTALL_DIR}" --thirdparty-path "${VISIT_INSTALL_DIR}/third-party"
 
     # Remove VisIt build and source directories
-#    readarray -t targzs <<< "$(ls *.tar.gz)"
-#    for targz in "${targzs[@]}"; do
-#      rm -rf "$(basename ${targz} .tar.gz)"
-#      rm "${targz}"
-#    done
-#    readarray -t tarxzs <<< "$(ls *.tar.xz)"
-#    for tarxz in "${tarxzs[@]}"; do
-#      rm -rf "$(basename ${tarxz} .tar.xz)"
-#      rm "${tarxz}"
-#    done
+    readarray -t targzs <<< "$(ls *.tar.gz)"
+    for targz in "${targzs[@]}"; do
+      rm -rf "$(basename ${targz} .tar.gz)"
+      rm "${targz}"
+    done
+    readarray -t tarxzs <<< "$(ls *.tar.xz)"
+    for tarxz in "${tarxzs[@]}"; do
+      rm -rf "$(basename ${tarxz} .tar.xz)"
+      rm "${tarxz}"
+    done
 
     # Cleanup
     apt-get -y autoremove --purge
