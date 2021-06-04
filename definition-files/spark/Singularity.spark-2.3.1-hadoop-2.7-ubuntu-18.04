@@ -10,7 +10,7 @@ From: mkandes/naked-singularity:ubuntu-18.04
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20210501
+    LAST_UPDATED 20210604
 
 %setup
 
@@ -35,15 +35,6 @@ From: mkandes/naked-singularity:ubuntu-18.04
     # Set environment variables utilized by Spark
     export JAVA_HOME='/usr'
     export SPARK_HOME="${SPARK_INSTALL_DIR}"
-
-    # Execute the command on the remote host.
-    # ssh -i "${ssh_private_key}" \
-    # -o IdentitiesOnly=yes \
-    #  -o PasswordAuthentication=no \
-    #  -o PubkeyAuthentication=yes \
-    #  -o PreferredAuthentications=publickey \
-    #  "${remote_username}@${remote_hostname}" \
-    #  "${remote_command}"
 
 %post -c /bin/bash
 
