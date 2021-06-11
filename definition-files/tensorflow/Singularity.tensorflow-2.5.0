@@ -1,0 +1,255 @@
+Bootstrap: shub
+From: mkandes/naked-singularity:ubuntu-18.04-cuda-11.2-openmpi-4.0.5
+
+%labels
+
+    APPLICATION_NAME tensorflow
+    APPLICATION_VERSION 2.5.0
+    APPLICATION_URL https://www.tensorflow.org
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20200605
+
+%setup
+
+%environment
+
+    # Set path to Bazel binary and libraries
+    export BAZEL_VERSION='3.7.2'
+    export BAZEL_ROOT_DIR='/opt/bazel'
+    export BAZEL_INSTALL_DIR="${BAZEL_ROOT_DIR}/${BAZEL_VERSION}"
+    export PATH="${BAZEL_INSTALL_DIR}/output:${PATH}"
+
+    # Set TensorFlow version number, root and install directories
+    export TENSORFLOW_VERSION='2.5.0'
+    export TENSORFLOW_ROOT_DIR='/opt/tensorflow'
+    export TENSORFLOW_INSTALL_DIR="${TENSORFLOW_ROOT_DIR}/${TENSORFLOW_VERSION}"
+
+    export PYTHONPATH="${TENSORFLOW_INSTALL_DIR}/models:${PYTHONPATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='bionic'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set CUDA version
+    export CUDA_MAJOR='11'
+    export CUDA_MINOR='2'
+    export CUDA_VERSION="${CUDA_MAJOR}.${CUDA_MINOR}"
+
+    # Set paths to CUDA binaries and libraries
+    export CUDA_HOME="/usr/local/cuda-${CUDA_VERSION}"
+    export PATH="${CUDA_HOME}/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="${CUDA_HOME}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+
+    # Set Mellanox OFED version, operating system, and hardware platform
+    export MLNX_ROOT_URL='http://www.mellanox.com/downloads/ofed'
+    export MLNX_OFED_VERSION='4.7-3.2.9.0'
+    export MLNX_OS_VERSION='ubuntu18.04'
+    export MLNX_PLATFORM='x86_64'
+
+    # Set OpenMPI major, minor, and revision numbers, root and
+    # installation directories
+    export OMPI_ROOT_URL='https://download.open-mpi.org/release/open-mpi'
+    export OMPI_MAJOR='4'
+    export OMPI_MINOR='0'
+    export OMPI_REVISION='5'
+    export OMPI_VERSION="${OMPI_MAJOR}.${OMPI_MINOR}.${OMPI_REVISION}"
+    export OMPI_ROOT_DIR='/opt/openmpi'
+    export OMPI_INSTALL_DIR="${OMPI_ROOT_DIR}/${OMPI_VERSION}"
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="${OMPI_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${OMPI_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    # Upgrade all packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    # Install python3 and some common core packages 
+    apt-get -y install python3-dev
+    apt-get -y install python3-pip
+    apt-get -y install python3-setuptools
+    apt-get -y install python3-virtualenv
+
+    # Install Bazel dependencies and prerequisites
+    apt-get -y install g++
+    apt-get -y install unzip
+    apt-get -y install zip
+    apt-get -y install git
+    apt-get -y install openjdk-11-jdk
+
+    # Set Bazel version number, root and installation directories
+    export BAZEL_VERSION='3.7.2'
+    export BAZEL_ROOT_DIR='/opt/bazel'
+    export BAZEL_INSTALL_DIR="${BAZEL_ROOT_DIR}/${BAZEL_VERSION}"
+    
+    # Download, build, and install Bazel
+    mkdir -p "${BAZEL_INSTALL_DIR}"
+    cd "${BAZEL_INSTALL_DIR}"
+    wget "https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/bazel-${BAZEL_VERSION}-dist.zip"
+    unzip -o "bazel-${BAZEL_VERSION}-dist.zip"
+    export EXTRA_BAZEL_ARGS="--host_javabase=@local_jdk//:jdk"
+    rm /usr/bin/python
+    ln -s /usr/bin/python3 /usr/bin/python
+    ./compile.sh
+
+    # Set path to Bazel
+    export PATH="${BAZEL_INSTALL_DIR}/output:${PATH}"
+
+    # Install common mathematical and scientific python3 packages
+    apt-get -y install python3-numpy
+    apt-get -y install python3-scipy
+    apt-get -y install python3-pandas
+    apt-get -y install python3-sklearn
+    apt-get -y install python3-skimage
+    apt-get -y install python3-statsmodels
+    apt-get -y install python3-matplotlib
+    apt-get -y install python3-plotly
+    apt-get -y install python3-seaborn
+    apt-get -y install python3-opencv
+    apt-get -y install python3-astropy
+    apt-get -y install python3-biopython
+    apt-get -y install python3-h5py
+    apt-get -y install python3-nltk
+    apt-get -y install python3-sympy
+    apt-get -y install python3-netcdf4
+
+    # Install JupyterLab
+    apt-get -y install jupyter
+    pip3 install jupyterlab
+
+    # Install additioanl dependencies for TensorFlow
+    apt-get -y install python3-six
+    apt-get -y install python3-wheel
+    apt-get -y install python3-mock
+    apt-get -y install python3-future
+
+    pip3 install keras_applications --no-deps
+    pip3 install keras_preprocessing --no-deps
+
+    # Set TensorFlow version number, root and install directories
+#    export TENSORFLOW_VERSION='2.5.0'
+#    export TENSORFLOW_ROOT_DIR='/opt/tensorflow'
+#    export TENSORFLOW_INSTALL_DIR="${TENSORFLOW_ROOT_DIR}/${TENSORFLOW_VERSION}"
+#
+#    # Download, build, and install TensorFlow
+#    mkdir -p "${TENSORFLOW_INSTALL_DIR}"
+#    cd "${TENSORFLOW_INSTALL_DIR}"
+#    git clone https://github.com/tensorflow/tensorflow.git
+#    cd tensorflow
+#    git checkout "v${TENSORFLOW_VERSION}"
+#
+#    export PYTHON_BIN_PATH='/usr/bin/python3'
+#    export PYTHON_LIB_PATH='/usr/local/lib/python3.6/dist-packages'
+#    export TF_ENABLE_XLA=1
+#    export TF_NEED_OPENCL_SYCL=0
+#    export TF_NEED_ROCM=0
+#    export TF_NEED_CUDA=1
+#    export TF_NEED_TENSORRT=0
+#    #export TF_CUDA_COMPUTE_CAPABILITIES='3.5,3.7,5.2,6.0,6.1,7.0,7.5'
+#    export TF_CUDA_COMPUTE_CAPABILITIES='3.7,6.0,7.0'
+#    export TF_CUDA_CLANG=0
+#    export TF_NEED_MPI=1
+#    export MPI_HOME="${OPENMPI_INSTALL_DIR}"
+#    export CC_OPT_FLAGS='-mtune=generic'
+#    export TF_SET_ANDROID_WORKSPACE=0
+#
+#    #bazel build --local_ram_resources 2048 --local_cpu_resources 1 -c opt --config=cuda --config=numa --config=v2 --verbose_failures //tensorflow/tools/pip_package:build_pip_package
+#    bazel build -c opt --config=cuda --config=numa --config=v2 --verbose_failures //tensorflow/tools/pip_package:build_pip_package
+#    bazel-bin/tensorflow/tools/pip_package/build_pip_package tensorflow_pkg
+#    pip3 install tensorflow_pkg/tensorflow-2.5.0-cp36-cp36m-linux_x86_64.whl
+
+#    Build is currently failing with following error.
+
+#Starting local Bazel server and connecting to it...
+#WARNING: The following configs were expanded more than once: [v2]. For repeatable flags, repeats are counted twice and may lead to unexpected behavior.
+#INFO: Options provided by the client:
+#  Inherited 'common' options: --isatty=1 --terminal_columns=80
+#INFO: Reading rc options for 'build' from /opt/tensorflow/2.5.0/tensorflow/.bazelrc:
+#  Inherited 'common' options: --experimental_repo_remote_exec
+#INFO: Reading rc options for 'build' from /opt/tensorflow/2.5.0/tensorflow/.bazelrc:
+#  'build' options: --define framework_shared_object=true --java_toolchain=@tf_toolchains//toolchains/java:tf_java_toolchain --host_java_toolchain=@tf_toolchains//toolchains/java:tf_java_toolchain --define=use_fast_cpp_protos=true --define=allow_oversize_protos=true --spawn_strategy=standalone -c opt --announce_rc --define=grpc_no_ares=true --noincompatible_remove_legacy_whole_archive --noincompatible_prohibit_aapt1 --enable_platform_specific_config --define=with_xla_support=true --config=short_logs --config=v2
+#INFO: Found applicable config definition build:short_logs in file /opt/tensorflow/2.5.0/tensorflow/.bazelrc: --output_filter=DONT_MATCH_ANYTHING
+#INFO: Found applicable config definition build:v2 in file /opt/tensorflow/2.5.0/tensorflow/.bazelrc: --define=tf_api_version=2 --action_env=TF2_BEHAVIOR=1
+#INFO: Found applicable config definition build:cuda in file /opt/tensorflow/2.5.0/tensorflow/.bazelrc: --repo_env TF_NEED_CUDA=1 --crosstool_top=@local_config_cuda//crosstool:toolchain --@local_config_cuda//:enable_cuda
+#INFO: Found applicable config definition build:numa in file /opt/tensorflow/2.5.0/tensorflow/.bazelrc: --define=with_numa_support=true
+#INFO: Found applicable config definition build:v2 in file /opt/tensorflow/2.5.0/tensorflow/.bazelrc: --define=tf_api_version=2 --action_env=TF2_BEHAVIOR=1
+#INFO: Found applicable config definition build:linux in file /opt/tensorflow/2.5.0/tensorflow/.bazelrc: --copt=-w --host_copt=-w --define=PREFIX=/usr --define=LIBDIR=$(PREFIX)/lib --define=INCLUDEDIR=$(PREFIX)/include --define=PROTOBUF_INCLUDE_PATH=$(PREFIX)/include --cxxopt=-std=c++14 --host_cxxopt=-std=c++14 --config=dynamic_kernels
+#INFO: Found applicable config definition build:dynamic_kernels in file /opt/tensorflow/2.5.0/tensorflow/.bazelrc: --define=dynamic_loaded_kernels=true --copt=-DAUTOLOAD_DYNAMIC_KERNELS
+#DEBUG: /root/.cache/bazel/_bazel_root/62c1e32d266c8fdbd78a7dac0f001dcf/external/bazel_tools/tools/cpp/lib_cc_configure.bzl:118:10:
+#Auto-Configuration Warning: 'TMP' environment variable is not set, using 'C:\Windows\Temp' as default
+#DEBUG: Rule 'io_bazel_rules_docker' indicated that a canonical reproducible form can be obtained by modifying arguments shallow_since = "1556410077 -0400"
+#DEBUG: Repository io_bazel_rules_docker instantiated at:
+#  /opt/tensorflow/2.5.0/tensorflow/WORKSPACE:23:14: in <toplevel>
+#  /opt/tensorflow/2.5.0/tensorflow/tensorflow/workspace0.bzl:105:34: in workspace
+#  /root/.cache/bazel/_bazel_root/62c1e32d266c8fdbd78a7dac0f001dcf/external/bazel_toolchains/repositories/repositories.bzl:37:23: in repositories
+#Repository rule git_repository defined at:
+#  /root/.cache/bazel/_bazel_root/62c1e32d266c8fdbd78a7dac0f001dcf/external/bazel_tools/tools/build_defs/repo/git.bzl:199:33: in <toplevel>
+#INFO: Analyzed target //tensorflow/tools/pip_package:build_pip_package (428 packages loaded, 36893 targets configured).
+#INFO: Found 1 target...
+#ERROR: /opt/tensorflow/2.5.0/tensorflow/tensorflow/compiler/mlir/tensorflow/BUILD:390:15: C++ compilation of rule '//tensorflow/compiler/mlir/tensorflow:tensorflow_ops_n_z' failed (Exit 4): crosstool_wrapper_driver_is_not_gcc failed: error executing command
+#  (cd /root/.cache/bazel/_bazel_root/62c1e32d266c8fdbd78a7dac0f001dcf/execroot/org_tensorflow && \
+#  exec env - \
+#    LD_LIBRARY_PATH=/opt/openmpi/4.0.5/lib:/usr/local/cuda-11.2/lib64:/.singularity.d/libs \
+#    PATH=/opt/bazel/3.7.2/output:/opt/openmpi/4.0.5/bin:/usr/local/cuda-11.2/bin:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin \
+#    PWD=/proc/self/cwd \
+
+
+
+#
+#    cd "${TENSORFLOW_INSTALL_DIR}"
+#
+#    # Download, build and install TensorFlow Addons
+#    git clone https://github.com/tensorflow/addons.git
+#    cd addons
+#    git checkout v0.11.2
+#
+#    export TF_NEED_CUDA=1
+#    export TF_CUDA_VERSION="${CUDA_VERSION}"
+#    export TF_CUDNN_VERSION=7
+#    export CUDA_TOOLKIT_PATH="${CUDA_HOME}"
+#    export CUDNN_INSTALL_PATH='/usr/lib/x86_64-linux-gnu'
+#
+#    python3 ./configure.py
+#
+#    rm /usr/bin/python
+#    ln -s /usr/bin/python3 /usr/bin/python
+#
+#    bazel build --enable_runfiles build_pip_pkg
+#    bazel-bin/build_pip_pkg artifacts
+#    pip3 install artifacts/tensorflow_addons-*.whl
+#
+#    cd "${TENSORFLOW_INSTALL_DIR}"
+#
+#    # Download and install TensorFlow Models
+#    git clone https://github.com/tensorflow/models.git
+#    cd models
+#    git checkout "v${TENSORFLOW_VERSION}"
+#    export PYTHONPATH="${TENSORFLOW_INSTALL_DIR}/models:${PYTHONPATH}"
+#    sed -i 's/kaggle>=1.3.9/#kaggle>=1.3.9/' official/requirements.txt
+#    pip3 install scikit-build
+#    pip3 install -r official/requirements.txt
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
