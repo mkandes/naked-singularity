@@ -10,7 +10,7 @@ From: mkandes/naked-singularity:ubuntu-18.04-cuda-11.2-openmpi-4.0.5
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20210608
+    LAST_UPDATED 20210610
 
 %setup
 
@@ -155,8 +155,7 @@ From: mkandes/naked-singularity:ubuntu-18.04-cuda-11.2-openmpi-4.0.5
     export ATEN_THREADING='OMP'
     export MKL_THREADING='OMP'
 
-    #export TORCH_CUDA_ARCH_LIST='3.5;3.7;5.2;6.0;6.1;7.0;7.5;8.0;8.6'
-    export TORCH_CUDA_ARCH_LIST='3.7;6.0;7.0'
+    export TORCH_CUDA_ARCH_LIST='3.5;3.7;5.2;6.0;6.1;7.0;7.5;8.0;8.6'
     export USE_CUDA=1
     export USE_CUDNN=1
 
@@ -194,6 +193,46 @@ From: mkandes/naked-singularity:ubuntu-18.04-cuda-11.2-openmpi-4.0.5
     # Download examples for PyTorch
     git clone https://github.com/pytorch/examples.git
 
+    # Download and install PyTorch Ignite
+    # https://github.com/pytorch/ignite
+    pip install pytorch-ignite==0.4.4
+
+    # Download and install PyTorch Lightning with extra dependencies
+    # https://github.com/PyTorchLightning/pytorch-lightning
+    # Note: 'extra' dependencies seems to include horovod; may want to 
+    #       separate out horovod installation in the next iteration.
+
+    #pip install pytorch-lightning['extra'] 
+
+    # Unfortunately, while PyTorch Lightning installs successfully via 
+    # pip, it is not importing properly due to some incompatibility with 
+    # latest torchtext. See error below.
+
+#Singularity> python
+#Python 3.8.5 (default, Sep  4 2020, 07:30:14) 
+#[GCC 7.3.0] :: Anaconda, Inc. on linux
+#Type "help", "copyright", "credits" or "license" for more information.
+#>>> import torch
+#>>> import pytorch_lightning
+#Traceback (most recent call last):
+#  File "<stdin>", line 1, in <module>
+#  File "/opt/miniconda3/lib/python3.8/site-packages/pytorch_lightning/__init__.py", line 20, in <module>
+#    from pytorch_lightning import metrics  # noqa: E402
+#  File "/opt/miniconda3/lib/python3.8/site-packages/pytorch_lightning/metrics/__init__.py", line 15, in <module>
+#    from pytorch_lightning.metrics.classification import (  # noqa: F401
+#  File "/opt/miniconda3/lib/python3.8/site-packages/pytorch_lightning/metrics/classification/__init__.py", line 14, in <module>
+#    from pytorch_lightning.metrics.classification.accuracy import Accuracy  # noqa: F401
+#  File "/opt/miniconda3/lib/python3.8/site-packages/pytorch_lightning/metrics/classification/accuracy.py", line 18, in <module>
+#    from pytorch_lightning.metrics.utils import deprecated_metrics
+#  File "/opt/miniconda3/lib/python3.8/site-packages/pytorch_lightning/metrics/utils.py", line 29, in <module>
+#    from pytorch_lightning.utilities import rank_zero_deprecation
+#  File "/opt/miniconda3/lib/python3.8/site-packages/pytorch_lightning/utilities/__init__.py", line 18, in <module>
+#    from pytorch_lightning.utilities.apply_func import move_data_to_device  # noqa: F401
+#  File "/opt/miniconda3/lib/python3.8/site-packages/pytorch_lightning/utilities/apply_func.py", line 32, in <module>
+#    from torchtext.data import Batch
+#ImportError: cannot import name 'Batch' from 'torchtext.data' (/opt/miniconda3/lib/python3.8/site-packages/torchtext-0.9.0a0+4de31fc-py3.8-linux-x86_64.egg/torchtext/data/__init__.py)
+#>>>
+   
     # Cleanup
     apt-get -y autoremove --purge
     apt-get -y clean

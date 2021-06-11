@@ -10,7 +10,7 @@ From: mkandes/naked-singularity:ubuntu-18.04-cuda-10.1.168-openmpi-3.1.4
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20201231
+    LAST_UPDATED 20210610
 
 %setup
 
@@ -175,6 +175,16 @@ From: mkandes/naked-singularity:ubuntu-18.04-cuda-10.1.168-openmpi-3.1.4
     git checkout 1.0.61
     tools/run-after-git-clone
     pip install -e ".[dev]"
+
+    # Download and install PyTorch Ignite
+    # https://github.com/pytorch/ignite
+    pip install pytorch-ignite==0.4.4
+
+    # Download and install PyTorch Lightning with extra dependencies
+    # https://github.com/PyTorchLightning/pytorch-lightning
+    # Note: 'extra' dependencies seems to include horovod; may want to
+    #       separate out horovod installation in the next iteration.
+    pip install pytorch-lightning['extra']
 
     # Cleanup
     apt-get -y autoremove --purge
