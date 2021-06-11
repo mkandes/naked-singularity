@@ -1,0 +1,111 @@
+Bootstrap: localimage
+From: ../anaconda/anaconda3-py38-2020.11-ubuntu-18.04.sif
+
+%labels
+
+    APPLICATION_NAME spark + hadoop
+    APPLICATION_VERSION 3.1.2 + 3.2
+    APPLICATION_URL https://spark.apache.org
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20210609
+
+%setup
+
+%environment
+
+    # Set the Spark version number, the Hadoop version number, the root
+    # and install directories where Spark will be installed within the 
+    # container, and the URLs to the pre-packaged Spark builds
+    export SPARK_VERSION='3.1.2'
+    export SPARK_HADOOP_VERSION='3.2'
+    export SPARK_ROOT_DIR='/opt/spark'
+    export SPARK_INSTALL_DIR="${SPARK_ROOT_DIR}/${SPARK_VERSION}/hadoop/${SPARK_HADOOP_VERSION}"
+    export SPARK_ROOT_URL='https://archive.apache.org/dist/spark'
+
+    # Set PATH to spark binaries
+    export PATH="${SPARK_INSTALL_DIR}/bin:${PATH}"
+    export PATH="${SPARK_INSTALL_DIR}/sbin:${PATH}"
+
+    # Configure Dropbear SSH options for Spark
+    export SPARK_SSH_OPTS='-p 2222 -o StrictHostKeyChecking=no'
+
+    # Set environment variables utilized by Spark
+    export JAVA_HOME='/usr'
+    export SPARK_HOME="${SPARK_INSTALL_DIR}"
+    export PYTHONPATH="${SPARK_HOME}/python/lib/pyspark.zip:${PYTHONPATH}"
+    export PYTHONPATH="${SPARK_HOME}/python/lib/py4j-0.10.9-src.zip:${PYTHONPATH}"
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='bionic'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    # Install Spark dependencies
+    apt-get -y install python3
+    apt-get -y install python3-dev
+    apt-get -y install openjdk-8-jre
+
+    # Use symbolic link for python2/3-compatability
+    ln -s /usr/bin/python3 /usr/bin/python
+
+    # Install OpenSSH and Dropbear to provide SSH communication 
+    # between Spark cluster nodes.
+    apt-get -y install openssh-client --no-install-recommends --allow-change-held-packages
+    apt-get -y install dropbear --no-install-recommends --allow-change-held-packages
+
+    # Set Dropbear port
+    sed -i -e 's@\(DROPBEAR_PORT=\).*@\12222@' /etc/default/dropbear
+
+    # Set the Spark version number, the Hadoop version, the root and
+    # install directories where Spark will be installed within the
+    # container, and the URLs to the pre-packaged Spark buildi
+    export SPARK_VERSION='3.1.2'
+    export SPARK_HADOOP_VERSION='3.2'
+    export SPARK_ROOT_DIR='/opt/spark'
+    export SPARK_INSTALL_DIR="${SPARK_ROOT_DIR}/${SPARK_VERSION}/hadoop/${SPARK_HADOOP_VERSION}"
+    export SPARK_ROOT_URL='https://archive.apache.org/dist/spark'
+
+    mkdir -p "${SPARK_INSTALL_DIR}"
+    cd "${SPARK_INSTALL_DIR}"
+
+    # Download, unpack, and install Spark
+    mkdir -p "${SPARK_INSTALL_DIR}"
+    cd "${SPARK_INSTALL_DIR}"
+    wget "${SPARK_ROOT_URL}/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${SPARK_HADOOP_VERSION}.tgz"
+    tar -xf "spark-${SPARK_VERSION}-bin-hadoop${SPARK_HADOOP_VERSION}.tgz"
+    cd "spark-${SPARK_VERSION}-bin-hadoop${SPARK_HADOOP_VERSION}"
+    mv * ../
+    cd ../
+    rmdir "spark-${SPARK_VERSION}-bin-hadoop${SPARK_HADOOP_VERSION}"
+    rm "spark-${SPARK_VERSION}-bin-hadoop${SPARK_HADOOP_VERSION}.tgz"
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%startscript
+
+    /etc/init.d/dropbear start
+
+%test

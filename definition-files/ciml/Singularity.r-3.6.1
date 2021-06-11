@@ -1,0 +1,73 @@
+Bootstrap: localimage
+From: ../miniconda/miniconda3-py38-4.9.2-ubuntu-18.04.sif
+
+%labels
+
+    APPLICATION_NAME r
+    APPLICATION_VERSION
+    APPLICATION_URL https://www.r-project.org/
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20210609
+
+%setup
+
+%environment
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='bionic'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set the conda distribution type, its version number, the python
+    # version it utilizes, the root and installation directories where
+    # the distribution will be installed within the container, and the
+    # root URL to the installer
+    export CONDA_DISTRIBUTION='miniconda'
+    export CONDA_VERSION='3'
+    export CONDA_PYTHON_VERSION='py38'
+    export CONDA_INSTALLER_VERSION='4.9.2'
+    export CONDA_ARCH='Linux-x86_64'
+    export CONDA_INSTALL_DIR="/opt/${CONDA_DISTRIBUTION}${CONDA_VERSION}"
+
+    # Set PATH to conda distribution
+    export PATH="${CONDA_INSTALL_DIR}/bin:${PATH}"
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    # Install R and its most popular packages
+    conda install -y r-base=3.6.1
+    conda install -y r-devtools=2.0.2
+    conda install -y r-essentials=3.6.0
+
+    # Install additional user-requested R packages
+    conda install -y r-doparallel=1.0.14
+    conda install -y r-rstan=2.18.2
+
+    # Install JupyterLab
+    conda install -y jupyterlab
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
