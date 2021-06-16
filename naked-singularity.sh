@@ -17,7 +17,7 @@
 #
 # LAST UPDATED
 #
-#   Tuesday, February 23rd, 2021
+#   Wednesday, June 16th, 2021
 #
 # ----------------------------------------------------------------------
 
@@ -122,36 +122,36 @@ naked::install() {
   if [[ "${os_release_id}" = 'centos' ]]; then
 
     log::output 'Running yum update ...'
-    sudo yum -y update
+    yum -y update
 
     log::output 'Installing Singularity dependencies ...'
-    sudo yum -y groupinstall 'Development Tools'
-    sudo yum -y install epel-release
-    sudo yum -y install openssl-devel
-    sudo yum -y install libuuid-devel
-    sudo yum -y install libseccomp-devel
-    sudo yum -y install wget
-    sudo yum -y install squashfs-tools
-    sudo yum -y install cryptsetup
-    sudo yum -y install debootstrap
+    yum -y groupinstall 'Development Tools'
+    yum -y install epel-release
+    yum -y install openssl-devel
+    yum -y install libuuid-devel
+    yum -y install libseccomp-devel
+    yum -y install wget
+    yum -y install squashfs-tools
+    yum -y install cryptsetup
+    yum -y install debootstrap
 
   elif [[ "${os_release_id}" = 'ubuntu' ]]; then
 
     log::output 'Running apt-get update ...'
-    sudo apt-get -y update
+    apt-get -y update
 
     log::output 'Installing Singularity dependencies ...'
-    sudo apt-get -y install build-essential
-    sudo apt-get -y install libssl-dev
-    sudo apt-get -y install uuid-dev
-    sudo apt-get -y install libgpgme-dev
-    sudo apt-get -y install squashfs-tools
-    sudo apt-get -y install libseccomp-dev
-    sudo apt-get -y install wget
-    sudo apt-get -y install pkg-config
-    sudo apt-get -y install git
-    sudo apt-get -y install cryptsetup-bin
-    sudo apt-get -y install debootstrap
+    apt-get -y install build-essential
+    apt-get -y install libssl-dev
+    apt-get -y install uuid-dev
+    apt-get -y install libgpgme-dev
+    apt-get -y install squashfs-tools
+    apt-get -y install libseccomp-dev
+    apt-get -y install wget
+    apt-get -y install pkg-config
+    apt-get -y install git
+    apt-get -y install cryptsetup-bin
+    apt-get -y install debootstrap
 
   else
 
@@ -193,7 +193,7 @@ naked::install() {
   cd singularity
   ./mconfig #--prefix=/opt/singularity
   make -C ./builddir
-  sudo make -C ./builddir install
+  make -C ./builddir install
 
   log::output 'Checking if Singularity was installed successully ...'
   singularity --version

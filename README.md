@@ -10,7 +10,7 @@ run on high-performance computing systems.
 Install Singularity on your Linux desktop, laptop, or virtual machine. 
 
 ```bash
-./naked-singularity.sh install
+sudo ./naked-singularity.sh install
 ```
 
 ## Build a Singularity container from a definition file
@@ -57,7 +57,7 @@ University of California, San Diego
 
 ## Version
 
-1.6.9
+1.7.0
 
 ## Last Updated
 
