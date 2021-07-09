@@ -10,7 +10,7 @@ From: mkandes/naked-singularity:ubuntu-18.04-cuda-11.2-openmpi-4.0.5
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20200617
+    LAST_UPDATED 20200707
 
 %setup
 
@@ -121,7 +121,9 @@ From: mkandes/naked-singularity:ubuntu-18.04-cuda-11.2-openmpi-4.0.5
     apt-get -y install python3-scipy
     apt-get -y install python3-pandas
     apt-get -y install python3-sklearn
+    pip3 install --upgrade scikit-learn
     apt-get -y install python3-skimage
+    pip3 install --upgrade scikit-image
     apt-get -y install python3-statsmodels
     apt-get -y install python3-matplotlib
     apt-get -y install python3-plotly
@@ -133,10 +135,6 @@ From: mkandes/naked-singularity:ubuntu-18.04-cuda-11.2-openmpi-4.0.5
     apt-get -y install python3-nltk
     apt-get -y install python3-sympy
     apt-get -y install python3-netcdf4
-
-    # Install JupyterLab
-    apt-get -y install jupyter
-    pip3 install jupyterlab
 
     # Install additioanl dependencies for TensorFlow
     apt-get -y install python3-six
@@ -173,7 +171,7 @@ From: mkandes/naked-singularity:ubuntu-18.04-cuda-11.2-openmpi-4.0.5
     export CC_OPT_FLAGS='-mtune=generic'
     export TF_SET_ANDROID_WORKSPACE=0
 
-    bazel build --local_ram_resources 2048 --local_cpu_resources 1 -c opt --config=cuda --config=numa --config=v2 --verbose_failures //tensorflow/tools/pip_package:build_pip_package
+    bazel build --local_ram_resources 8192 --local_cpu_resources 4 -c opt --config=cuda --config=numa --config=v2 --verbose_failures //tensorflow/tools/pip_package:build_pip_package
     bazel-bin/tensorflow/tools/pip_package/build_pip_package tensorflow_pkg
     pip3 install tensorflow_pkg/tensorflow-2.5.0-cp36-cp36m-linux_x86_64.whl
 
@@ -209,6 +207,11 @@ From: mkandes/naked-singularity:ubuntu-18.04-cuda-11.2-openmpi-4.0.5
     #sed -i 's/kaggle>=1.3.9/#kaggle>=1.3.9/' official/requirements.txt
     pip3 install scikit-build
     pip3 install -r official/requirements.txt
+
+    # Install JupyterLab
+    pip3 install jupyter
+    pip3 install jupyterlab
+    pip3 install --upgrade --force jupyter-console
 
     # Cleanup
     apt-get -y autoremove --purge
