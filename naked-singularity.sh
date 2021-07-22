@@ -154,6 +154,10 @@ naked::install() {
     apt-get -y install debootstrap
     apt-get -y install yum-utils
 
+    # https://github.com/hpcng/singularity/issues/241
+    echo '%_var /var' > ~/.rpmmacros
+    echo '%_dbpath %{_var}/lib/rpm' >> ~/.rpmmacros
+
   else
 
     log::error 'Operating system not recognized or not supported.'
