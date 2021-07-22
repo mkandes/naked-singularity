@@ -17,7 +17,7 @@
 #
 # LAST UPDATED
 #
-#   Wednesday, June 16th, 2021
+#   Thursday, July 22nd, 2021
 #
 # ----------------------------------------------------------------------
 
@@ -75,7 +75,7 @@ naked::install() {
   log::output 'Checking if Singularity is already installed ...'
   singularity --version > /dev/null 2>&1
   if [[ "${?}" -eq 0 ]]; then
-    log:error "Singularity is installed: $(singularity --version)"
+    log::error "Singularity is installed: $(singularity --version)"
     return 1
   else
     log::output 'Singularity is not installed.'
@@ -152,6 +152,7 @@ naked::install() {
     apt-get -y install git
     apt-get -y install cryptsetup-bin
     apt-get -y install debootstrap
+    apt-get -y install yum-utils
 
   else
 
