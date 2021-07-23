@@ -17,7 +17,7 @@
 #
 # LAST UPDATED
 #
-#   Thursday, July 22nd, 2021
+#   Friday, July 23rd, 2021
 #
 # ----------------------------------------------------------------------
 
@@ -196,9 +196,18 @@ naked::install() {
   wget "https://github.com/hpcng/singularity/releases/download/v${singularity_version}/singularity-${singularity_version}.tar.gz"
   tar -xf "singularity-${singularity_version}.tar.gz"
   cd singularity
-  ./mconfig #--prefix=/opt/singularity
+  ./mconfig #--prefix=/opt/singularity <- include prefix as used-defined option?
   make -C ./builddir
   make -C ./builddir install
+
+  # Prepend the path of the install directory of Singularity to PATH
+  # because not all secure_paths in /etc/sudoers may include it. If it
+  # is not included as one of the secure_paths by default, then the
+  # final install test below will fail erroneously, even when
+  # Singularity has been installed successfully.
+  #
+  # https://unix.stackexchange.com/questions/8646/why-are-path-variables-different-when-running-via-sudo-and-su
+  export PATH="/usr/local/bin:${PATH}"
 
   log::output 'Checking if Singularity was installed successully ...'
   singularity --version
