@@ -1,0 +1,77 @@
+Bootstrap: yum 
+OSVersion: 7
+MirrorURL: https://vault.centos.org/7.7.1908/os/x86_64
+Include: yum
+
+%labels
+
+    APPLICATION_NAME centos
+    APPLICATION_VERSION 7.7.1908
+    APPLICATION_URL https://www.centos.org
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20210725
+
+%setup
+
+%environment
+
+    # Set operating system mirror URL
+    export MIRRORURL='https://vault.centos.org/7.7.1908/os/x86_64'
+
+    # Set operating system version
+    export OSVERSION='7'
+
+    # Set system locale
+    export LC_ALL=C
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='https://vault.centos.org/7.7.1908/os/x86_64'
+
+    # Set operating system version
+    export OSVERSION='7'
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Add software repositories
+    yum -y install epel-release
+
+    # Install system software metapackages
+    yum -y groupinstall "Development Tools"
+    yum -y groupinstall "Additional Development"
+    yum -y groupinstall "Compatibility Libraries"
+
+    # Update all software packages to their latest versions
+    yum -y check-update && yum -y update
+
+    # Install common software packages
+    yum -y install bc
+    yum -y install cmake
+    yum -y install curl
+    yum -y install expect
+    yum -y install mlocate
+    yum -y install python3
+    yum -y install rsync
+    yum -y install time
+    yum -y install vim-minimal
+    yum -y install wget
+    yum -y install which
+    yum -y install yum-utils
+
+    # Cleanup
+    package-cleanup -q --leaves | xargs -l1 yum -y remove
+    yum -y clean all
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
