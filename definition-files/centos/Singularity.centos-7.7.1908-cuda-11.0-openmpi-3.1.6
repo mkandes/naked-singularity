@@ -1,0 +1,137 @@
+Bootstrap: localimage
+From: centos-7.7.1908-cuda-11.0.sif
+
+%labels
+
+    APPLICATION_NAME centos + cuda + openmpi
+    APPLICATION_VERSION 7.7.1908 + 11.0 + 3.1.6
+    APPLICATION_URL https://www.open-mpi.org
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20210727
+
+%setup
+
+%environment
+
+    # Set Mellanox OFED version, operating system, and hardware platform
+    export MLNX_ROOT_URL='http://www.mellanox.com/downloads/ofed'
+    export MLNX_OFED_VERSION='4.7-3.2.9.0'
+    export MLNX_OS_VERSION='rhel7.7'
+    export MLNX_PLATFORM='x86_64'
+
+    # Set OpenMPI major, minor, and revision numbers, root and
+    # installation directories
+    export OMPI_ROOT_URL='https://download.open-mpi.org/release/open-mpi'
+    export OMPI_MAJOR='3'
+    export OMPI_MINOR='1'
+    export OMPI_REVISION='6'
+    export OMPI_VERSION="${OMPI_MAJOR}.${OMPI_MINOR}.${OMPI_REVISION}"
+    export OMPI_ROOT_DIR='/opt/openmpi'
+    export OMPI_INSTALL_DIR="${OMPI_ROOT_DIR}/${OMPI_VERSION}"
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="${OMPI_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${OMPI_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='https://vault.centos.org/7.7.1908/os/x86_64'
+
+    # Set operating system version
+    export OSVERSION='7'
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Update all software packages to their latest versions
+    yum -y check-update && yum -y update
+
+    # Install all dependencies and/or prerequisites for Mellanox OFED
+    yum -y install perl 
+    yum -y install pciutils
+    yum -y install python
+    yum -y install gcc-gfortran
+    yum -y install libxml2-python
+    yum -y install tcsh
+    yum -y install libnl.i686
+    yum -y install libnl
+    yum -y install expat
+    yum -y install glib2
+    yum -y install tcl
+    yum -y install libstdc++
+    yum -y install bc
+    yum -y install tk
+    yum -y install gtk2
+    yum -y install atk
+    yum -y install cairo
+    yum -y install numactl
+    yum -y install pkgconfig
+    yum -y install ethtool
+
+    cd /tmp
+
+    # Set Mellanox OFED version, operating system, and hardware platform
+    export MLNX_ROOT_URL='http://www.mellanox.com/downloads/ofed'
+    export MLNX_OFED_VERSION='4.7-3.2.9.0'
+    export MLNX_OS_VERSION='rhel7.7'
+    export MLNX_PLATFORM='x86_64'
+
+    # Download and install Mellanox OFED drivers and supporting
+    # libraries for userspace access to Ethernet, RDMA, and Infiniband.
+    # https://docs.mellanox.com/pages/releaseview.action?pageId=15049785
+    wget "${MLNX_ROOT_URL}/MLNX_OFED-${MLNX_OFED_VERSION}/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-${MLNX_OS_VERSION}-${MLNX_PLATFORM}.tgz"
+    tar -xf "MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-${MLNX_OS_VERSION}-${MLNX_PLATFORM}.tgz"
+    cd "MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-${MLNX_OS_VERSION}-${MLNX_PLATFORM}"
+    ./mlnxofedinstall --user-space-only --without-fw-update --force
+
+    cd /tmp
+
+    # Remove Mellanox OFED archive directory and tarball
+    rm -rf "MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-${MLNX_OS_VERSION}-${MLNX_PLATFORM}"
+    rm "MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-${MLNX_OS_VERSION}-${MLNX_PLATFORM}.tgz"
+
+    # Install OpenMPI dependencies
+    yum -y install zlib
+    yum -y install zlib-devel
+
+    cd /tmp
+
+    # Set OpenMPI major, minor, and revision numbers, root and
+    # installation directories
+    export OMPI_ROOT_URL='https://download.open-mpi.org/release/open-mpi'
+    export OMPI_MAJOR='3'
+    export OMPI_MINOR='1'
+    export OMPI_REVISION='6'
+    export OMPI_VERSION="${OMPI_MAJOR}.${OMPI_MINOR}.${OMPI_REVISION}"
+    export OMPI_ROOT_DIR='/opt/openmpi'
+    export OMPI_INSTALL_DIR="${OMPI_ROOT_DIR}/${OMPI_VERSION}"
+
+    # Download, build, and install OpenMPI
+    wget "${OMPI_ROOT_URL}/v${OMPI_MAJOR}.${OMPI_MINOR}/openmpi-${OMPI_VERSION}.tar.gz"
+    tar -xf "openmpi-${OMPI_VERSION}.tar.gz"
+    cd "openmpi-${OMPI_VERSION}"
+    ./configure --prefix="${OMPI_INSTALL_DIR}" --with-cuda
+    make all install
+
+    cd /tmp
+
+    # Remove OpenMPI build directory and source tarball
+    rm -rf "openmpi-${OMPI_VERSION}"
+    rm "openmpi-${OMPI_VERSION}.tar.gz"
+
+    # Cleanup
+    package-cleanup -q --leaves | xargs -l1 yum -y remove
+    yum -y clean all
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test

@@ -1,5 +1,5 @@
 Bootstrap: localimage
-From: ../centos/centos-7.7.1908-openmpi-3.1.6.sif
+From: ../centos/centos-7.7.1908-cuda-11.0-openmpi-3.1.6.sif
 
 %labels
 
@@ -10,7 +10,7 @@ From: ../centos/centos-7.7.1908-openmpi-3.1.6.sif
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20210727
+    LAST_UPDATED 20210728
 
 %setup
 
@@ -41,6 +41,16 @@ From: ../centos/centos-7.7.1908-openmpi-3.1.6.sif
 
     # Set system locale
     export LC_ALL=C
+
+    # Set CUDA version
+    export CUDA_MAJOR='11'
+    export CUDA_MINOR='0'
+    export CUDA_VERSION="${CUDA_MAJOR}.${CUDA_MINOR}"
+
+    # Set paths to CUDA binaries and libraries
+    export CUDA_HOME="/usr/local/cuda-${CUDA_VERSION}"
+    export PATH="${CUDA_HOME}/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="${CUDA_HOME}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
 
     # Set Mellanox OFED version, operating system, and hardware platform
     export MLNX_ROOT_URL='http://www.mellanox.com/downloads/ofed'
@@ -80,7 +90,7 @@ From: ../centos/centos-7.7.1908-openmpi-3.1.6.sif
     wget "${OMB_ROOT_URL}/osu-micro-benchmarks-${OMB_VERSION}.tar.gz"
     tar -xf "osu-micro-benchmarks-${OMB_VERSION}.tar.gz"
     cd "osu-micro-benchmarks-${OMB_VERSION}"
-    ./configure --prefix="${OMB_INSTALL_DIR}" CC='mpicc' CXX='mpicxx'
+    ./configure --prefix="${OMB_INSTALL_DIR}" CC='mpicc' CXX='mpicxx' --enable-cuda --with-cuda-include="${CUDA_HOME}/include" --with-cuda-libpath="${CUDA_HOME}/lib64"
     make
     make install
 

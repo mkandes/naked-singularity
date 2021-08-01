@@ -1,5 +1,5 @@
 Bootstrap: localimage
-From: ../centos/centos-7.7.1908-openmpi-3.1.6.sif
+From: ../centos/centos-7.7.1908-openmpi-4.0.5.sif
 
 %labels
 
@@ -10,7 +10,7 @@ From: ../centos/centos-7.7.1908-openmpi-3.1.6.sif
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20210727
+    LAST_UPDATED 20210729
 
 %setup
 
@@ -51,9 +51,9 @@ From: ../centos/centos-7.7.1908-openmpi-3.1.6.sif
     # Set OpenMPI major, minor, and revision numbers, root and
     # installation directories
     export OMPI_ROOT_URL='https://download.open-mpi.org/release/open-mpi'
-    export OMPI_MAJOR='3'
-    export OMPI_MINOR='1'
-    export OMPI_REVISION='6'
+    export OMPI_MAJOR='4'
+    export OMPI_MINOR='0'
+    export OMPI_REVISION='5'
     export OMPI_VERSION="${OMPI_MAJOR}.${OMPI_MINOR}.${OMPI_REVISION}"
     export OMPI_ROOT_DIR='/opt/openmpi'
     export OMPI_INSTALL_DIR="${OMPI_ROOT_DIR}/${OMPI_VERSION}"

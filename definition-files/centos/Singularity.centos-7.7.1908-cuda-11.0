@@ -1,0 +1,169 @@
+Bootstrap: localimage
+From: centos-7.7.1908.sif
+
+%labels
+
+    APPLICATION_NAME centos + cuda
+    APPLICATION_VERSION 7.7.1908 + 11.0
+    APPLICATION_URL https://docs.nvidia.com/cuda
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20210727
+
+%setup
+
+%environment
+
+    # Location of NVIDIA/CUDA repositories
+    export CUDA_ROOT_URL='http://developer.download.nvidia.com/compute'
+    export CUDA_DISTRO='rhel7'
+    export CUDA_ARCH='x86_64'
+    export CUDA_REPO_URL="${CUDA_ROOT_URL}/cuda/repos/${CUDA_DISTRO}/${CUDA_ARCH}"
+    export CUDA_GPG_PUBKEY='7fa2af80.pub'
+
+    # Set NVIDIA driver and CUDA versions
+    export CUDA_DRIVER_MAJOR='460'
+    export CUDA_DRIVER_MINOR='32'
+    export CUDA_DRIVER_REVISION='03'
+    export CUDA_DRIVER_VERSION="${CUDA_DRIVER_MAJOR}.${CUDA_DRIVER_MINOR}.${CUDA_DRIVER_REVISION}"
+    export CUDA_MAJOR='11'
+    export CUDA_MINOR='0'
+    export CUDA_REVISION='2'
+    export CUDA_VERSION="${CUDA_MAJOR}.${CUDA_MINOR}"
+    export CUDNN_MAJOR='8'
+    export CUDNN_MINOR='1'
+    export CUDNN_REVISION='0.77'
+    export CUDNN_VERSION="${CUDNN_MAJOR}.${CUDNN_MINOR}.${CUDNN_REVISION}"
+    export NCCL_MAJOR='2'
+    export NCCL_MINOR='8'
+    export NCCL_REVISION='4'
+    export NCCL_VERSION="${NCCL_MAJOR}.${NCCL_MINOR}.${NCCL_REVISION}"
+
+    # Set paths to CUDA binaries and libraries
+    export CUDA_HOME="/usr/local/cuda-${CUDA_VERSION}"
+    export PATH="${CUDA_HOME}/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="${CUDA_HOME}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='https://vault.centos.org/7.7.1908/os/x86_64'
+
+    # Set operating system version
+    export OSVERSION='7'
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Update all software packages to their latest versions
+    yum -y check-update && yum -y update
+
+    # Location of NVIDIA/CUDA repositories
+    export CUDA_ROOT_URL='http://developer.download.nvidia.com/compute'
+    export CUDA_DISTRO='rhel7'
+    export CUDA_ARCH='x86_64'
+    export CUDA_REPO_URL="${CUDA_ROOT_URL}/cuda/repos/${CUDA_DISTRO}/${CUDA_ARCH}"
+    export CUDA_GPG_PUBKEY='7fa2af80.pub'
+
+    # Set NVIDIA driver and CUDA versions             
+    export CUDA_DRIVER_MAJOR='460'                    
+    export CUDA_DRIVER_MINOR='32'                     
+    export CUDA_DRIVER_REVISION='03'                  
+    export CUDA_DRIVER_VERSION="${CUDA_DRIVER_MAJOR}.${CUDA_DRIVER_MINOR}.${CUDA_DRIVER_REVISION}"                                    
+    export CUDA_MAJOR='11'                            
+    export CUDA_MINOR='0'                             
+    export CUDA_REVISION='2'                          
+    export CUDA_VERSION="${CUDA_MAJOR}.${CUDA_MINOR}"
+    export CUDNN_MAJOR='8'
+    export CUDNN_MINOR='1'
+    export CUDNN_REVISION='0.77'
+    export CUDNN_VERSION="${CUDNN_MAJOR}.${CUDNN_MINOR}.${CUDNN_REVISION}"
+    export NCCL_MAJOR='2'
+    export NCCL_MINOR='8'
+    export NCCL_REVISION='4'
+    export NCCL_VERSION="${NCCL_MAJOR}.${NCCL_MINOR}.${NCCL_REVISION}"
+
+    # Set paths to CUDA binaries and libraries
+    export CUDA_HOME="/usr/local/cuda-${CUDA_VERSION}"
+    export PATH="${CUDA_HOME}/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="${CUDA_HOME}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+
+    # Install NVIDIA package dependencies
+    yum -y install xorg-x11-server-Xorg
+    yum -y install xorg-x11-server-common
+    yum -y install xorg-x11-apps
+    yum -y install xorg-x11-utils
+    yum -y install xorg-x11-xauth
+    yum -y install xorg-x11-xkb-utils
+    yum -y install cmake
+    yum -y install make
+    yum -y install dkms
+    yum -y install kernel-headers
+    yum -y install glibc-devel
+    yum -y install glibc-headers
+    yum -y install glibc-utils
+    yum -y install libwayland-client
+    yum -y install libwayland-server
+    yum -y install pkgconfig
+    yum -y install libvdpau
+    yum -y install libva-vdpau-driver
+    yum -y install atk
+    yum -y install atk-devel
+    yum -y install cairo
+    yum -y install cairo-devel
+    yum -y install cairo-gobject
+    yum -y install cairo-gobject-devel
+    yum -y install cairo-tools
+    yum -y install fontconfig
+    yum -y install fontconfig-devel
+    yum -y install gdk-pixbuf2
+    yum -y install gdk-pixbuf2-devel
+    yum -y install gtk3
+    yum -y install gtk3-devel
+    yum -y install gtk2
+    yum -y install gtk2-devel
+    yum -y install jansson
+    yum -y install freeglut
+    yum -y install freeglut-devel
+    yum -y install libX11
+    yum -y install libX11-devel
+    yum -y install libX11-common
+    yum -y install libXmu
+    yum -y install libXmu-devel
+    yum -y install libXi
+    yum -y install libXi-devel
+    yum -y install mesa-libGLU
+    yum -y install mesa-libGLU-devel
+    yum -y install java-latest-openjdk
+    yum -y install java-latest-openjdk-devel
+
+    yum -y install grubby
+    yum -y install libtirpc
+    yum -y install ocl-icd
+    yum -y install opencl-filesystem
+    yum -y install vulkan-filesystem
+
+    cd /tmp
+
+    # Download local installer rpm and then install NVIDIA driver and 
+    # CUDA toolkit meta-packages
+    wget http://developer.download.nvidia.com/compute/cuda/11.0.2/local_installers/cuda-repo-rhel7-11-0-local-11.0.2_450.51.05-1.x86_64.rpm
+    rpm -i cuda-repo-rhel7-11-0-local-11.0.2_450.51.05-1.x86_64.rpm
+    yum -y install nvidia-driver-latest-dkms
+    yum -y install cuda
+    yum -y install cuda-drivers
+
+    # Cleanup
+    package-cleanup -q --leaves | xargs -l1 yum -y remove
+    yum -y clean all
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
