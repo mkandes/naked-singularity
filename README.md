@@ -31,11 +31,14 @@ hosted at Singularity Hub.
 singularity pull shub://mkandes/naked-singularity:ubuntu-18.04
 ```
 
-[Singularity Hub has been archived](https://vsoch.github.io/2021/singularity-hub-archive). At least for the time being, naked-singularity definition 
-files that rely on containers that were built and hosted on Singularity
-Hub prior to it being archived will continue to pull in these container
-dependencies and build properly. Alternative container build and hosting
-options for all future work are still under consideration.
+IMPORTANT: [Singularity Hub has been archived](https://vsoch.github.io/2021/singularity-hub-archive). 
+For the time being, naked-singularity definition files that rely on 
+containers that were built and hosted on Singularity Hub prior to it 
+being archived will continue to pull in these container dependencies and
+build properly. Note, however, new pre-built containers of the latest 
+naked-singularity definition files are currently being updated to be 
+hosted via the [GitHub Container Registry](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry).
+
 
 ## Status
 
@@ -57,8 +60,8 @@ University of California, San Diego
 
 ## Version
 
-1.7.9
+1.8.1
 
 ## Last Updated
 
-Sunday, August 1st, 2021
+Wednesday, August 4th, 2021
