@@ -1,0 +1,109 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-mlnx-ofed-4.7-3.2.9.0-mvapich-2.3.6
+
+%labels
+
+    APPLICATION_NAME OSU Micro-Benchmarks
+    APPLICATION_VERSION 5.7
+    APPLICATION_URL http://mvapich.cse.ohio-state.edu/benchmarks
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20210805
+
+%setup
+
+%environment
+
+    # Set OMB major and minor version numbers, root and
+    # installation directories
+    export OMB_ROOT_URL='http://mvapich.cse.ohio-state.edu/download/mvapich'
+    export OMB_MAJOR='5'
+    export OMB_MINOR='7'
+    export OMB_VERSION="${OMB_MAJOR}.${OMB_MINOR}"
+    export OMB_ROOT_DIR='/opt/omb'
+    export OMB_INSTALL_DIR="${OMB_ROOT_DIR}/${OMB_VERSION}"
+
+    # Set paths to OSU Microbenchmarks binaries
+    export PATH="${OMB_INSTALL_DIR}/collective:${PATH}"
+    export PATH="${OMB_INSTALL_DIR}/one-sided:${PATH}"
+    export PATH="${OMB_INSTALL_DIR}/pt2pt:${PATH}"
+    export PATH="${OMB_INSTALL_DIR}/startup:${PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='bionic'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set MVAPICH major, minor, and revision numbers, root and
+    # installation directories
+    export MV_ROOT_URL='http://mvapich.cse.ohio-state.edu/download/mvapich'
+    export MV_MAJOR='2'
+    export MV_MINOR='3'
+    export MV_REVISION='6'
+    export MV_VERSION="${MV_MAJOR}.${MV_MINOR}.${MV_REVISION}"
+    export MV_ROOT_DIR='/opt/mvapich'
+    export MV_INSTALL_DIR="${MV_ROOT_DIR}/${MV_VERSION}"
+
+    # Set paths to MVAPICH binaries and libraries
+    export PATH="${MV_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${MV_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    cd /tmp
+
+    # Set OMB major and minor version numbers, root and
+    # installation directories
+    export OMB_ROOT_URL='http://mvapich.cse.ohio-state.edu/download/mvapich'
+    export OMB_MAJOR='5'
+    export OMB_MINOR='7'
+    export OMB_VERSION="${OMB_MAJOR}.${OMB_MINOR}"
+    export OMB_ROOT_DIR='/opt/omb'
+    export OMB_INSTALL_DIR="${OMB_ROOT_DIR}/${OMB_VERSION}"
+
+    # Download, build, and install OSU Microbenchmarks
+    wget "${OMB_ROOT_URL}/osu-micro-benchmarks-${OMB_VERSION}.tar.gz"
+    tar -xf "osu-micro-benchmarks-${OMB_VERSION}.tar.gz"
+    cd "osu-micro-benchmarks-${OMB_VERSION}"
+    ./configure --prefix="${OMB_INSTALL_DIR}" CC='mpicc' CXX='mpicxx'
+    make
+    make install
+
+    # Reorganize OSU Microbenchmarks directory structure
+    cd "${OMB_INSTALL_DIR}"
+    mv libexec/osu-micro-benchmarks/mpi/collective ./
+    mv libexec/osu-micro-benchmarks/mpi/one-sided ./
+    mv libexec/osu-micro-benchmarks/mpi/pt2pt ./
+    mv libexec/osu-micro-benchmarks/mpi/startup ./
+    rm -rf libexec
+
+    cd /tmp
+
+    # Remove OMB build directory and source tarball
+    rm -rf "osu-micro-benchmarks-${OMB_VERSION}"
+    rm "osu-micro-benchmarks-${OMB_VERSION}.tar.gz"
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
