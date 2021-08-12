@@ -1,5 +1,5 @@
-Bootstrap: shub
-From: mkandes/naked-singularity:ubuntu-18.04
+Bootstrap: oras
+From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04
 
 %labels
 
@@ -10,7 +10,7 @@ From: mkandes/naked-singularity:ubuntu-18.04
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20210427
+    LAST_UPDATED 20210804
 
 %setup
 
@@ -125,11 +125,6 @@ From: mkandes/naked-singularity:ubuntu-18.04
     apt-get -y libxi-dev
     apt-get -y libglu1-mesa
     apt-get -y libglu1-mesa-dev
-
-    # Set paths to CUDA binaries and libraries
-    export CUDA_HOME="/usr/local/cuda-${CUDA_VERSION}"
-    export PATH="${CUDA_HOME}/bin${PATH:+:${PATH}}"
-    export LD_LIBRARY_PATH="${CUDA_HOME}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
 
     # Cleanup
     apt-get -y autoremove --purge
