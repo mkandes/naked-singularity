@@ -6,8 +6,9 @@
 #
 # DESCRIPTION
 #
-#   A bash script to help users work with Singularity on their Linux 
-#   desktop, laptop, or virtual machine.
+#   A bash shell utility to help you work with Singularity (and the 
+#   definition files within the naked-singularity repository) on your
+#   Linux desktop, laptop, or virtual machine.
 #
 # USAGE
 #
@@ -17,7 +18,7 @@
 #
 # LAST UPDATED
 #
-#   Friday, July 23rd, 2021
+#   Wednesday, Auguest 18th, 2021
 #
 # ----------------------------------------------------------------------
 
@@ -26,7 +27,7 @@ source log.sh
 # ----------------------------------------------------------------------
 # naked::install
 #
-#   Install Singularity (from source).
+#   Installs Singularity from source [or via rpm].
 #
 # Globals:
 #
@@ -38,8 +39,8 @@ source log.sh
 #
 # Returns:
 #
-#   True (0) if Singularity is installed sucessfully. False (1)
-#   if the installation fails.
+#   True (0) if Singularity is installed sucessfully.
+#   False (1) if the installation of Singularity fails.
 #
 # ----------------------------------------------------------------------
 
@@ -54,6 +55,10 @@ naked::install() {
 
   while (("${#}" > 0)); do
     case "${1}" in
+      -s | --singularity )
+        singularity_version="${2}"
+        shift 2
+        ;;
       -g | --go )
         go_version="${2}"
         shift 2
@@ -61,10 +66,6 @@ naked::install() {
       -r | --rpm )
         use_rpm=0
         shift 1
-        ;;
-      -s | --singularity )
-        singularity_version="${2}"
-        shift 2
         ;;
       *)
         log::error "Command-line option ${1} not recognized or not supported."
@@ -223,6 +224,80 @@ naked::install() {
 }
 
 # ----------------------------------------------------------------------
+# naked::uninstall
+#
+#   Removes an existing source [or rpm-based] installation of Singularity.
+#
+# Globals:
+#
+#   N/A
+#
+# Arguments:
+#
+#   @
+#
+# Returns:
+#
+#   True (0) if Singularity is uninstalled and removed sucessfully.
+#   False (1) if the removal of Singularity fails.
+#
+# ----------------------------------------------------------------------
+
+naked::uninstall() {
+
+  local singularity_prefix='/usr/local'
+  local -i use_rpm=1
+
+  local os_release_id=''
+  local os_release_version_id=''
+
+  while (("${#}" > 0)); do
+    case "${1}" in
+      -p | --prefix )
+        singularity_prefix="${2}"
+        shift 2
+        ;;
+      -r | --rpm )
+        use_rpm=0
+        shift 1
+        ;;
+      *)
+        log::error "Command-line option ${1} not recognized or not supported."
+        return 1
+    esac
+  done
+
+  log::output 'Checking if Singularity is already installed ...'
+  singularity --version > /dev/null 2>&1
+  if [[ "${?}" -eq 0 ]]; then
+    log::output "Singularity is installed: $(singularity --version)"
+  else
+    log::error 'Singularity is not installed.'
+    return 1
+  fi
+
+  log::output 'Uninstalling Singularity ...'
+  sudo rm -rf "${singularity_prefix}/libexec/singularity"
+  sudo rm -rf "${singularity_prefix}/var/singularity"
+  sudo rm -rf "${singularity_prefix}/etc/singularity"
+  sudo rm -rf "${singularity_prefix}/bin/singularity"
+  sudo rm -rf "${singularity_prefix}/bin/run-singularity"
+  sudo rm -rf "${singularity_prefix}/etc/bash_completion.d/singularity"
+
+  log::output 'Checking if Singularity was uninstalled successfully ...'
+  which singularity
+  if [[ "${?}" -eq 0 ]]; then
+    log:error 'Singularity was NOT uninstalled!'
+    return 1
+  fi
+
+  log::output 'Singularity was uninstalled successfully!'
+
+  return 0
+
+}
+
+# ----------------------------------------------------------------------
 # naked::help
 #
 #   Prints information on how to use this script to standard output.
@@ -265,8 +340,8 @@ naked::help() {
 #
 # Returns:
 #
-#   True (0) if the script executes without issue. False (1) if the 
-#   script fails to executre properly.
+#   True (0) if the script executes without issue.
+#   False (1) if the script fails to executre properly.
 # 
 # ----------------------------------------------------------------------
 
@@ -287,6 +362,14 @@ naked::main() {
       naked::install "${@}"
       if [[ "${?}" -ne 0 ]]; then
         log::error 'Failed to run install command.'
+        exit 1
+      fi
+
+    elif [[ "${naked_command}" = 'uninstall' ]]; then
+
+      naked::uninstall "${@}"
+      if [[ "${?}" -ne 0 ]]; then
+        log::error 'Failed to run uninstall command.'
         exit 1
       fi
 
