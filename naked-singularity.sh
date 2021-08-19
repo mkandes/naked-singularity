@@ -48,7 +48,8 @@ naked::install() {
 
   local singularity_version='3.5.3'
   local go_version='1.15.6'
-  local -i use_rpm=1
+  local use_rpm='false'
+  local rpm_repo='epel'
 
   local os_release_id=''
   local os_release_version_id=''
@@ -64,8 +65,12 @@ naked::install() {
         shift 2
         ;;
       -r | --rpm )
-        use_rpm=0
+        use_rpm='true'
         shift 1
+        ;;
+      -e | --enable-repo )
+        rpm_repo="${2}"
+        shift 2
         ;;
       *)
         log::error "Command-line option ${1} not recognized or not supported."
@@ -166,40 +171,49 @@ naked::install() {
 
   fi
 
-  mkdir -p /tmp/go
-  cd /tmp/go
+  if [[ "${os_release_id}" = 'centos' && "${use_rpm}" = 'true' ]]; then
 
-  log::output 'Installing Go ...'
-  export CGO_ENABLED=0
-  wget https://dl.google.com/go/go1.4-bootstrap-20171003.tar.gz
-  tar -xf go1.4-bootstrap-20171003.tar.gz
-  mv go 1.4
-  cd 1.4/src
-  ./make.bash
+    log::output 'Installing Singularity ...'
+    yum -y install --enablerepo="${rpm_repo}" singularity-"${singularity_version}"
 
-  export GOROOT_BOOTSTRAP='/tmp/go/1.4'
+  else # build and install singularity from source
 
-  cd /tmp/go
+    mkdir -p /tmp/go
+    cd /tmp/go
 
-  export CGO_ENABLED=1
-  git clone https://go.googlesource.com/go "${go_version}"
-  cd "${go_version}"
-  git checkout "go${go_version}"
-  cd src
-  ./all.bash
+    log::output 'Installing Go ...'
+    export CGO_ENABLED=0
+    wget https://dl.google.com/go/go1.4-bootstrap-20171003.tar.gz
+    tar -xf go1.4-bootstrap-20171003.tar.gz
+    mv go 1.4
+    cd 1.4/src
+    ./make.bash
 
-  export GOROOT="/tmp/go/${go_version}"
-  export PATH="${GOROOT}/bin:${PATH}"
+    export GOROOT_BOOTSTRAP='/tmp/go/1.4'
 
-  cd /tmp
+    cd /tmp/go
 
-  log::output 'Installing Singularity ...'
-  wget "https://github.com/hpcng/singularity/releases/download/v${singularity_version}/singularity-${singularity_version}.tar.gz"
-  tar -xf "singularity-${singularity_version}.tar.gz"
-  cd singularity
-  ./mconfig #--prefix=/opt/singularity <- include prefix as used-defined option?
-  make -C ./builddir
-  make -C ./builddir install
+    export CGO_ENABLED=1
+    git clone https://go.googlesource.com/go "${go_version}"
+    cd "${go_version}"
+    git checkout "go${go_version}"
+    cd src
+    ./all.bash
+
+    export GOROOT="/tmp/go/${go_version}"
+    export PATH="${GOROOT}/bin:${PATH}"
+
+    cd /tmp
+
+    log::output 'Installing Singularity ...'
+    wget "https://github.com/hpcng/singularity/releases/download/v${singularity_version}/singularity-${singularity_version}.tar.gz"
+    tar -xf "singularity-${singularity_version}.tar.gz"
+    cd singularity
+    ./mconfig #--prefix=/opt/singularity <- include prefix as used-defined option?
+    make -C ./builddir
+    make -C ./builddir install
+
+  fi
 
   # Prepend the path of the install directory of Singularity to PATH
   # because not all secure_paths in /etc/sudoers may include it. If it
@@ -246,7 +260,7 @@ naked::install() {
 naked::uninstall() {
 
   local singularity_prefix='/usr/local'
-  local -i use_rpm=1
+  local use_rpm='false'
 
   local os_release_id=''
   local os_release_version_id=''
@@ -258,7 +272,7 @@ naked::uninstall() {
         shift 2
         ;;
       -r | --rpm )
-        use_rpm=0
+        use_rpm='true'
         shift 1
         ;;
       *)
@@ -276,18 +290,64 @@ naked::uninstall() {
     return 1
   fi
 
+  log::output 'Parsing /etc/os-release to identify operating system ...'
+  if [[ -f '/etc/os-release' ]]; then
+
+    grep '^ID=' /etc/os-release > /dev/null 2>&1
+    if [[ "${?}" -eq 0 ]]; then
+      grep '^ID=' /etc/os-release | grep '"' > /dev/null 2>&1
+      if [[ "${?}" -eq 0 ]]; then
+        os_release_id="$(grep '^ID=' /etc/os-release | cut -d '"' -f 2)"
+      else
+        os_release_id="$(grep '^ID=' /etc/os-release | cut -d '=' -f 2)"
+      fi
+      log::output "Operating system identified as ${os_release_id}."
+    else
+      log::error '/etc/os-release does not contain ID parameter.'
+      return 1
+    fi
+
+    grep '^VERSION_ID=' /etc/os-release > /dev/null 2>&1
+    if [[ "${?}" -eq 0 ]]; then
+      grep '^VERSION_ID=' /etc/os-release | grep '"' > /dev/null 2>&1
+      if [[ "${?}" -eq 0 ]]; then
+        os_release_version_id="$(grep '^VERSION_ID=' /etc/os-release | cut -d '"' -f 2)"
+      else
+        os_release_version_id="$(grep '^VERSION_ID=' /etc/os-release | cut -d '=' -f 2)"
+      fi
+      log::output "Operating system version identified as ${os_release_version_id}."
+    else
+      log::error '/etc/os-release does not contain VERSION_ID parameter.'
+      return 1
+    fi
+
+  else
+
+    log::error '/etc/os-release does not exist.'
+    return 1
+
+  fi
+
   log::output 'Uninstalling Singularity ...'
-  sudo rm -rf "${singularity_prefix}/libexec/singularity"
-  sudo rm -rf "${singularity_prefix}/var/singularity"
-  sudo rm -rf "${singularity_prefix}/etc/singularity"
-  sudo rm -rf "${singularity_prefix}/bin/singularity"
-  sudo rm -rf "${singularity_prefix}/bin/run-singularity"
-  sudo rm -rf "${singularity_prefix}/etc/bash_completion.d/singularity"
+  if [[ "${os_release_id}" = 'centos' && "${use_rpm}" = 'true' ]]; then
+
+    yum -y remove singularity
+
+  else # remove source-based install
+
+    rm -rf "${singularity_prefix}/libexec/singularity"
+    rm -rf "${singularity_prefix}/var/singularity"
+    rm -rf "${singularity_prefix}/etc/singularity"
+    rm -rf "${singularity_prefix}/bin/singularity"
+    rm -rf "${singularity_prefix}/bin/run-singularity"
+    rm -rf "${singularity_prefix}/etc/bash_completion.d/singularity"
+
+  fi
 
   log::output 'Checking if Singularity was uninstalled successfully ...'
   which singularity
   if [[ "${?}" -eq 0 ]]; then
-    log:error 'Singularity was NOT uninstalled!'
+    log::error 'Singularity was NOT uninstalled!'
     return 1
   fi
 
