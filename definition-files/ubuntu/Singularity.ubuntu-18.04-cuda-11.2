@@ -10,18 +10,11 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20210804
+    LAST_UPDATED 20210831
 
 %setup
 
 %environment
-
-    # Location of NVIDIA/CUDA repositories
-    export CUDA_ROOT_URL='http://developer.download.nvidia.com/compute'
-    export CUDA_DISTRO='ubuntu1804'
-    export CUDA_ARCH='x86_64'
-    export CUDA_REPO_URL="${CUDA_ROOT_URL}/cuda/repos/${CUDA_DISTRO}/${CUDA_ARCH}"
-    export CUDA_GPG_PUBKEY='7fa2af80.pub'
 
     # Set NVIDIA driver and CUDA versions
     export CUDA_DRIVER_VERSION='460'
@@ -73,7 +66,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04
     export CUDA_VERSION="${CUDA_MAJOR}.${CUDA_MINOR}"
     export CUDNN_MAJOR='8'
     export CUDNN_MINOR='1'
-    export CUDNN_REVISION='0.77'
+    export CUDNN_REVISION='1.33'
     export CUDNN_VERSION="${CUDNN_MAJOR}.${CUDNN_MINOR}.${CUDNN_REVISION}"
     export NCCL_MAJOR='2'
     export NCCL_MINOR='8'
