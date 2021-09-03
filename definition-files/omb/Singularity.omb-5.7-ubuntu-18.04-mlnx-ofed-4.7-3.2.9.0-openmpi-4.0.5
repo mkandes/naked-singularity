@@ -10,7 +10,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-mlnx-ofed-4.7-3.2.9.0-openm
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20210804
+    LAST_UPDATED 20210901
 
 %setup
 
@@ -18,7 +18,6 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-mlnx-ofed-4.7-3.2.9.0-openm
 
     # Set OMB major and minor version numbers, root and
     # installation directories
-    export OMB_ROOT_URL='http://mvapich.cse.ohio-state.edu/download/mvapich'
     export OMB_MAJOR='5'
     export OMB_MINOR='7'
     export OMB_VERSION="${OMB_MAJOR}.${OMB_MINOR}"
@@ -47,7 +46,6 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-mlnx-ofed-4.7-3.2.9.0-openm
 
     # Set OpenMPI major, minor, and revision numbers, root and
     # installation directories
-    export OMPI_ROOT_URL='https://download.open-mpi.org/release/open-mpi'
     export OMPI_MAJOR='4'
     export OMPI_MINOR='0'
     export OMPI_REVISION='5'
