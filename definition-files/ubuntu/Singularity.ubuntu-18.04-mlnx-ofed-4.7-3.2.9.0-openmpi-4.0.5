@@ -10,7 +10,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-mlnx-ofed-4.7-3.2.9.0
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20210804
+    LAST_UPDATED 20210903
 
 %setup
 
@@ -18,7 +18,6 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-mlnx-ofed-4.7-3.2.9.0
 
     # Set OpenMPI major, minor, and revision numbers, root and
     # installation directories
-    export OMPI_ROOT_URL='https://download.open-mpi.org/release/open-mpi'
     export OMPI_MAJOR='4'
     export OMPI_MINOR='0'
     export OMPI_REVISION='5'
@@ -66,7 +65,16 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-mlnx-ofed-4.7-3.2.9.0
     wget "${OMPI_ROOT_URL}/v${OMPI_MAJOR}.${OMPI_MINOR}/openmpi-${OMPI_VERSION}.tar.gz"
     tar -xf "openmpi-${OMPI_VERSION}.tar.gz"
     cd "openmpi-${OMPI_VERSION}"
-    ./configure --prefix="${OMPI_INSTALL_DIR}" --without-verbs
+    ./configure --prefix="${OMPI_INSTALL_DIR}" --enable-shared \
+      --disable-silent-rules --disable-builtin-atomics --enable-static \
+      --without-hcoll --without-psm --without-knem --without-psm2 \
+      --without-verbs --without-ofi --without-mxm --without-fca \
+      --without-xpmem --with-ucx=/usr --without-cma --without-slurm \
+      --without-tm --without-loadleveler --without-alps --without-lsf \
+      --without-sge --disable-memchecker  --disable-java \
+      --disable-mpi-java --without-cuda --disable-mpi-cxx \
+      --disable-cxx-exceptions
+    #--enable-mpi1-compatibility
     make all install
 
     cd /tmp

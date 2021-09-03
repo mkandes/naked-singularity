@@ -10,14 +10,13 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20210804
+    LAST_UPDATED 20210901
 
 %setup
 
 %environment
 
     # Set Mellanox OFED version, operating system, and hardware platform
-    export MLNX_ROOT_URL='http://www.mellanox.com/downloads/ofed'
     export MLNX_OFED_VERSION='4.7-3.2.9.0'
     export MLNX_OS_VERSION='ubuntu18.04'
     export MLNX_PLATFORM='x86_64'
@@ -61,7 +60,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04
     export MLNX_PLATFORM='x86_64'
 
     # Download and install Mellanox OFED drivers and supporting
-    # libraries for userspace access to Ethernet, RDMA, and Infiniband. 
+    # libraries for user space access to Ethernet, RDMA, and Infiniband.
     # https://docs.mellanox.com/pages/releaseview.action?pageId=15049785
     wget "${MLNX_ROOT_URL}/MLNX_OFED-${MLNX_OFED_VERSION}/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-${MLNX_OS_VERSION}-${MLNX_PLATFORM}.tgz"
     tar -xf "MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-${MLNX_OS_VERSION}-${MLNX_PLATFORM}.tgz"
