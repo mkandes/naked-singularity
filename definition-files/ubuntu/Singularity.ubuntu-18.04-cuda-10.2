@@ -10,30 +10,55 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20210903
+    LAST_UPDATED 20211001
 
 %setup
 
 %environment
 
     # Set NVIDIA driver and CUDA versions
-    export CUDA_DRIVER_VERSION='460'
+    export CUDA_DRIVER_MAJOR='460'
+    export CUDA_DRIVER_MINOR='32'
+    export CUDA_DRIVER_REVISION='03'
+    export CUDA_DRIVER_VERSION="${CUDA_DRIVER_MAJOR}.${CUDA_DRIVER_MINOR}.${CUDA_DRIVER_REVISION}"
+
     export CUDA_MAJOR='10'
     export CUDA_MINOR='2' 
-    export CUDA_VERSION="${CUDA_MAJOR}.${CUDA_MINOR}"
+    export CUDA_REVISION='89'
+    export CUDA_VERSION="${CUDA_MAJOR}.${CUDA_MINOR}.${CUDA_REVISION}"
+
     export CUDNN_MAJOR='8'
     export CUDNN_MINOR='1'
     export CUDNN_REVISION='1.33'
     export CUDNN_VERSION="${CUDNN_MAJOR}.${CUDNN_MINOR}.${CUDNN_REVISION}"
+
     export NCCL_MAJOR='2'
     export NCCL_MINOR='8'
     export NCCL_REVISION='4'
     export NCCL_VERSION="${NCCL_MAJOR}.${NCCL_MINOR}.${NCCL_REVISION}"
 
+    export TENSORRT_MAJOR='8'
+    export TENSORRT_MINOR='0'
+    export TENSORRT_REVISION='3'
+    export TENSORRT_VERSION="${TENSORRT_MAJOR}.${TENSORRT_MINOR}.${TENSORRT_REVISION}"
+
     # Set paths to CUDA binaries and libraries
-    export CUDA_HOME="/usr/local/cuda-${CUDA_VERSION}"
+    export CUDA_HOME="/usr/local/cuda-${CUDA_MAJOR}.${CUDA_MINOR}"
+
+    export CUDNN_INCLUDE='/usr/include'
+    export CUDNN_LIB='/usr/lib/x86_64-linux-gnu'
+
+    export NCCL_INCLUDE='/usr/include'
+    export NCCL_LIB='/usr/lib/x86_64-linux-gnu'
+
+    export TENSORRT_INCLUDE='/usr/include'
+    export TENSORRT_LIB='/usr/lib/x86_64-linux-gnu'
+
     export PATH="${CUDA_HOME}/bin${PATH:+:${PATH}}"
     export LD_LIBRARY_PATH="${CUDA_HOME}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+    export LD_LIBRARY_PATH="${CUDNN_LIB}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${NCCL_LIB}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${TENSORRT_LIB}:${LD_LIBRARY_PATH}"
 
 %post -c /bin/bash
 
@@ -60,18 +85,30 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04
     export CUDA_GPG_PUBKEY='7fa2af80.pub'
 
     # Set NVIDIA driver and CUDA versions
-    export CUDA_DRIVER_VERSION='460'
+    export CUDA_DRIVER_MAJOR='460'
+    export CUDA_DRIVER_MINOR='32'
+    export CUDA_DRIVER_REVISION='03'
+    export CUDA_DRIVER_VERSION="${CUDA_DRIVER_MAJOR}.${CUDA_DRIVER_MINOR}.${CUDA_DRIVER_REVISION}"
+
     export CUDA_MAJOR='10'
     export CUDA_MINOR='2'
-    export CUDA_VERSION="${CUDA_MAJOR}.${CUDA_MINOR}"
+    export CUDA_REVISION='89'                         
+    export CUDA_VERSION="${CUDA_MAJOR}.${CUDA_MINOR}.${CUDA_REVISION}"
+
     export CUDNN_MAJOR='8'
     export CUDNN_MINOR='1'
     export CUDNN_REVISION='1.33'
     export CUDNN_VERSION="${CUDNN_MAJOR}.${CUDNN_MINOR}.${CUDNN_REVISION}"
+
     export NCCL_MAJOR='2'
     export NCCL_MINOR='8'
     export NCCL_REVISION='4'
     export NCCL_VERSION="${NCCL_MAJOR}.${NCCL_MINOR}.${NCCL_REVISION}"
+
+    export TENSORRT_MAJOR='8'
+    export TENSORRT_MINOR='0'
+    export TENSORRT_REVISION='3'
+    export TENSORRT_VERSION="${TENSORRT_MAJOR}.${TENSORRT_MINOR}.${TENSORRT_REVISION}"
 
     cd /tmp
 
@@ -95,29 +132,41 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04
 
     # Install NVIDIA driver meta-package
     # https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#package-manager-metas
-    apt-get -y install "cuda-drivers-${CUDA_DRIVER_VERSION}"
+    apt-get -y install "cuda-drivers-${CUDA_DRIVER_MAJOR}=${CUDA_DRIVER_VERSION}-1"
 
     # Install CUDA toolkit meta-package
-    apt-get -y install "cuda-toolkit-$(echo ${CUDA_VERSION} | sed 's/\./-/g')"
+    apt-get -y install "cuda-toolkit-${CUDA_MAJOR}-${CUDA_MINOR}=${CUDA_VERSION}-1"
 
     # Install the cuDNN library
-    apt-get -y install "libcudnn${CUDNN_MAJOR}=${CUDNN_VERSION}-1+cuda${CUDA_VERSION}"
-    apt-get -y install "libcudnn${CUDNN_MAJOR}-dev=${CUDNN_VERSION}-1+cuda${CUDA_VERSION}"
+    apt-get -y install "libcudnn${CUDNN_MAJOR}=${CUDNN_VERSION}-1+cuda${CUDA_MAJOR}.${CUDA_MINOR}"
+    apt-get -y install "libcudnn${CUDNN_MAJOR}-dev=${CUDNN_VERSION}-1+cuda${CUDA_MAJOR}.${CUDA_MINOR}"
 
     # Install NCCL
-    apt-get -y install "libnccl${NCCL_MAJOR}=${NCCL_VERSION}-1+cuda${CUDA_VERSION}"
-    apt-get -y install "libnccl-dev=${NCCL_VERSION}-1+cuda${CUDA_VERSION}"
+    apt-get -y install "libnccl${NCCL_MAJOR}=${NCCL_VERSION}-1+cuda${CUDA_MAJOR}.${CUDA_MINOR}"
+    apt-get -y install "libnccl-dev=${NCCL_VERSION}-1+cuda${CUDA_MAJOR}.${CUDA_MINOR}"
+
+    # Install TensorRT
+    apt-get -y install "libnvinfer${TENSORRT_MAJOR}=${TENSORRT_VERSION}-1+cuda${CUDA_MAJOR}.${CUDA_MINOR}"
+    apt-get -y install "libnvinfer-dev=${TENSORRT_VERSION}-1+cuda${CUDA_MAJOR}.${CUDA_MINOR}"
+    apt-get -y install "libnvinfer-plugin${TENSORRT_MAJOR}=${TENSORRT_VERSION}-1+cuda${CUDA_MAJOR}.${CUDA_MINOR}"
+    apt-get -y install "libnvinfer-plugin-dev=${TENSORRT_VERSION}-1+cuda${CUDA_MAJOR}.${CUDA_MINOR}"
+    apt-get -y install "libnvonnxparsers${TENSORRT_MAJOR}=${TENSORRT_VERSION}-1+cuda${CUDA_MAJOR}.${CUDA_MINOR}"
+    apt-get -y install "libnvonnxparsers-dev=${TENSORRT_VERSION}-1+cuda${CUDA_MAJOR}.${CUDA_MINOR}"
+    apt-get -y install "libnvparsers${TENSORRT_MAJOR}=${TENSORRT_VERSION}-1+cuda${CUDA_MAJOR}.${CUDA_MINOR}"
+    apt-get -y install "libnvparsers-dev=${TENSORRT_VERSION}-1+cuda${CUDA_MAJOR}.${CUDA_MINOR}"
+    apt-get -y install "python3-libnvinfer=${TENSORRT_VERSION}-1+cuda${CUDA_MAJOR}.${CUDA_MINOR}"
+    apt-get -y install "python3-libnvinfer-dev=${TENSORRT_VERSION}-1+cuda${CUDA_MAJOR}.${CUDA_MINOR}"
 
     # Install third-party libraries required for CUDA samples
     # https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#install-libraries
     apt-get -y install g++
     apt-get -y install freeglut3-dev
-    apt-get -y build-essential
-    apt-get -y libx11-dev
-    apt-get -y libxmu-dev
-    apt-get -y libxi-dev
-    apt-get -y libglu1-mesa
-    apt-get -y libglu1-mesa-dev
+    apt-get -y install build-essential
+    apt-get -y install libx11-dev
+    apt-get -y install libxmu-dev
+    apt-get -y install libxi-dev
+    apt-get -y install libglu1-mesa
+    apt-get -y install libglu1-mesa-dev
 
     # Cleanup
     apt-get -y autoremove --purge
