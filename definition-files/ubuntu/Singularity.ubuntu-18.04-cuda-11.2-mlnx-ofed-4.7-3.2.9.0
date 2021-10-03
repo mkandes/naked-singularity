@@ -10,7 +10,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-cuda-11.2
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20210903
+    LAST_UPDATED 20211002
 
 %setup
 
@@ -35,8 +35,8 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-cuda-11.2
     # Set debian frontend interface
     export DEBIAN_FRONTEND='noninteractive'
 
-    # Upgrade all software packages to their latest versions
-    apt-get -y update && apt-get -y upgrade
+    # DO NOT Upgrade all software packages to their latest versions
+    # apt-get -y update && apt-get -y upgrade
 
     # Install all dependencies and/or prerequisites for Mellanox OFED
     apt-get -y install bison
