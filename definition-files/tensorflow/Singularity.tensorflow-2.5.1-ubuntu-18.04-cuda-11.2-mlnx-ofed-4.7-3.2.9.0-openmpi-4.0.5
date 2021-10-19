@@ -10,7 +10,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-cuda-11.2-mlnx-ofed-4.7-3.2
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20211002
+    LAST_UPDATED 20211019
 
 %setup
 
@@ -206,12 +206,11 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-cuda-11.2-mlnx-ofed-4.7-3.2
     git clone --recursive https://github.com/horovod/horovod.git
     cd horovod
     git checkout "v${HOROVOD_VERSION}"
-    pip3 setup.py sdist
+    python3 setup.py clean
+    python3 setup.py sdist
     ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs 
-    pip3 install horovod
+    pip3 install dist/horovod-*.tar.gz
     ldconfig
-
-    #pip3 install horovod=="${HOROVOD_VERSION}"
 
     # Install TensorFlow tools, extentions, and related packages.
     pip3 install tensorflow-datasets==1.2.0

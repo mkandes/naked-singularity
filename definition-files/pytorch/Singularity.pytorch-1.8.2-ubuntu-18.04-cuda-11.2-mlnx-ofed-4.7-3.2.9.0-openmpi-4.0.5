@@ -1,0 +1,350 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-cuda-11.2-mlnx-ofed-4.7-3.2.9.0-openmpi-4.0.5
+
+%labels
+
+    APPLICATION_NAME pytorch
+    APPLICATION_VERSION 1.8.2
+    APPLICATION_URL https://pytorch.org
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20211019
+
+%setup
+
+%environment
+
+    # Set default miniconda environment
+    export PATH="/opt/miniconda3/bin:${PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='bionic'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set NVIDIA driver and CUDA versions
+    export CUDA_DRIVER_MAJOR='460'
+    export CUDA_DRIVER_MINOR='32'
+    export CUDA_DRIVER_REVISION='03'
+    export CUDA_DRIVER_VERSION="${CUDA_DRIVER_MAJOR}.${CUDA_DRIVER_MINOR}.${CUDA_DRIVER_REVISION}"
+
+    export CUDA_MAJOR='11'
+    export CUDA_MINOR='2'
+    export CUDA_REVISION='2'
+    export CUDA_VERSION="${CUDA_MAJOR}.${CUDA_MINOR}.${CUDA_REVISION}"
+
+    export CUDNN_MAJOR='8'
+    export CUDNN_MINOR='1'
+    export CUDNN_REVISION='1.33'
+    export CUDNN_VERSION="${CUDNN_MAJOR}.${CUDNN_MINOR}.${CUDNN_REVISION}"
+
+    export NCCL_MAJOR='2'
+    export NCCL_MINOR='8'
+    export NCCL_REVISION='4'
+    export NCCL_VERSION="${NCCL_MAJOR}.${NCCL_MINOR}.${NCCL_REVISION}"
+
+    export TENSORRT_MAJOR='8'
+    export TENSORRT_MINOR='0'
+    export TENSORRT_REVISION='3'
+    export TENSORRT_VERSION="${TENSORRT_MAJOR}.${TENSORRT_MINOR}.${TENSORRT_REVISION}"
+
+    # Set paths to CUDA binaries and libraries
+    export CUDA_HOME="/usr/local/cuda-${CUDA_MAJOR}.${CUDA_MINOR}"
+
+    export CUDNN_INCLUDE='/usr/include'
+    export CUDNN_LIB='/usr/lib/x86_64-linux-gnu'
+
+    export NCCL_INCLUDE='/usr/include'
+    export NCCL_LIB='/usr/lib/x86_64-linux-gnu'
+
+    export TENSORRT_INCLUDE='/usr/include'
+    export TENSORRT_LIB='/usr/lib/x86_64-linux-gnu'
+
+    export PATH="${CUDA_HOME}/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="${CUDA_HOME}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+    export LD_LIBRARY_PATH="${CUDNN_LIB}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${NCCL_LIB}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${TENSORRT_LIB}:${LD_LIBRARY_PATH}"
+
+    # Set Mellanox OFED version, operating system, and hardware platform
+    export MLNX_ROOT_URL='http://www.mellanox.com/downloads/ofed'
+    export MLNX_OFED_VERSION='4.7-3.2.9.0'
+    export MLNX_OS_VERSION='ubuntu18.04'
+    export MLNX_PLATFORM='x86_64'
+
+    # Set OpenMPI major, minor, and revision numbers, root and
+    # installation directories
+    export OMPI_ROOT_URL='https://download.open-mpi.org/release/open-mpi'
+    export OMPI_MAJOR='4'
+    export OMPI_MINOR='0'
+    export OMPI_REVISION='5'
+    export OMPI_VERSION="${OMPI_MAJOR}.${OMPI_MINOR}.${OMPI_REVISION}"
+    export OMPI_ROOT_DIR='/opt/openmpi'
+    export OMPI_INSTALL_DIR="${OMPI_ROOT_DIR}/${OMPI_VERSION}"
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="${OMPI_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${OMPI_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    # DO NOT Upgrade all packages to their latest versions
+    # apt-get -y update && apt-get -y upgrade
+
+    cd /tmp
+
+    # Install miniconda3
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    chmod +x Miniconda3-latest-Linux-x86_64.sh
+    ./Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda3
+
+    # Setup conda environment
+    export PATH="/opt/miniconda3/bin:${PATH}"
+    export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
+
+    # Install common python packages 
+    conda install -y python=3.8.5
+    conda install -y jupyterlab
+    conda install -y numpy
+    conda install -y matplotlib
+    conda install -y pandas
+    conda install -y plotly
+    conda install -y scipy
+    conda install -y scikit-learn
+    conda install -y scikit-image
+    conda install -y seaborn
+    conda install -y statsmodels
+    #conda install -y opencv
+
+    # Install GPU-accelerated python packages
+    conda install -y numba
+
+    # Install additional python packages
+    conda install -y astropy
+    conda install -y biopython
+    conda install -y h5py
+    conda install -y nltk
+    conda install -y sympy
+    conda install -y netcdf4
+    conda install -y spacy
+
+    # Install mpi4py
+    pip3 install mpi4py==3.0.3
+
+    # Install PyTorch dependencies 
+    # https://github.com/pytorch/pytorch#install-dependencies
+    conda install -y astunparse
+    conda install -y numpy
+    conda install -y ninja
+    conda install -y pyyaml
+    conda install -y mkl
+    conda install -y mkl-include
+    conda install -y setuptools
+    conda install -y cmake
+    conda install -y cffi
+    conda install -y typing_extensions
+    conda install -y future
+    conda install -y six
+    conda install -y requests
+    conda install -y dataclasses
+
+    # Add LAPACK support for the GPU
+    conda install -y magma-cuda112 -c pytorch
+
+    cd /tmp
+
+    # Set PyTorch version number
+    export PYTORCH_VERSION='1.8.2'
+
+    # Download, build and install PyTorch
+    git clone --recursive https://github.com/pytorch/pytorch
+    cd pytorch
+    git checkout "v${PYTORCH_VERSION}"
+    git submodule sync
+    git submodule update --init --recursive --jobs 0
+
+    export CC='mpicc'
+    export CXX='mpicxx'
+    export CFLAGS='-mtune=generic'
+
+    export BLAS='MKL'
+    export USE_FBGEMM=1
+    export USE_MKLDNN=1
+    export USE_NNPACK=1
+    export USE_NUMPY=1
+    export USE_QNNPACK=1
+
+    export USE_DISTRIBUTED=1
+    export USE_IBVERBS=1
+    export USE_GLOO=1
+    export USE_MPI=1
+    export USE_C10D_MPI=1
+    export USE_NCCL=1
+    export USE_SYSTEM_NCCL=1
+    #sed -i '77,80 s/^/#/' cmake/Modules/FindNCCL.cmake
+
+    export USE_OPENMP=1
+    export ATEN_THREADING='OMP'
+    export MKL_THREADING='OMP'
+
+    export TORCH_CUDA_ARCH_LIST='7.0'
+    export USE_CUDA=1
+    export USE_CUDNN=1
+    export USE_TENSORRT=1
+
+    export USE_FFMPEG=0
+    export USE_OPENCV=0
+
+    python setup.py install
+
+    cd /tmp
+
+    # Set TorchVision version number
+    export PYTORCH_VISION_VERSION='0.9.1'
+
+    # Download, build and install TorchVision
+    git clone https://github.com/pytorch/vision.git
+    cd vision
+    git checkout "v${PYTORCH_VISION_VERSION}"
+    python setup.py install
+
+    cd /tmp
+
+    # Set TorchText version number
+    export PYTORCH_TEXT_VERSION='0.9.2-rc1'
+
+    # Download, build and install TorchText
+    git clone https://github.com/pytorch/text.git
+    cd text
+    git checkout "v${PYTORCH_TEXT_VERSION}"
+    git submodule update --init --recursive
+    python setup.py clean install
+
+    cd /tmp
+
+    # Set TorchAudio version number
+    export PYTORCH_AUDIO_VERSION='0.8.1'
+
+    # Download, build and install TorchAudio
+    git clone https://github.com/pytorch/audio.git
+    cd audio
+    git checkout "v${PYTORCH_AUDIO_VERSION}"
+    git submodule update --init --recursive
+    BUILD_SOX=1 python setup.py clean install
+
+    cd /tmp
+
+    # Set PyTorch Ignite version number
+    export PYTORCH_IGNITE_VERSION='0.4.5'
+
+    # Install PyTorch Ignite
+    # https://github.com/pytorch/ignite
+    pip install pytorch-ignite=="${PYTORCH_IGNITE_VERSION}"
+
+    cd /tmp
+
+    # Set PyTorch Lightning version number
+    export PYTORCH_LIGHTNING_VERSION='1.4.9'
+
+    # Download, build and install PyTorch Lightning
+    # https://github.com/PyTorchLightning/pytorch-lightning
+    git clone https://github.com/PyTorchLightning/pytorch-lightning.git
+    cd pytorch-lightning
+    git checkout "${PYTORCH_LIGHTNING_VERSION}"
+    git submodule sync
+    git submodule update --init --recursive
+
+    # # # # Create patch file for torchtext import # # #
+    # https://github.com/PyTorchLightning/pytorch-lightning/issues/6210
+    # https://github.com/PyTorchLightning/pytorch-lightning/pull/6211
+    cd /tmp/pytorch-lightning/pytorch_lightning/utilities
+
+    tee -a apply_func.patch << EOF
+--- apply_func.py       2021-10-19 00:04:42.685745070 +0000
++++ apply_func.py       2021-10-19 01:57:26.057751093 +0000
+@@ -27,10 +27,10 @@
+ from pytorch_lightning.utilities.imports import _compare_version, _TORCHTEXT_AVAILABLE
+
+ if _TORCHTEXT_AVAILABLE:
+-    if _compare_version("torchtext", operator.ge, "0.9.0"):
+-        from torchtext.legacy.data import Batch
+-    else:
+-        from torchtext.data import Batch
++    #if _compare_version("torchtext", operator.ge, "0.9.0"):
++    from torchtext.legacy.data import Batch
++    #else:
++    #    from torchtext.data import Batch
+ else:
+     Batch = type(None)
+EOF
+    patch -u apply_func.py -i apply_func.patch
+
+    cd /tmp/pytorch-lightning
+
+    python setup.py clean install
+
+    cd /tmp
+
+    # Set Horovod version number
+    export HOROVOD_VERSION=0.22.1
+
+    # Download, build and install Horovod with PyTorch + NVIDIA GPU support 
+    export HOROVOD_WITH_PYTORCH=1
+    export HOROVOD_WITHOUT_MXNET=1
+    export HOROVOD_WITHOUT_TENSORFLOW=1
+    export HOROVOD_WITH_MPI=1
+    export HOROVOD_WITH_GLOO=1
+    export HOROVOD_GPU=CUDA
+    export HOROVOD_CUDA_HOME="${CUDA_HOME}"
+    export HOROVOD_BUILD_CUDA_CC_LIST=70
+    export HOROVOD_GPU_OPERATIONS=NCCL
+    export HOROVOD_NCCL_INCLUDE="${NCCL_INCLUDE}"
+    export HOROVOD_NCCL_LIB="${NCCL_LIB}"
+
+    git clone --recursive https://github.com/horovod/horovod.git
+    cd horovod
+    git checkout "v${HOROVOD_VERSION}"
+    python3 setup.py clean
+    python3 setup.py sdist
+    ldconfig /usr/local/cuda/targets/x86_64-linux/lib/stubs 
+    pip3 install dist/horovod-*.tar.gz
+    ldconfig
+
+    cd /tmp
+
+    # Set ONNX version number
+    export ONNX_VERSION='1.10.1'
+
+    # Install prerequisites and dependencies for ONNX
+    apt-get -y install libprotobuf-dev
+    apt-get -y install protobuf-compiler
+
+    # Download, build and install ONNX
+    export CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=ON"
+    git clone --recursive https://github.com/onnx/onnx.git
+    cd onnx
+    git checkout "v${ONNX_VERSION}"
+    set CMAKE_ARGS=-DONNX_USE_LITE_PROTO=ON
+    pip install -e .
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
