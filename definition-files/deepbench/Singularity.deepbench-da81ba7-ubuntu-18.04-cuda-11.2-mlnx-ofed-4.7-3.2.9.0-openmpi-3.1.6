@@ -10,7 +10,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-cuda-11.2-mlnx-ofed-4.7-3.2
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20211022
+    LAST_UPDATED 20211107
 
 %setup
 
@@ -120,8 +120,29 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-cuda-11.2-mlnx-ofed-4.7-3.2
     # Download, build, and install DeepBench
     git clone https://github.com/baidu-research/DeepBench.git
     cd DeepBench/code
-    git checkout "${BAIDU_RING_ALLREDUCE_VERSION}"
+    git checkout "${BAIDU_DEEPBENCH_VERSION}"
     sed -i 's/cudnnSetRNNDescriptor/cudnnSetRNNDescriptor_v6/' nvidia/cudnn_helper.h
+    cd kernels
+    tee -a conv_problems.patch << EOF # add Voyager convolution benchmark problem sizes via patch
+--- conv_problems.h     2021-11-06 23:16:29.422708701 +0000,
++++ conv_problems.h     2021-11-07 00:22:25.444177548 +0000,
+@@ -2,6 +2,13 @@uple(700, 161, 1, 16, 32, 20, 5, 0, 0, 2, 2),
+ std::vector<std::tuple<unsigned int, unsigned int, unsigned int, unsigned int,
+                        unsigned int, unsigned int, unsigned int,
+                        unsigned int, unsigned int, unsigned int, unsigned int>> training_set = {
++    std::make_tuple(14, 14, 56, 128, 1024, 1, 1, 0, 0, 1, 1),
++    std::make_tuple(14, 14, 256, 128, 1024, 1, 1, 0, 0, 1, 1),
++    std::make_tuple(28, 28, 128, 128, 512, 1, 1, 0, 0, 1, 1),
++    std::make_tuple(28, 28, 512, 128, 512, 1, 1, 0, 0, 1, 1),
++    std::make_tuple(14, 14, 256, 128, 512, 1, 1, 0, 0, 1, 1),
++    std::make_tuple(28, 28, 128, 128, 128, 3, 3, 0, 0, 1, 1),
++    std::make_tuple(14, 14, 64, 128, 64, 3, 3, 0, 0, 1, 1),
+     std::make_tuple(700, 161, 1, 4, 32, 20, 5, 0, 0, 2, 2),
+     std::make_tuple(700, 161, 1, 8, 32, 20, 5, 0, 0, 2, 2),
+     std::make_tuple(700, 161, 1, 16, 32, 20, 5, 0, 0, 2, 2),
+EOF
+    patch -u conv_problems.h -i conv_problems.patch
+    cd ../
     export MPI_PATH="${OMPI_INSTALL_DIR}"
     export MPI_INCLUDE_PATH="${OMPI_INSTALL_DIR}/include"
     export BAIDU_ALLREDUCE_PATH='/opt/baidu-allreduce'
