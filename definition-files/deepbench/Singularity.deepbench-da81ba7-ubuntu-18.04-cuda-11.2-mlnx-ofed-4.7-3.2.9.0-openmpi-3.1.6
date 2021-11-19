@@ -10,7 +10,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-cuda-11.2-mlnx-ofed-4.7-3.2
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20211107
+    LAST_UPDATED 20211108
 
 %setup
 
@@ -142,6 +142,24 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-cuda-11.2-mlnx-ofed-4.7-3.2
      std::make_tuple(700, 161, 1, 16, 32, 20, 5, 0, 0, 2, 2),
 EOF
     patch -u conv_problems.h -i conv_problems.patch
+    tee -a all_reduce_problems.patch << EOF # add Voyager all-reduce benchmark problem sizes via patch 
+--- all_reduce_problems.h       2021-11-08 20:52:30.034094940 +0000
++++ all_reduce_problems.h       2021-11-08 21:11:00.631756829 +0000
+@@ -2,9 +2,9 @@
+ #define _ALL_REDUCE_KERNELS_
+
+
+-#define _NUMBER_OF_KERNELS_ 7
++#define _NUMBER_OF_KERNELS_ 28
+
+-int64_t all_reduce_kernels_size[] = {100000, 3097600, 4194304, 6553600, 16777217, 38360000, 64500000};
+-int64_t all_reduce_kernels_repeat[] = {10000, 10000, 10000, 10000, 1000, 1000, 1000};
++int64_t all_reduce_kernels_size[] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 16777216, 33554432, 67108864, 134217728, 268435456};
++int64_t all_reduce_kernels_repeat[] = {10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 1000, 1000, 1000, 1000, 1000, 1000, 1000};
+
+ #endif
+EOF
+    patch -u all_reduce_problems.h -i all_reduce_problems.patch
     cd ../
     export MPI_PATH="${OMPI_INSTALL_DIR}"
     export MPI_INCLUDE_PATH="${OMPI_INSTALL_DIR}/include"
