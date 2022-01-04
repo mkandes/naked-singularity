@@ -1,0 +1,38 @@
+ARG OS_ARCH='linux/amd64'
+ARG OS_DISTRO='ubuntu'
+ARG OS_VERSION='focal'
+FROM --platform="${OS_ARCH}" "${OS_DISTRO}:${OS_VERSION}"
+
+LABEL APPLICATION_NAME='ubuntu'
+LABEL APPLICATION_VERSION='20.04'
+LABEL APPLICATION_URL='https://www.ubuntu.com'
+
+LABEL AUTHOR_NAME='Marty Kandes'
+LABEL AUTHOR_EMAIL='mkandes@sdsc.edu'
+
+LABEL LAST_UPDATED='20220103' 
+
+ENV MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+ENV OSVERSION='focal'
+ENV LC_ALL=C
+ENV DEBIAN_FRONTEND='noninteractive'
+
+RUN apt-get update && apt-get install -y \
+  ubuntu-standard \
+  ubuntu-server \
+  autoconf \
+  automake \
+  build-essential \
+  cmake \
+  evince \
+  expect \
+  gfortran \
+  libtool \
+  mlocate \
+  pkg-config \
+  wget \
+  zip \
+  && rm -rf /var/lib/apt/lists/* \
+  && apt-get -y autoremove --purge \
+  && apt-get -y clean \
+  && updatedb
