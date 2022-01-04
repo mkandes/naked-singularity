@@ -1,0 +1,47 @@
+FROM ghcr.io/mkandes/naked-docker:ubuntu-20.04
+
+LABEL APPLICATION_NAME='ubuntu + openmpi'
+LABEL APPLICATION_VERSION='20.04 + 4.0.5'
+LABEL APPLICATION_URL='https://www.open-mpi.org'
+
+LABEL AUTHOR_NAME='Marty Kandes'
+LABEL AUTHOR_EMAIL='mkandes@sdsc.edu'
+
+LABEL LAST_UPDATED='20220103' 
+
+ENV MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+ENV OSVERSION='focal'
+ENV LC_ALL=C
+ENV DEBIAN_FRONTEND='noninteractive'
+
+RUN apt-get -y purge --auto-remove command-not-found
+
+RUN apt-get update \
+ && apt-get -y upgrade \
+ && apt-get -y install zlib1g-dev \
+ && apt-get -y autoremove --purge \
+ && apt-get -y clean \
+ && rm -rf /var/lib/apt/lists/*
+
+ENV OMPI_ROOT_URL='https://download.open-mpi.org/release/open-mpi'
+ENV OMPI_MAJOR='4'
+ENV OMPI_MINOR='0'
+ENV OMPI_REVISION='5'
+ENV OMPI_VERSION="${OMPI_MAJOR}.${OMPI_MINOR}.${OMPI_REVISION}"
+ENV OMPI_ROOT_DIR='/opt/openmpi'
+ENV OMPI_INSTALL_DIR="${OMPI_ROOT_DIR}/${OMPI_VERSION}"
+
+WORKDIR /tmp
+
+RUN wget "${OMPI_ROOT_URL}/v${OMPI_MAJOR}.${OMPI_MINOR}/openmpi-${OMPI_VERSION}.tar.gz" \
+ && tar -xf "openmpi-${OMPI_VERSION}.tar.gz" \
+ && cd "openmpi-${OMPI_VERSION}" \
+ && ./configure --prefix="${OMPI_INSTALL_DIR}" \
+ && make all install \
+ && cd /tmp \
+ && rm -rf "openmpi-${OMPI_VERSION}" \
+ && rm "openmpi-${OMPI_VERSION}.tar.gz" \
+ && updatedb
+
+ENV PATH="${OMPI_INSTALL_DIR}/bin:${PATH}"
+ENV LD_LIBRARY_PATH="${OMPI_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
