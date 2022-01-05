@@ -1,0 +1,46 @@
+FROM ghcr.io/mkandes/naked-docker:ubuntu-20.04-openmpi-4.0.5
+
+LABEL APPLICATION_NAME='IOR'
+LABEL APPLICATION_VERSION='3.3.0'
+LABEL APPLICATION_URL='https://ior.readthedocs.io'
+
+LABEL AUTHOR_NAME='Marty Kandes'
+LABEL AUTHOR_EMAIL='mkandes@sdsc.edu'
+
+LABEL LAST_UPDATED='20220105'
+
+SHELL ["/bin/bash", "-c"]
+
+ENV MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+ENV OSVERSION='focal'
+ENV LC_ALL=C
+ENV DEBIAN_FRONTEND='noninteractive'
+
+RUN apt-get -y purge --auto-remove command-not-found
+
+RUN apt-get update \
+ && apt-get -y upgrade \
+ && apt-get -y autoremove --purge \
+ && apt-get -y clean \
+ && rm -rf /var/lib/apt/lists/*
+
+ENV IOR_REPO_URL='https://github.com/hpc/ior.git'
+ENV IOR_VERSION='3.3.0'
+ENV IOR_ROOT_DIR='/opt/ior'
+ENV IOR_INSTALL_DIR="${IOR_ROOT_DIR}/${IOR_VERSION}"
+
+WORKDIR /tmp
+
+RUN git clone "${IOR_REPO_URL}" \
+ && cd ior \
+ && git checkout "${IOR_VERSION}" \
+ && ./bootstrap \
+ && ./configure --prefix="${IOR_INSTALL_DIR}" \
+ && make \
+ && make install \
+ && cd ../ \
+ && rm -rf ior \
+ && updatedb
+
+ENV PATH="${IOR_INSTALL_DIR}/bin:${PATH}"
+ENV LD_LIBRARY_PATH="${IOR_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
