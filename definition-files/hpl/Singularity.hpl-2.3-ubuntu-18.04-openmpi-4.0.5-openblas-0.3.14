@@ -10,7 +10,7 @@ From: mkandes/naked-singularity:ubuntu-18.04-openmpi-4.0.5
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20210321
+    LAST_UPDATED 20220104
 
 %setup
 
@@ -127,7 +127,7 @@ From: mkandes/naked-singularity:ubuntu-18.04-openmpi-4.0.5
     sed -i 's/ARCH         = UNKNOWN/ARCH         = linux64/' Make.linux64
     sed -i 's/TOPdir       = $(HOME)\/hpl/TOPdir       =/' Make.linux64
     sed -i "s/TOPdir       =/TOPdir       = \/opt\/hpl\/${HPL_VERSION}/" Make.linux64
-    sed -i 's/MPdir        = /MPdir        = \/opt\/openmpi/4.0.4/' Make.linux64
+    sed -i 's/MPdir        = /MPdir        = \/opt\/openmpi/4.0.5/' Make.linux64
     sed -i 's/MPinc        = /MPinc        = -I$(MPdir)\/include/' Make.linux64
     sed -i 's/MPlib        = /MPlib        = $(MPdir)\/lib\/libmpi.so/' Make.linux64
     sed -i "s/LAdir        = /LAdir        = \/opt\/openblas\/${OPENBLAS_VERSION}/" Make.linux64
