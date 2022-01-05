@@ -1,0 +1,56 @@
+FROM ghcr.io/mkandes/naked-docker:ubuntu-20.04-openmpi-4.0.5
+
+LABEL APPLICATION_NAME='OSU Micro-Benchmarks'
+LABEL APPLICATION_VERSION='5.8'
+LABEL APPLICATION_URL='http://mvapich.cse.ohio-state.edu/benchmarks'
+
+LABEL AUTHOR_NAME='Marty Kandes'
+LABEL AUTHOR_EMAIL='mkandes@sdsc.edu'
+
+LABEL LAST_UPDATED='20220105'
+
+SHELL ["/bin/bash", "-c"]
+
+ENV MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+ENV OSVERSION='focal'
+ENV LC_ALL=C
+ENV DEBIAN_FRONTEND='noninteractive'
+
+RUN apt-get -y purge --auto-remove command-not-found
+
+RUN apt-get update \
+ && apt-get -y upgrade \
+ && apt-get -y autoremove --purge \
+ && apt-get -y clean \
+ && rm -rf /var/lib/apt/lists/*
+
+ENV OMB_ROOT_URL='http://mvapich.cse.ohio-state.edu/download/mvapich'
+ENV OMB_MAJOR='5'
+ENV OMB_MINOR='8'
+ENV OMB_VERSION="${OMB_MAJOR}.${OMB_MINOR}"
+ENV OMB_ROOT_DIR='/opt/omb'
+ENV OMB_INSTALL_DIR="${OMB_ROOT_DIR}/${OMB_VERSION}"
+
+WORKDIR /tmp
+
+RUN wget "${OMB_ROOT_URL}/osu-micro-benchmarks-${OMB_VERSION}.tgz" \
+ && tar -xf "osu-micro-benchmarks-${OMB_VERSION}.tgz" \
+ && cd "osu-micro-benchmarks-${OMB_VERSION}" \
+ && ./configure --prefix="${OMB_INSTALL_DIR}" CC='mpicc' CXX='mpicxx' \
+ && make \
+ && make install \
+ && cd "${OMB_INSTALL_DIR}" \
+ && mv libexec/osu-micro-benchmarks/mpi/collective ./ \
+ && mv libexec/osu-micro-benchmarks/mpi/one-sided ./ \
+ && mv libexec/osu-micro-benchmarks/mpi/pt2pt ./ \
+ && mv libexec/osu-micro-benchmarks/mpi/startup ./ \
+ && rm -rf libexec \
+ && cd /tmp \
+ && rm -rf "osu-micro-benchmarks-${OMB_VERSION}" \
+ && rm "osu-micro-benchmarks-${OMB_VERSION}.tgz" \
+ && updatedb
+
+ENV PATH="${OMB_INSTALL_DIR}/collective:${PATH}"
+ENV PATH="${OMB_INSTALL_DIR}/one-sided:${PATH}"
+ENV PATH="${OMB_INSTALL_DIR}/pt2pt:${PATH}"
+ENV PATH="${OMB_INSTALL_DIR}/startup:${PATH}"
