@@ -1,0 +1,30 @@
+FROM vault.habana.ai/gaudi-docker/1.2.0/ubuntu20.04/habanalabs/tensorflow-installer-tf-cpu-2.6.2:1.2.0-585
+
+LABEL APPLICATION_NAME='habana-tensorflow'
+LABEL APPLICATION_VERSION='2.6.2'
+LABEL APPLICATION_URL='https://habana.ai'
+
+LABEL AUTHOR_NAME='Marty Kandes'
+LABEL AUTHOR_EMAIL='mkandes@sdsc.edu'
+
+LABEL LAST_UPDATED='20220203' 
+
+ENV MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+ENV OSVERSION='focal'
+ENV LC_ALL=C
+ENV DEBIAN_FRONTEND='noninteractive'
+
+RUN apt-get update \
+ && apt-get -y upgrade \
+ && apt-get -y install build-essential \
+ && apt-get -y install gdb \
+ && apt-get -y install strace \
+ && apt-get -y install ltrace \
+ && apt-get -y install linux-tools-generic \
+ && apt-get -y install linux-tools-$(uname -r) \
+ && apt-get -y install linux-headers-$(uname -r) \
+ && apt-get -y install libelf-dev \
+ && apt-get -y install valgrind \
+ && apt-get -y autoremove --purge \
+ && apt-get -y clean \
+ && rm -rf /var/lib/apt/lists/*
