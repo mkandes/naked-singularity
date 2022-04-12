@@ -8,10 +8,14 @@ OSVersion: bionic
     APPLICATION_VERSION 18.04
     APPLICATION_URL https://www.ubuntu.com
 
+    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:ubuntu-18.04
+    IMAGE_MD5 d30a1d4ca9c6cde19ee70cbb9407a614
+    IMAGE_SHA256 e6d7678b50c9104ae920093dc44ce216a9b85af51d7788f4c7fb228e06b096cd
+
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20210112
+    LAST_UPDATED 20220412
 
 %setup
 
