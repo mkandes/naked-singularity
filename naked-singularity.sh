@@ -14,11 +14,11 @@
 #
 #   Install Singularity from source.
 #
-#     ./naked-singularity.sh install
+#     sudo ./naked-singularity.sh install
 #
 # LAST UPDATED
 #
-#   Wednesday, Auguest 18th, 2021
+#   Tuesday, Auguest 12th, 2022
 #
 # ----------------------------------------------------------------------
 
@@ -46,7 +46,8 @@ source log.sh
 
 naked::install() {
 
-  local singularity_version='3.5.3'
+  local singularity_version='3.7.4'
+  local apptainer_version='1.0.1'
   local go_version='1.15.6'
   local use_rpm='false'
   local rpm_repo='epel'
@@ -158,6 +159,9 @@ naked::install() {
     apt-get -y install git
     apt-get -y install cryptsetup-bin
     apt-get -y install debootstrap
+
+    # no longer available after ubuntu 18.04; used previously to build 
+    # centos-based Singularity containers on ubuntu-based hosts
     apt-get -y install yum-utils
 
     # https://github.com/hpcng/singularity/issues/241
