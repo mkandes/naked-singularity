@@ -1,0 +1,112 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-mlnx-ofed-4.9-4.1.7.0
+
+%labels
+
+    APPLICATION_NAME ubuntu + mlnx-ofed + openmpi
+    APPLICATION_VERSION 18.04 + 4.9-4.1.7.0 + 4.1.3
+    APPLICATION_URL https://www.open-mpi.org
+
+    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:ubuntu-18.04-mlnx-ofed-4.9-4.1.7.0-openmpi-4.1.3
+    IMAGE_MD5 d0181b5a180369822d272dded7ae249f
+    IMAGE_SHA256 176002803c7e3f7807858e6416a1c9eb918cdeb5e7db3039de0e96cd6c1d7847
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20220414
+
+%setup
+
+%environment
+
+    # Set OpenMPI major, minor, and revision numbers, root and
+    # installation directories
+    export OMPI_MAJOR='4'
+    export OMPI_MINOR='1'
+    export OMPI_REVISION='3'
+    export OMPI_VERSION="${OMPI_MAJOR}.${OMPI_MINOR}.${OMPI_REVISION}"
+    export OMPI_ROOT_DIR='/opt/openmpi'
+    export OMPI_INSTALL_DIR="${OMPI_ROOT_DIR}/${OMPI_VERSION}"
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="${OMPI_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${OMPI_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='bionic'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    # Install OpenMPI dependencies
+    apt-get -y install zlib1g-dev
+
+    # Set OpenMPI major, minor, and revision numbers, root and
+    # installation directories
+    export OMPI_ROOT_URL='https://download.open-mpi.org/release/open-mpi'
+    export OMPI_MAJOR='4'
+    export OMPI_MINOR='1'
+    export OMPI_REVISION='3'
+    export OMPI_VERSION="${OMPI_MAJOR}.${OMPI_MINOR}.${OMPI_REVISION}"
+    export OMPI_ROOT_DIR='/opt/openmpi'
+    export OMPI_INSTALL_DIR="${OMPI_ROOT_DIR}/${OMPI_VERSION}"
+
+    cd /tmp
+
+    # Download, build, and install OpenMPI
+    # 
+    #   Disabled ucx support, re-enabled verbs support because the ucx 
+    #   version distributed with MLNX OFED 4.9-4.1.7.0 for Ubuntu 18.04
+    #   LTS is not supported by OpenMPI 4.1.3 ...
+    #
+    #   checking for UCX version compatibility... yes
+    #   checking UCX version... bad (1.8.x)
+    #   configure: WARNING: UCX support skipped because version 1.8.x was found, which has a known catastrophic issue.
+    #   configure: WARNING: Please upgrade to UCX version 1.9 or higher.
+    #   configure: error: UCX support requested but not found.  Aborting
+    
+    wget "${OMPI_ROOT_URL}/v${OMPI_MAJOR}.${OMPI_MINOR}/openmpi-${OMPI_VERSION}.tar.gz"
+    tar -xf "openmpi-${OMPI_VERSION}.tar.gz"
+    cd "openmpi-${OMPI_VERSION}"
+    ./configure --prefix="${OMPI_INSTALL_DIR}" --enable-shared \
+      --disable-silent-rules --disable-builtin-atomics --enable-static \
+      --without-hcoll --without-psm --without-knem --without-psm2 \
+      --with-verbs=/usr --without-ofi --without-mxm --without-fca \
+      --without-xpmem --without-ucx --without-cma --without-slurm \
+      --without-tm --without-loadleveler --without-alps --without-lsf \
+      --without-sge --disable-memchecker  --disable-java \
+      --disable-mpi-java --without-cuda --disable-mpi-cxx \
+      --disable-cxx-exceptions
+    #--enable-mpi1-compatibility
+    make all install
+
+    cd /tmp
+
+    # Remove OpenMPI build directory and source tarball
+    rm -rf "openmpi-${OMPI_VERSION}"
+    rm "openmpi-${OMPI_VERSION}.tar.gz"
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
