@@ -7,40 +7,49 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04
     APPLICATION_VERSION 18.04 + 10.2
     APPLICATION_URL https://docs.nvidia.com/cuda
 
+    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:ubuntu-18.04-cuda-10.2
+    IMAGE_MD5 7f898f54184195dd67b8dfa9131813e7
+    IMAGE_SHA256 3c15ffe3ccb6efbdaf2fd1f985d345f59c6a5f308bab0757bf1415fc699c910b
+
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20211001
+    LAST_UPDATED 20220422
 
 %setup
 
 %environment
 
     # Set NVIDIA driver and CUDA versions
-    export CUDA_DRIVER_MAJOR='460'
-    export CUDA_DRIVER_MINOR='32'
-    export CUDA_DRIVER_REVISION='03'
-    export CUDA_DRIVER_VERSION="${CUDA_DRIVER_MAJOR}.${CUDA_DRIVER_MINOR}.${CUDA_DRIVER_REVISION}"
+    export NVIDIA_DRIVER_MAJOR='470'
+    export NVIDIA_DRIVER_MINOR='57'
+    export NVIDIA_DRIVER_REVISION='02'
+    export NVIDIA_DRIVER_VERSION="${NVIDIA_DRIVER_MAJOR}.${NVIDIA_DRIVER_MINOR}.${NVIDIA_DRIVER_REVISION}"
 
     export CUDA_MAJOR='10'
-    export CUDA_MINOR='2' 
+    export CUDA_MINOR='2'
     export CUDA_REVISION='89'
     export CUDA_VERSION="${CUDA_MAJOR}.${CUDA_MINOR}.${CUDA_REVISION}"
 
     export CUDNN_MAJOR='8'
-    export CUDNN_MINOR='1'
-    export CUDNN_REVISION='1.33'
+    export CUDNN_MINOR='2'
+    export CUDNN_REVISION='4.15'
     export CUDNN_VERSION="${CUDNN_MAJOR}.${CUDNN_MINOR}.${CUDNN_REVISION}"
 
     export NCCL_MAJOR='2'
-    export NCCL_MINOR='8'
+    export NCCL_MINOR='11'
     export NCCL_REVISION='4'
     export NCCL_VERSION="${NCCL_MAJOR}.${NCCL_MINOR}.${NCCL_REVISION}"
 
     export TENSORRT_MAJOR='8'
-    export TENSORRT_MINOR='0'
-    export TENSORRT_REVISION='3'
+    export TENSORRT_MINOR='2'
+    export TENSORRT_REVISION='4'
     export TENSORRT_VERSION="${TENSORRT_MAJOR}.${TENSORRT_MINOR}.${TENSORRT_REVISION}"
+
+    export CUTENSOR_MAJOR='1'
+    export CUTENSOR_MINOR='5'
+    export CUTENSOR_REVISION='0.3'
+    export CUTENSOR_VERSION="${CUTENSOR_MAJOR}.${CUTENSOR_MINOR}.${CUTENSOR_REVISION}"
 
     # Set paths to CUDA binaries and libraries
     export CUDA_HOME="/usr/local/cuda-${CUDA_MAJOR}.${CUDA_MINOR}"
@@ -54,11 +63,15 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04
     export TENSORRT_INCLUDE='/usr/include'
     export TENSORRT_LIB='/usr/lib/x86_64-linux-gnu'
 
+    export CUTENSOR_INCLUDE='/usr/include'
+    export CUTENSOR_LIB='/usr/lib/x86_64-linux-gnu'
+
     export PATH="${CUDA_HOME}/bin${PATH:+:${PATH}}"
     export LD_LIBRARY_PATH="${CUDA_HOME}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
     export LD_LIBRARY_PATH="${CUDNN_LIB}:${LD_LIBRARY_PATH}"
     export LD_LIBRARY_PATH="${NCCL_LIB}:${LD_LIBRARY_PATH}"
     export LD_LIBRARY_PATH="${TENSORRT_LIB}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${CUTENSOR_LIB}:${LD_LIBRARY_PATH}"
 
 %post -c /bin/bash
 
@@ -85,30 +98,35 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04
     export CUDA_GPG_PUBKEY='7fa2af80.pub'
 
     # Set NVIDIA driver and CUDA versions
-    export CUDA_DRIVER_MAJOR='460'
-    export CUDA_DRIVER_MINOR='32'
-    export CUDA_DRIVER_REVISION='03'
-    export CUDA_DRIVER_VERSION="${CUDA_DRIVER_MAJOR}.${CUDA_DRIVER_MINOR}.${CUDA_DRIVER_REVISION}"
+    export NVIDIA_DRIVER_MAJOR='470'
+    export NVIDIA_DRIVER_MINOR='57'
+    export NVIDIA_DRIVER_REVISION='02'
+    export NVIDIA_DRIVER_VERSION="${NVIDIA_DRIVER_MAJOR}.${NVIDIA_DRIVER_MINOR}.${NVIDIA_DRIVER_REVISION}"
 
     export CUDA_MAJOR='10'
     export CUDA_MINOR='2'
-    export CUDA_REVISION='89'                         
+    export CUDA_REVISION='89'
     export CUDA_VERSION="${CUDA_MAJOR}.${CUDA_MINOR}.${CUDA_REVISION}"
 
     export CUDNN_MAJOR='8'
-    export CUDNN_MINOR='1'
-    export CUDNN_REVISION='1.33'
+    export CUDNN_MINOR='2'
+    export CUDNN_REVISION='4.15'
     export CUDNN_VERSION="${CUDNN_MAJOR}.${CUDNN_MINOR}.${CUDNN_REVISION}"
 
     export NCCL_MAJOR='2'
-    export NCCL_MINOR='8'
+    export NCCL_MINOR='11'
     export NCCL_REVISION='4'
     export NCCL_VERSION="${NCCL_MAJOR}.${NCCL_MINOR}.${NCCL_REVISION}"
 
     export TENSORRT_MAJOR='8'
-    export TENSORRT_MINOR='0'
-    export TENSORRT_REVISION='3'
+    export TENSORRT_MINOR='2'
+    export TENSORRT_REVISION='4'
     export TENSORRT_VERSION="${TENSORRT_MAJOR}.${TENSORRT_MINOR}.${TENSORRT_REVISION}"
+
+    export CUTENSOR_MAJOR='1'
+    export CUTENSOR_MINOR='5'
+    export CUTENSOR_REVISION='0.3'
+    export CUTENSOR_VERSION="${CUTENSOR_MAJOR}.${CUTENSOR_MINOR}.${CUTENSOR_REVISION}"
 
     cd /tmp
 
@@ -130,14 +148,137 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04
     # Update the apt repository cache
     apt-get update
 
-    # Install NVIDIA driver meta-package
+    # Install NVIDIA package dependencies
+    apt-get -y install dkms
+    apt-get -y install x11-common
+    apt-get -y install xserver-xorg-core
+    apt-get -y install xserver-xorg-legacy
+    apt-get -y install libgl1
+    apt-get -y install libegl1
+    apt-get -y install libopengl0
+    apt-get -y install libgles2
+    apt-get -y install screen-resolution-extra 
+    apt-get -y install libvdpau1
+    apt-get -y install libjansson4 
+
+    # Download and unpackage NVIDIA drivers and libraries manually; 
+    # unfortunately, all packages are installed here manually because 
+    # the current versions of the NVIDIA driver meta-package does not 
+    # allow you to explicitly set the NVIDIA_DRIVER_MINOR and 
+    # NVIDIA_DRIVER_REVISION versions.
     # https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#package-manager-metas
-    apt-get -y install "cuda-drivers-${CUDA_DRIVER_MAJOR}=${CUDA_DRIVER_VERSION}-1"
+    wget --wait=5 "${CUDA_REPO_URL}/libnvidia-common-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_all.deb"
+    dpkg -i "libnvidia-common-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_all.deb"
+    rm "libnvidia-common-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_all.deb"
+
+    wget --wait=5 "${CUDA_REPO_URL}/libnvidia-compute-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    dpkg -i "libnvidia-compute-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    rm "libnvidia-compute-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+
+    wget --wait=5 "${CUDA_REPO_URL}/libnvidia-cfg1-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    dpkg -i "libnvidia-cfg1-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    rm "libnvidia-cfg1-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+
+    wget --wait=5 "${CUDA_REPO_URL}/libnvidia-decode-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    dpkg -i "libnvidia-decode-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    rm "libnvidia-decode-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+
+    wget --wait=5 "${CUDA_REPO_URL}/libnvidia-encode-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    dpkg -i "libnvidia-encode-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    rm "libnvidia-encode-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+
+    wget --wait=5 "${CUDA_REPO_URL}/libnvidia-fbc1-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    dpkg -i "libnvidia-fbc1-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    rm "libnvidia-fbc1-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+
+    wget --wait=5 "${CUDA_REPO_URL}/libnvidia-gl-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    dpkg -i "libnvidia-gl-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    rm "libnvidia-gl-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+
+    wget --wait=5 "${CUDA_REPO_URL}/libnvidia-ifr1-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    dpkg -i "libnvidia-ifr1-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    rm "libnvidia-ifr1-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+
+    wget --wait=5 "${CUDA_REPO_URL}/libxnvctrl0_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    dpkg -i "libxnvctrl0_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    rm "libxnvctrl0_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+
+    wget --wait=5 "${CUDA_REPO_URL}/libxnvctrl-dev_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    dpkg -i "libxnvctrl-dev_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    rm "libxnvctrl-dev_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+
+    wget --wait=5 "${CUDA_REPO_URL}/libnvidia-extra-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    dpkg -i "libnvidia-extra-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    rm "libnvidia-extra-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+
+    wget --wait=5 "${CUDA_REPO_URL}/libnvidia-nscq-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-1_amd64.deb"
+    dpkg -i "libnvidia-nscq-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-1_amd64.deb"
+    rm "libnvidia-nscq-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-1_amd64.deb"
+
+    wget --wait=5 "${CUDA_REPO_URL}/nvidia-kernel-source-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    dpkg -i "nvidia-kernel-source-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    rm "nvidia-kernel-source-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+
+    wget --wait=5 "${CUDA_REPO_URL}/nvidia-kernel-common-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    dpkg -i "nvidia-kernel-common-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    rm "nvidia-kernel-common-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+
+    wget --wait=5 "${CUDA_REPO_URL}/nvidia-dkms-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    dpkg -i "nvidia-dkms-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    rm "nvidia-dkms-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+
+    wget --wait=5 "${CUDA_REPO_URL}/nvidia-compute-utils-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    dpkg -i "nvidia-compute-utils-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    rm "nvidia-compute-utils-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+
+    wget --wait=5 "${CUDA_REPO_URL}/nvidia-utils-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    dpkg -i "nvidia-utils-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    rm "nvidia-utils-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+
+    wget --wait=5 "${CUDA_REPO_URL}/xserver-xorg-video-nvidia-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    dpkg -i "xserver-xorg-video-nvidia-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    rm "xserver-xorg-video-nvidia-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+
+    wget --wait=5 "${CUDA_REPO_URL}/nvidia-driver-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    dpkg -i "nvidia-driver-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    rm "nvidia-driver-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+
+    wget --wait=5 "${CUDA_REPO_URL}/nvidia-modprobe_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    dpkg -i "nvidia-modprobe_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    rm "nvidia-modprobe_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+
+    wget --wait=5 "${CUDA_REPO_URL}/nvidia-settings_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    dpkg -i "nvidia-settings_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    rm "nvidia-settings_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+
+    wget --wait=5 "${CUDA_REPO_URL}/nvidia-headless-no-dkms-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    dpkg -i "nvidia-headless-no-dkms-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    rm "nvidia-headless-no-dkms-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+
+    wget --wait=5 "${CUDA_REPO_URL}/nvidia-headless-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    dpkg -i "nvidia-headless-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+    rm "nvidia-headless-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-0ubuntu1_amd64.deb"
+
+    wget --wait=5 "${CUDA_REPO_URL}/cuda-drivers-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-1_amd64.deb"
+    dpkg -i "cuda-drivers-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-1_amd64.deb"
+    rm "cuda-drivers-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-1_amd64.deb"
+
+    wget --wait=5 "${CUDA_REPO_URL}/nvidia-fabricmanager-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-1_amd64.deb"
+    dpkg -i "nvidia-fabricmanager-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-1_amd64.deb"
+    rm "nvidia-fabricmanager-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-1_amd64.deb"
+
+    wget --wait=5 "${CUDA_REPO_URL}/cuda-drivers-fabricmanager-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-1_amd64.deb"
+    dpkg -i "cuda-drivers-fabricmanager-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-1_amd64.deb"
+    rm "cuda-drivers-fabricmanager-${NVIDIA_DRIVER_MAJOR}_${NVIDIA_DRIVER_VERSION}-1_amd64.deb"
+
+    wget --wait=5 "${CUDA_REPO_URL}/cuda-compat-${CUDA_MAJOR}-${CUDA_MINOR}_${NVIDIA_DRIVER_VERSION}-1_amd64.deb"
+    dpkg -i "cuda-compat-${CUDA_MAJOR}-${CUDA_MINOR}_${NVIDIA_DRIVER_VERSION}-1_amd64.deb"
+    rm "cuda-compat-${CUDA_MAJOR}-${CUDA_MINOR}_${NVIDIA_DRIVER_VERSION}-1_amd64.deb"
 
     # Install CUDA toolkit meta-package
     apt-get -y install "cuda-toolkit-${CUDA_MAJOR}-${CUDA_MINOR}=${CUDA_VERSION}-1"
 
-    # Install the cuDNN library
+     # Install the cuDNN library
     apt-get -y install "libcudnn${CUDNN_MAJOR}=${CUDNN_VERSION}-1+cuda${CUDA_MAJOR}.${CUDA_MINOR}"
     apt-get -y install "libcudnn${CUDNN_MAJOR}-dev=${CUDNN_VERSION}-1+cuda${CUDA_MAJOR}.${CUDA_MINOR}"
 
@@ -156,6 +297,10 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04
     apt-get -y install "libnvparsers-dev=${TENSORRT_VERSION}-1+cuda${CUDA_MAJOR}.${CUDA_MINOR}"
     apt-get -y install "python3-libnvinfer=${TENSORRT_VERSION}-1+cuda${CUDA_MAJOR}.${CUDA_MINOR}"
     apt-get -y install "python3-libnvinfer-dev=${TENSORRT_VERSION}-1+cuda${CUDA_MAJOR}.${CUDA_MINOR}"
+
+    # Install cuTensor - https://developer.nvidia.com/cutensor
+    apt-get -y install "libcutensor1=${CUTENSOR_VERSION}-1"
+    apt-get -y install "libcutensor-dev=${CUTENSOR_VERSION}-1"
 
     # Install third-party libraries required for CUDA samples
     # https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#install-libraries
