@@ -1,5 +1,5 @@
 Bootstrap: oras
-From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-mlnx-ofed-4.9-4.1.7.0-openmpi-3.1.6
+From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-mlnx-ofed-4.9-4.1.7.0-openmpi-4.1.3
 
 %labels
 
@@ -7,9 +7,9 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-mlnx-ofed-4.9-4.1.7.0-openm
     APPLICATION_VERSION 2.3
     APPLICATION_URL https://www.netlib.org/benchmark/hpl
 
-    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:hpl-2.3-ubuntu-20.04-openmpi-3.1.6-openblas-0.3.18
-    IMAGE_MD5 06de07f915e73f5cff407e9b7e076f52
-    IMAGE_SHA256 2ae30fd90af4144361c9fd87a4abb6786ed9333b853a6cd1ab4d5f9943804131
+    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:hpl-2.3-ubuntu-20.04-mlnx-ofed-4.9-4.1.7.0-openmpi-4.1.3-openblas-0.3.18
+    IMAGE_MD5 21b86f327decd21334175b58aea6e5b1
+    IMAGE_SHA256 162c18503fdf40be6617c7909558880fbac6cbc72b0f94f48436262dc096ac83
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
@@ -68,9 +68,9 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-mlnx-ofed-4.9-4.1.7.0-openm
     # Set OpenMPI major, minor, and revision numbers, root and
     # installation directories
     export OMPI_ROOT_URL='https://download.open-mpi.org/release/open-mpi'
-    export OMPI_MAJOR='3'
+    export OMPI_MAJOR='4'
     export OMPI_MINOR='1'
-    export OMPI_REVISION='6'
+    export OMPI_REVISION='3'
     export OMPI_VERSION="${OMPI_MAJOR}.${OMPI_MINOR}.${OMPI_REVISION}"
     export OMPI_ROOT_DIR='/opt/openmpi'
     export OMPI_INSTALL_DIR="${OMPI_ROOT_DIR}/${OMPI_VERSION}"
