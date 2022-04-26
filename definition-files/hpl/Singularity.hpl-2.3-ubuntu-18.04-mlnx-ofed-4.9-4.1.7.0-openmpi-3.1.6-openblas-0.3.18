@@ -1,0 +1,165 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-mlnx-ofed-4.9-4.1.7.0-openmpi-3.1.6
+
+%labels
+
+    APPLICATION_NAME High-Performance Linpack (HPL)
+    APPLICATION_VERSION 2.3
+    APPLICATION_URL https://www.netlib.org/benchmark/hpl
+
+    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:hpl-2.3-ubuntu-18.04-mlnx-ofed-4.9-4.1.7.0-openmpi-3.1.6-openblas-0.3.18 
+    IMAGE_MD5 25c81dcff0df747f26d25f7bfb1f082b
+    IMAGE_SHA256 7e5f24d203a954fc1d88442202c6d676aae95c1969ee6149207424aad3ef9354
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20220425
+
+%setup
+
+%environment
+
+    # Set OpenBLAS version number, target architecture, maximum number
+    # of threads, root and installation directories
+    export OPENBLAS_REPO_URL='https://github.com/xianyi/OpenBLAS.git'
+    export OPENBLAS_VERSION='0.3.18'
+    export OPENBLAS_ROOT_DIR='/opt/openblas'
+    export OPENBLAS_INSTALL_DIR="${OPENBLAS_ROOT_DIR}/${OPENBLAS_VERSION}"
+    export OPENBLAS_USE_OPENMP=1
+    export OPENBLAS_DYNAMIC_ARCH=1
+    export OPENBLAS_TARGET_ARCH='HASWELL'
+    export OPENBLAS_MAX_NUM_THREADS=256
+
+    # Set path to OpenBLAS libraries
+    export LD_LIBRARY_PATH="${OPENBLAS_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    # Set HPL version number, target architecture, root and installation
+    # directories
+    export HPL_ROOT_URL='http://www.netlib.org/benchmark/hpl'
+    export HPL_VERSION='2.3'
+    export HPL_ARCH='linux64'
+    export HPL_ROOT_DIR='/opt/hpl'
+    export HPL_INSTALL_DIR="${HPL_ROOT_DIR}/${HPL_VERSION}"
+
+    # Set path to HPL binary
+    export PATH="${HPL_INSTALL_DIR}/bin:${PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='bionic'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set Mellanox OFED version, operating system, and hardware platform
+    export MLNX_ROOT_URL='http://www.mellanox.com/downloads/ofed'
+    export MLNX_OFED_VERSION='4.9-4.1.7.0'
+    export MLNX_OS_VERSION='ubuntu20.04'
+    export MLNX_PLATFORM='x86_64'
+
+    # Set OpenMPI major, minor, and revision numbers, root and
+    # installation directories
+    export OMPI_ROOT_URL='https://download.open-mpi.org/release/open-mpi'
+    export OMPI_MAJOR='3'
+    export OMPI_MINOR='1'
+    export OMPI_REVISION='6'
+    export OMPI_VERSION="${OMPI_MAJOR}.${OMPI_MINOR}.${OMPI_REVISION}"
+    export OMPI_ROOT_DIR='/opt/openmpi'
+    export OMPI_INSTALL_DIR="${OMPI_ROOT_DIR}/${OMPI_VERSION}"
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="${OMPI_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${OMPI_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    cd /tmp
+
+    # Set OpenBLAS version number, target architecture, maximum number 
+    # of threads, root and installation directories
+    export OPENBLAS_REPO_URL='https://github.com/xianyi/OpenBLAS.git'
+    export OPENBLAS_VERSION='0.3.18'
+    export OPENBLAS_ROOT_DIR='/opt/openblas'
+    export OPENBLAS_INSTALL_DIR="${OPENBLAS_ROOT_DIR}/${OPENBLAS_VERSION}"
+    export OPENBLAS_USE_OPENMP=1
+    export OPENBLAS_DYNAMIC_ARCH=1
+    export OPENBLAS_TARGET_ARCH='HASWELL'
+    export OPENBLAS_MAX_NUM_THREADS=256
+
+    # Download, build, and install OpenBLAS
+    git clone "${OPENBLAS_REPO_URL}"
+    cd OpenBLAS
+    git checkout "v${OPENBLAS_VERSION}"
+    if (( "${OPENBLAS_DYNAMIC_ARCH}" == 1 )); then
+      make FC='gfortran' BINARY=64 USE_OPENMP="${OPENBLAS_USE_OPENMP}" DYNAMIC_ARCH=1 NUM_THREADS="${OPENBLAS_MAX_NUM_THREADS}"
+    else
+      make FC='gfortran' BINARY=64 USE_OPENMP="${OPENBLAS_USE_OPENMP}" TARGET="${OPENBLAS_TARGET_ARCH}" NUM_THREADS="${OPENBLAS_MAX_NUM_THREADS}"
+    fi
+    make PREFIX="${OPENBLAS_INSTALL_DIR}" install
+
+    # Set path to OpenBLAS libraries
+    export LD_LIBRARY_PATH="${OPENBLAS_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    cd /tmp
+
+    # Remove OpenBLAS build directory
+    rm -rf OpenBLAS
+
+    # Set HPL version number, target architecture, root and installation
+    # directories
+    export HPL_ROOT_URL='http://www.netlib.org/benchmark/hpl'
+    export HPL_VERSION='2.3'
+    export HPL_ARCH='linux64'
+    export HPL_ROOT_DIR='/opt/hpl'
+    export HPL_INSTALL_DIR="${HPL_ROOT_DIR}/${HPL_VERSION}"
+
+    # Download, build, and install HPL
+    wget "${HPL_ROOT_URL}/hpl-${HPL_VERSION}.tar.gz"
+    tar -xf "hpl-${HPL_VERSION}.tar.gz" 
+    cd "hpl-${HPL_VERSION}/setup"
+    source make_generic
+    mv Make.UNKNOWN Make.linux64
+    sed -i 's/ARCH         = UNKNOWN/ARCH         = linux64/' Make.linux64
+    sed -i 's/TOPdir       = $(HOME)\/hpl/TOPdir       =/' Make.linux64
+    sed -i "s/TOPdir       =/TOPdir       = \/opt\/hpl\/${HPL_VERSION}/" Make.linux64
+    sed -i 's/MPdir        = /MPdir        = \/opt\/openmpi/4.0.5/' Make.linux64
+    sed -i 's/MPinc        = /MPinc        = -I$(MPdir)\/include/' Make.linux64
+    sed -i 's/MPlib        = /MPlib        = $(MPdir)\/lib\/libmpi.so/' Make.linux64
+    sed -i "s/LAdir        = /LAdir        = \/opt\/openblas\/${OPENBLAS_VERSION}/" Make.linux64
+    sed -i 's/LAinc        = /LAinc        = -I$(LAdir)\/include/' Make.linux64
+    sed -i 's/LAlib        = -lblas/LAlib        = $(LAdir)\/lib\/libopenblas.a/' Make.linux64
+    sed -i 's/LINKER       = mpif77/LINKER       = mpicc/' Make.linux64
+    cp Make.linux64 ../
+    cd ../
+    export LDFLAGS="-L${OPENBLAS_INSTALL_DIR}/lib"
+    ./configure --prefix="${HPL_INSTALL_DIR}"
+    make arch='linux64'
+    make install
+
+    cd /tmp
+
+    # Remove HPL build directory and source tarball
+    rm -rf "hpl-${HPL_VERSION}"
+    rm "hpl-${HPL_VERSION}.tar.gz"
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
