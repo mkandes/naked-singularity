@@ -1,0 +1,164 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-cuda-10.2-mlnx-ofed-4.9-4.1.7.0-openmpi-4.1.3
+
+%labels
+
+    APPLICATION_NAME OSU Micro-Benchmarks
+    APPLICATION_VERSION 5.9
+    APPLICATION_URL http://mvapich.cse.ohio-state.edu/benchmarks
+
+    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:omb-5.9-ubuntu-18.04-cuda-10.2-mlnx-ofed-4.9-4.1.7.0-openmpi-4.1.3 
+    IMAGE_MD5 cdc00bf3a7f21d2222cc1c6aae9c5ead
+    IMAGE_SHA256 6d2a4553f034cfd5e8c62de69d3ac2936a231d987ef13d6f4e1af819516e0d99 
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20220426
+
+%setup
+
+%environment
+
+    # Set OMB major and minor version numbers, root and
+    # installation directories
+    export OMB_MAJOR='5'
+    export OMB_MINOR='9'
+    export OMB_VERSION="${OMB_MAJOR}.${OMB_MINOR}"
+    export OMB_ROOT_DIR='/opt/omb'
+    export OMB_INSTALL_DIR="${OMB_ROOT_DIR}/${OMB_VERSION}"
+
+    # Set paths to OSU Microbenchmarks binaries
+    export PATH="${OMB_INSTALL_DIR}/collective:${PATH}"
+    export PATH="${OMB_INSTALL_DIR}/one-sided:${PATH}"
+    export PATH="${OMB_INSTALL_DIR}/pt2pt:${PATH}"
+    export PATH="${OMB_INSTALL_DIR}/startup:${PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='bionic'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set NVIDIA driver and CUDA versions
+    export NVIDIA_DRIVER_MAJOR='470'
+    export NVIDIA_DRIVER_MINOR='57'
+    export NVIDIA_DRIVER_REVISION='02'
+    export NVIDIA_DRIVER_VERSION="${NVIDIA_DRIVER_MAJOR}.${NVIDIA_DRIVER_MINOR}.${NVIDIA_DRIVER_REVISION}"
+
+    export CUDA_MAJOR='10'
+    export CUDA_MINOR='2'
+    export CUDA_REVISION='89'
+    export CUDA_VERSION="${CUDA_MAJOR}.${CUDA_MINOR}.${CUDA_REVISION}"
+
+    export CUDNN_MAJOR='8'
+    export CUDNN_MINOR='2'
+    export CUDNN_REVISION='4.15'
+    export CUDNN_VERSION="${CUDNN_MAJOR}.${CUDNN_MINOR}.${CUDNN_REVISION}"
+
+    export NCCL_MAJOR='2'
+    export NCCL_MINOR='11'
+    export NCCL_REVISION='4'
+    export NCCL_VERSION="${NCCL_MAJOR}.${NCCL_MINOR}.${NCCL_REVISION}"
+
+    export TENSORRT_MAJOR='8'
+    export TENSORRT_MINOR='2'
+    export TENSORRT_REVISION='4'
+    export TENSORRT_VERSION="${TENSORRT_MAJOR}.${TENSORRT_MINOR}.${TENSORRT_REVISION}"
+
+    export CUTENSOR_MAJOR='1'
+    export CUTENSOR_MINOR='5'
+    export CUTENSOR_REVISION='0.3'
+    export CUTENSOR_VERSION="${CUTENSOR_MAJOR}.${CUTENSOR_MINOR}.${CUTENSOR_REVISION}"
+
+    # Set paths to CUDA binaries and libraries
+    export CUDA_HOME="/usr/local/cuda-${CUDA_MAJOR}.${CUDA_MINOR}"
+
+    export CUDNN_INCLUDE='/usr/include'
+    export CUDNN_LIB='/usr/lib/x86_64-linux-gnu'
+
+    export NCCL_INCLUDE='/usr/include'
+    export NCCL_LIB='/usr/lib/x86_64-linux-gnu'
+
+    export TENSORRT_INCLUDE='/usr/include'
+    export TENSORRT_LIB='/usr/lib/x86_64-linux-gnu'
+
+    export CUTENSOR_INCLUDE='/usr/include'
+    export CUTENSOR_LIB='/usr/lib/x86_64-linux-gnu'
+
+    export PATH="${CUDA_HOME}/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="${CUDA_HOME}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+    export LD_LIBRARY_PATH="${CUDNN_LIB}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${NCCL_LIB}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${TENSORRT_LIB}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${CUTENSOR_LIB}:${LD_LIBRARY_PATH}"
+
+    # Set OpenMPI major, minor, and revision numbers, root and
+    # installation directories
+    export OMPI_MAJOR='4'
+    export OMPI_MINOR='1'
+    export OMPI_REVISION='3'
+    export OMPI_VERSION="${OMPI_MAJOR}.${OMPI_MINOR}.${OMPI_REVISION}"
+    export OMPI_ROOT_DIR='/opt/openmpi'
+    export OMPI_INSTALL_DIR="${OMPI_ROOT_DIR}/${OMPI_VERSION}"
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="${OMPI_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${OMPI_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    # DO NOT Upgrade all software packages to their latest versions
+    # apt-get -y update && apt-get -y upgrade
+
+    cd /tmp
+
+    # Set OMB major and minor version numbers, root and
+    # installation directories
+    export OMB_ROOT_URL='http://mvapich.cse.ohio-state.edu/download/mvapich'
+    export OMB_MAJOR='5'
+    export OMB_MINOR='9'
+    export OMB_VERSION="${OMB_MAJOR}.${OMB_MINOR}"
+    export OMB_ROOT_DIR='/opt/omb'
+    export OMB_INSTALL_DIR="${OMB_ROOT_DIR}/${OMB_VERSION}"
+
+    # Download, build, and install OSU Microbenchmarks
+    wget "${OMB_ROOT_URL}/osu-micro-benchmarks-${OMB_VERSION}.tar.gz"
+    tar -xf "osu-micro-benchmarks-${OMB_VERSION}.tar.gz"
+    cd "osu-micro-benchmarks-${OMB_VERSION}"
+    ./configure --prefix="${OMB_INSTALL_DIR}" CC='mpicc' CXX='mpicxx' --enable-cuda --with-cuda-include="${CUDA_HOME}/include" --with-cuda-libpath="${CUDA_HOME}/lib64"
+    make
+    make install
+
+    # Reorganize OSU Microbenchmarks directory structure
+    cd "${OMB_INSTALL_DIR}"
+    mv libexec/osu-micro-benchmarks/mpi/collective ./
+    mv libexec/osu-micro-benchmarks/mpi/one-sided ./
+    mv libexec/osu-micro-benchmarks/mpi/pt2pt ./
+    mv libexec/osu-micro-benchmarks/mpi/startup ./
+    rm -rf libexec
+
+    cd /tmp
+
+    # Remove OMB build directory and source tarball
+    rm -rf "osu-micro-benchmarks-${OMB_VERSION}"
+    rm "osu-micro-benchmarks-${OMB_VERSION}.tar.gz"
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
