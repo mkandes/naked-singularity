@@ -1,0 +1,103 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-mlnx-ofed-4.9-4.1.7.0-openmpi-4.1.3
+
+%labels
+
+    APPLICATION_NAME IOR
+    APPLICATION_VERSION 3.3.0
+    APPLICATION_URL https://ior.readthedocs.io
+
+    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:ior-3.3.0-ubuntu-20.04-mlnx-ofed-4.9-4.1.7.0-openmpi-4.1.3 
+    IMAGE_MD5 c31889cdbd0247d5e593bc24a59c9ff1
+    IMAGE_SHA256 bb5da39387aec2615f0912d1cda7edbe2fb47f873ec9c900e68faa22a6d5d317 
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20220426
+
+%setup
+
+%environment
+
+    # Set IOR version number, root and installation directories
+    export IOR_REPO_URL='https://github.com/hpc/ior.git'
+    export IOR_VERSION='3.3.0'
+    export IOR_ROOT_DIR='/opt/ior'
+    export IOR_INSTALL_DIR="${IOR_ROOT_DIR}/${IOR_VERSION}"
+
+    # Set path to IOR binary and libraries
+    export PATH="${IOR_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${IOR_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='bionic'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set Mellanox OFED version, operating system, and hardware platform
+    export MLNX_ROOT_URL='http://www.mellanox.com/downloads/ofed'
+    export MLNX_OFED_VERSION='4.9-4.1.7.0'
+    export MLNX_OS_VERSION='ubuntu20.04'
+    export MLNX_PLATFORM='x86_64'
+
+    # Set OpenMPI major, minor, and revision numbers, root and
+    # installation directories
+    export OMPI_ROOT_URL='https://download.open-mpi.org/release/open-mpi'
+    export OMPI_MAJOR='4'
+    export OMPI_MINOR='1'
+    export OMPI_REVISION='3'
+    export OMPI_VERSION="${OMPI_MAJOR}.${OMPI_MINOR}.${OMPI_REVISION}"
+    export OMPI_ROOT_DIR='/opt/openmpi'
+    export OMPI_INSTALL_DIR="${OMPI_ROOT_DIR}/${OMPI_VERSION}"
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="${OMPI_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${OMPI_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    cd /tmp
+
+    # Set IOR version number, root and installation directories
+    export IOR_REPO_URL='https://github.com/hpc/ior.git'
+    export IOR_VERSION='3.3.0'
+    export IOR_ROOT_DIR='/opt/ior'
+    export IOR_INSTALL_DIR="${IOR_ROOT_DIR}/${IOR_VERSION}"
+
+    # Download, build, and install IOR
+    git clone "${IOR_REPO_URL}"
+    cd ior
+    git checkout "${IOR_VERSION}"
+    ./bootstrap
+    ./configure --prefix="${IOR_INSTALL_DIR}"
+    make
+    make install
+
+    cd /tmp
+
+    # Remove IOR build directory and source repository
+    rm -rf ior
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
