@@ -1,0 +1,213 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-cuda-10.2-mlnx-ofed-4.9-4.1.7.0-openmpi-3.1.6
+
+%labels
+
+    APPLICATION_NAME DeepBench
+    APPLICATION_VERSION da81ba7
+    APPLICATION_URL https://github.com/baidu-research/DeepBench
+
+    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:deepbench-da81ba7-ubuntu-18.04-cuda-10.2-mlnx-ofed-4.9-4.1.7.0-openmpi-3.1.6
+    IMAGE_MD5 66009a22a7a9c81e1aa7d226c3b2b302 
+    IMAGE_SHA256 7c4cac989b308fdc533ed0dfe39b933547e482670c653b597a0cd8374f18e0a6
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20220426
+
+%setup
+
+%environment
+
+    # Set path to Baidu's allreduce-test binary
+    export PATH="/opt/baidu-allreduce:${PATH}"
+
+    # Set path to Baidu's DeepBench binaries
+    export PATH="/opt/DeepBench/code/bin:${PATH}"
+
+    # Set path to NVIDIA's nccl-tests binaries
+    export PATH="/opt/nccl-tests/build:${PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='bionic'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set NVIDIA driver and CUDA versions
+    export NVIDIA_DRIVER_MAJOR='470'
+    export NVIDIA_DRIVER_MINOR='57'
+    export NVIDIA_DRIVER_REVISION='02'
+    export NVIDIA_DRIVER_VERSION="${NVIDIA_DRIVER_MAJOR}.${NVIDIA_DRIVER_MINOR}.${NVIDIA_DRIVER_REVISION}"
+
+    export CUDA_MAJOR='10'
+    export CUDA_MINOR='2'
+    export CUDA_REVISION='89'
+    export CUDA_VERSION="${CUDA_MAJOR}.${CUDA_MINOR}.${CUDA_REVISION}"
+
+    export CUDNN_MAJOR='8'
+    export CUDNN_MINOR='2'
+    export CUDNN_REVISION='4.15'
+    export CUDNN_VERSION="${CUDNN_MAJOR}.${CUDNN_MINOR}.${CUDNN_REVISION}"
+
+    export NCCL_MAJOR='2'
+    export NCCL_MINOR='11'
+    export NCCL_REVISION='4'
+    export NCCL_VERSION="${NCCL_MAJOR}.${NCCL_MINOR}.${NCCL_REVISION}"
+
+    export TENSORRT_MAJOR='8'
+    export TENSORRT_MINOR='2'
+    export TENSORRT_REVISION='4'
+    export TENSORRT_VERSION="${TENSORRT_MAJOR}.${TENSORRT_MINOR}.${TENSORRT_REVISION}"
+
+    export CUTENSOR_MAJOR='1'
+    export CUTENSOR_MINOR='5'
+    export CUTENSOR_REVISION='0.3'
+    export CUTENSOR_VERSION="${CUTENSOR_MAJOR}.${CUTENSOR_MINOR}.${CUTENSOR_REVISION}"
+
+    # Set paths to CUDA binaries and libraries
+    export CUDA_HOME="/usr/local/cuda-${CUDA_MAJOR}.${CUDA_MINOR}"
+
+    export CUDNN_INCLUDE='/usr/include'
+    export CUDNN_LIB='/usr/lib/x86_64-linux-gnu'
+
+    export NCCL_INCLUDE='/usr/include'
+    export NCCL_LIB='/usr/lib/x86_64-linux-gnu'
+
+    export TENSORRT_INCLUDE='/usr/include'
+    export TENSORRT_LIB='/usr/lib/x86_64-linux-gnu'
+
+    export CUTENSOR_INCLUDE='/usr/include'
+    export CUTENSOR_LIB='/usr/lib/x86_64-linux-gnu'
+
+    export PATH="${CUDA_HOME}/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="${CUDA_HOME}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+    export LD_LIBRARY_PATH="${CUDNN_LIB}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${NCCL_LIB}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${TENSORRT_LIB}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${CUTENSOR_LIB}:${LD_LIBRARY_PATH}"
+
+    # Set OpenMPI major, minor, and revision numbers, root and
+    # installation directories
+    export OMPI_MAJOR='3'
+    export OMPI_MINOR='1'
+    export OMPI_REVISION='6'
+    export OMPI_VERSION="${OMPI_MAJOR}.${OMPI_MINOR}.${OMPI_REVISION}"
+    export OMPI_ROOT_DIR='/opt/openmpi'
+    export OMPI_INSTALL_DIR="${OMPI_ROOT_DIR}/${OMPI_VERSION}"
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="${OMPI_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${OMPI_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    # DO NOT Upgrade all software packages to their latest versions
+    # apt-get -y update && apt-get -y upgrade
+
+    cd /opt
+
+    # Set Baidu's Ring All-Reduce Library version number
+    export BAIDU_ALLREDUCE_VERSION='73c7b7f'
+
+    # Download, build, and install Baidu's Ring All-Reduce Library
+    git clone https://github.com/baidu-research/baidu-allreduce
+    cd baidu-allreduce
+    git checkout "${BAIDU_ALLREDUCE_VERSION}"
+    export MPI_ROOT="${OMPI_INSTALL_DIR}"
+    export CUDA_ROOT="${CUDA_HOME}"
+    make
+
+    cd /opt
+
+    # Set Baidu's DeepBench version number
+    export BAIDU_DEEPBENCH_VERSION='da81ba7'
+
+    # Download, build, and install DeepBench
+    git clone https://github.com/baidu-research/DeepBench.git
+    cd DeepBench/code
+    git checkout "${BAIDU_DEEPBENCH_VERSION}"
+    sed -i 's/cudnnSetRNNDescriptor/cudnnSetRNNDescriptor_v6/' nvidia/cudnn_helper.h
+    cd kernels
+    tee -a conv_problems.patch << EOF # add Voyager convolution benchmark problem sizes via patch
+--- conv_problems.h     2021-11-06 23:16:29.422708701 +0000,
++++ conv_problems.h     2021-11-07 00:22:25.444177548 +0000,
+@@ -2,6 +2,13 @@uple(700, 161, 1, 16, 32, 20, 5, 0, 0, 2, 2),
+ std::vector<std::tuple<unsigned int, unsigned int, unsigned int, unsigned int,
+                        unsigned int, unsigned int, unsigned int,
+                        unsigned int, unsigned int, unsigned int, unsigned int>> training_set = {
++    std::make_tuple(14, 14, 56, 128, 1024, 1, 1, 0, 0, 1, 1),
++    std::make_tuple(14, 14, 256, 128, 1024, 1, 1, 0, 0, 1, 1),
++    std::make_tuple(28, 28, 128, 128, 512, 1, 1, 0, 0, 1, 1),
++    std::make_tuple(28, 28, 512, 128, 128, 1, 1, 0, 0, 1, 1),
++    std::make_tuple(14, 14, 256, 128, 512, 1, 1, 0, 0, 1, 1),
++    std::make_tuple(28, 28, 128, 128, 128, 3, 3, 0, 0, 1, 1),
++    std::make_tuple(14, 14, 64, 128, 64, 3, 3, 0, 0, 1, 1),
+     std::make_tuple(700, 161, 1, 4, 32, 20, 5, 0, 0, 2, 2),
+     std::make_tuple(700, 161, 1, 8, 32, 20, 5, 0, 0, 2, 2),
+     std::make_tuple(700, 161, 1, 16, 32, 20, 5, 0, 0, 2, 2),
+EOF
+    patch -u conv_problems.h -i conv_problems.patch
+    tee -a all_reduce_problems.patch << EOF # add Voyager all-reduce benchmark problem sizes via patch 
+--- all_reduce_problems.h       2021-11-08 20:52:30.034094940 +0000
++++ all_reduce_problems.h       2021-11-08 21:11:00.631756829 +0000
+@@ -2,9 +2,9 @@
+ #define _ALL_REDUCE_KERNELS_
+
+
+-#define _NUMBER_OF_KERNELS_ 7
++#define _NUMBER_OF_KERNELS_ 28
+
+-int64_t all_reduce_kernels_size[] = {100000, 3097600, 4194304, 6553600, 16777217, 38360000, 64500000};
+-int64_t all_reduce_kernels_repeat[] = {10000, 10000, 10000, 10000, 1000, 1000, 1000};
++int64_t all_reduce_kernels_size[] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 16777216, 33554432, 67108864, 134217728, 268435456};
++int64_t all_reduce_kernels_repeat[] = {10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 1000, 1000, 1000, 1000, 1000, 1000, 1000};
+
+ #endif
+EOF
+    patch -u all_reduce_problems.h -i all_reduce_problems.patch
+    cd ../
+    export MPI_PATH="${OMPI_INSTALL_DIR}"
+    export MPI_INCLUDE_PATH="${OMPI_INSTALL_DIR}/include"
+    export BAIDU_ALLREDUCE_PATH='/opt/baidu-allreduce'
+    export CUDA_PATH="${CUDA_HOME}"
+    export CUDNN_PATH="${CUDNN_LIB}"
+    export NCCL_PATH="${NCCL_LIB}"
+    export ARCH='sm_70'
+    USE_TENSOR_CORES=1
+    make 
+
+    cd /opt
+
+    # Set NVIDIA's nccl-tests version number
+    export NCCL_TESTS_VERSION='2.9.0'
+
+    # Download, build, and install NVIDIA nccl-tests
+    git clone https://github.com/NVIDIA/nccl-tests.git
+    cd nccl-tests
+    git checkout "v${NCCL_TESTS_VERSION}"
+    export MPI=1
+    export MPI_HOME="${OMPI_INSTALL_DIR}"
+    export CUDA_HOME="${CUDA_HOME}"  
+    export NCCL_HOME="${NCCL_LIB}"
+    make
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
