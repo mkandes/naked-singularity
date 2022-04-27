@@ -1,0 +1,88 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04
+
+%labels
+
+    APPLICATION_NAME anaconda3
+    APPLICATION_VERSION py39-2021.11-Linux-x86_64
+    APPLICATION_URL https://docs.conda.io
+
+    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:anaconda3-py39-2021.11-ubuntu-20.04 
+    IMAGE_MD5 6cfe840bb2b190578a1af31a9bd3c30c
+    IMAGE_SHA256 f1a93bcc0f3f26d03c19901764f3d06ce8d32075ba637e58726f96b38d8bfb59
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20220427
+
+%setup
+
+%environment
+
+    # Set the conda distribution type, its version number, the python
+    # version it utilizes, the root and installation directories where
+    # the distribution will be installed within the container, and the
+    # root URL to the installer
+    export CONDA_DISTRIBUTION='anaconda'
+    export CONDA_VERSION='3'
+    export CONDA_PYTHON_VERSION='py39'
+    export CONDA_INSTALLER_VERSION='2021.11'
+    export CONDA_ARCH='Linux-x86_64'
+    export CONDA_INSTALL_DIR="/opt/${CONDA_DISTRIBUTION}${CONDA_VERSION}"
+
+    # Set PATH to conda distribution
+    export PATH="${CONDA_INSTALL_DIR}/bin:${PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='bionic'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    cd /tmp
+
+    # Set the conda distribution type, its version number, the python
+    # version it utilizes, the root and installation directories where
+    # the distribution will be installed within the container, and the
+    # root URL to the installer
+    export CONDA_DISTRIBUTION='anaconda'
+    export CONDA_VERSION='3'
+    export CONDA_PYTHON_VERSION='py39'
+    export CONDA_INSTALLER_VERSION='2021.11'
+    export CONDA_ARCH='Linux-x86_64'
+    export CONDA_INSTALLER="${CONDA_DISTRIBUTION^}${CONDA_VERSION}-${CONDA_INSTALLER_VERSION}-${CONDA_ARCH}.sh"
+    export CONDA_INSTALL_DIR="/opt/${CONDA_DISTRIBUTION}${CONDA_VERSION}"
+    export CONDA_ROOT_URL='https://repo.anaconda.com'
+
+    # Download and install conda distribution
+    wget "${CONDA_ROOT_URL}/archive/${CONDA_INSTALLER}"
+    chmod +x "${CONDA_INSTALLER}"
+    "./${CONDA_INSTALLER}" -b -p "${CONDA_INSTALL_DIR}"
+
+    # Remove conda installer
+    rm "${CONDA_INSTALLER}"
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
