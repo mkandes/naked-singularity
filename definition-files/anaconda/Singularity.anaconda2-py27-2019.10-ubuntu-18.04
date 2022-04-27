@@ -1,5 +1,5 @@
-Bootstrap: shub
-From: mkandes/naked-singularity:ubuntu-18.04
+Bootstrap: oras
+From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04
 
 %labels
 
@@ -7,10 +7,14 @@ From: mkandes/naked-singularity:ubuntu-18.04
     APPLICATION_VERSION py27-2019.10-Linux-x86_64
     APPLICATION_URL https://docs.conda.io
 
+    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:anaconda2-py27-2019.10-ubuntu-18.04 
+    IMAGE_MD5 4b2a7831019dd8e7b423a739d4e2f6fa
+    IMAGE_SHA256 568298303c5d697b2307e0a51a78a0b2e8a07a9f2bb96b198d2b8c82477ceda4
+
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20210427
+    LAST_UPDATED 20220427
 
 %setup
 
