@@ -7,10 +7,14 @@ From: mkandes/naked-singularity:ubuntu-18.04
     APPLICATION_VERSION py27-4.8.3-Linux-x86_64
     APPLICATION_URL https://docs.conda.io
 
+    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:miniconda2-py27-4.8.3-ubuntu-18.04 
+    IMAGE_MD5 af86d3a6569abdd568c7c72198b35094
+    IMAGE_SHA256 fd87dacd4d3073c506dcd0880df4301bba32c0cb8c2c9f97a1a3d97ab33a9840
+
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20210427
+    LAST_UPDATED 20220427
 
 %setup
 
