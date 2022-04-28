@@ -18,7 +18,7 @@
 #
 # LAST UPDATED
 #
-#   Tuesday, Auguest 12th, 2022
+#   Thursday, April 28th, 2022
 #
 # ----------------------------------------------------------------------
 
@@ -160,9 +160,18 @@ naked::install() {
     apt-get -y install cryptsetup-bin
     apt-get -y install debootstrap
 
-    # no longer available after ubuntu 18.04; used previously to build 
-    # centos-based Singularity containers on ubuntu-based hosts
+    # No longer available after Ubuntu 18.04; used previously to build 
+    # CentOS-based Singularity containers on Ubuntu-based hosts
     apt-get -y install yum-utils
+    
+    # Ran into the following error when building on Ubuntu 18.04 host.
+    #
+    #   INFO:    Starting build...
+    #   FATAL:   While performing build: conveyor failed to get: while fetching library image: failed to get checksum for oras://ghcr.io/mkandes/naked-singularity:ubuntu-18.04-mlnx-ofed-4.9-4.1.7.0-openmpi-3.1.6: while resolving reference: error getting credentials - err: exit status 1, out: `Cannot autolaunch D-Bus without X11 $DISPLAY`
+    # 
+    # Fixed by installing following packages. 
+    apt-get -y install pass 
+    apt-get -y install gnupg2
 
     # https://github.com/hpcng/singularity/issues/241
     echo '%_var /var' > ~/.rpmmacros
