@@ -1,0 +1,185 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-cuda-10.2
+
+%labels
+
+    APPLICATION_NAME beast
+    APPLICATION_VERSION 1.10.4
+    APPLICATION_URL https://beast.community
+
+    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:beast-1.10.4-ubuntu-18.04-cuda-10.2
+    IMAGE_MD5 2f00f0d32594e93c15528d309422d300 
+    IMAGE_SHA256 b7957aa502ddc12ec79551ea4874cb35f2fe51d62c4a492d761d3836bd4f4814
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20220427
+
+%setup
+
+%environment
+
+    # Set LD_LIBRARY_PATH to beagle
+    export LD_LIBRARY_PATH="/opt/beagle/lib:${LD_LIBRARY_PATH}"
+
+    # Set PATH to beast
+    export PATH="/opt/beast/bin:${PATH}"
+
+    # Set PATH to tracer
+    export PATH="/opt/tracer/bin:${PATH}"
+
+    # Set PATH to figtree
+    export PATH="/opt/figtree/bin:${PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='bionic'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set NVIDIA driver and CUDA versions
+    export NVIDIA_DRIVER_MAJOR='470'
+    export NVIDIA_DRIVER_MINOR='57'
+    export NVIDIA_DRIVER_REVISION='02'
+    export NVIDIA_DRIVER_VERSION="${NVIDIA_DRIVER_MAJOR}.${NVIDIA_DRIVER_MINOR}.${NVIDIA_DRIVER_REVISION}"
+
+    export CUDA_MAJOR='10'
+    export CUDA_MINOR='2'
+    export CUDA_REVISION='89'
+    export CUDA_VERSION="${CUDA_MAJOR}.${CUDA_MINOR}.${CUDA_REVISION}"
+
+    export CUDNN_MAJOR='8'
+    export CUDNN_MINOR='2'
+    export CUDNN_REVISION='4.15'
+    export CUDNN_VERSION="${CUDNN_MAJOR}.${CUDNN_MINOR}.${CUDNN_REVISION}"
+
+    export NCCL_MAJOR='2'
+    export NCCL_MINOR='11'
+    export NCCL_REVISION='4'
+    export NCCL_VERSION="${NCCL_MAJOR}.${NCCL_MINOR}.${NCCL_REVISION}"
+
+    export TENSORRT_MAJOR='8'
+    export TENSORRT_MINOR='2'
+    export TENSORRT_REVISION='4'
+    export TENSORRT_VERSION="${TENSORRT_MAJOR}.${TENSORRT_MINOR}.${TENSORRT_REVISION}"
+
+    export CUTENSOR_MAJOR='1'
+    export CUTENSOR_MINOR='5'
+    export CUTENSOR_REVISION='0.3'
+    export CUTENSOR_VERSION="${CUTENSOR_MAJOR}.${CUTENSOR_MINOR}.${CUTENSOR_REVISION}"
+
+    # Set paths to CUDA binaries and libraries
+    export CUDA_HOME="/usr/local/cuda-${CUDA_MAJOR}.${CUDA_MINOR}"
+
+    export CUDNN_INCLUDE='/usr/include'
+    export CUDNN_LIB='/usr/lib/x86_64-linux-gnu'
+
+    export NCCL_INCLUDE='/usr/include'
+    export NCCL_LIB='/usr/lib/x86_64-linux-gnu'
+
+    export TENSORRT_INCLUDE='/usr/include'
+    export TENSORRT_LIB='/usr/lib/x86_64-linux-gnu'
+
+    export CUTENSOR_INCLUDE='/usr/include'
+    export CUTENSOR_LIB='/usr/lib/x86_64-linux-gnu'
+
+    export PATH="${CUDA_HOME}/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="${CUDA_HOME}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+    export LD_LIBRARY_PATH="${CUDNN_LIB}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${NCCL_LIB}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${TENSORRT_LIB}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${CUTENSOR_LIB}:${LD_LIBRARY_PATH}"
+
+    # DO NOT Upgrade all packages to their latest versions
+    apt-get -y update #&& apt-get -y upgrade
+
+    # Install beast dependencies
+    apt-get -y install default-jdk
+    apt-get -y install default-jdk-doc
+    apt-get -y install ant
+
+    cd /tmp
+
+    # Download, build, and install beagle library
+    git clone https://github.com/beagle-dev/beagle-lib.git
+    cd beagle-lib
+    git checkout v3.1.2
+    ./autogen.sh
+    ./configure --prefix=/opt/beagle
+    make install
+    export LD_LIBRARY_PATH="/opt/beagle/lib:${LD_LIBRARY_PATH}"
+    make check
+
+    cd /tmp 
+
+    # Download, build, and install beast
+    git clone https://github.com/beast-dev/beast-mcmc.git
+    cd beast-mcmc
+    git checkout v1.10.4
+    export JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
+    ant linux
+    mv /tmp/beast-mcmc/release/Linux/BEASTv1.10.4 /opt/beast
+    cd /opt/beast/bin
+    sed -i 's/-Xms64m -Xmx2048m/-Xms256m -Xmx16000m/' beast
+
+    # Set PATH to beast
+    export PATH="/opt/beast/bin:${PATH}"
+
+    cd /tmp
+
+    # Download, build, and install tracer
+    git clone https://github.com/beast-dev/tracer.git
+    cd tracer
+    git checkout v1.7.1
+    ant linux
+    mv /tmp/tracer/release/Linux/Tracer_v1.7.1 /opt/tracer
+
+    # Set PATH to tracer
+    export PATH="/opt/tracer/bin:${PATH}"
+
+    cd /tmp
+
+    # Download, build, and install figtree ... build fails, package broken
+    # https://stackoverflow.com/questions/46493613/what-is-the-replacement-for-javax-activation-package-in-java-9
+    # git clone https://github.com/rambaut/figtree.git
+    # cd figtree
+    # git checkout v1.4.4
+    # sed -i 's/linux_unix_Release/linux/g' build.xml
+    # ant linux
+    # mv /tmp/figtree/release/Linux/FigTree_v1.4.4 /opt/figtree
+    # cd /opt/figtree/bin
+    # sed -i "s/lib/\/opt\/figtree\/lib/g" figtree
+    # chmod +x figtree
+
+    # Set PATH to figtree
+    export PATH="/opt/figtree/bin:${PATH}"
+
+    cd /tmp
+
+    # Remove source code and build directories 
+    rm -rf beagle-lib
+    rm -rf beast-mcmc
+    rm -rf tracer
+    rm -rf figtree
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
