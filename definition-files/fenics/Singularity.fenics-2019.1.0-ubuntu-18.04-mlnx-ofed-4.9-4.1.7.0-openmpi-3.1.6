@@ -1,0 +1,288 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-mlnx-ofed-4.9-4.1.7.0-openmpi-3.1.6
+
+%labels
+
+    APPLICATION_NAME fenics
+    APPLICATION_VERSION 2019.1.0.post0 
+    APPLICATION_URL https://fenicsproject.org
+
+    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:fenics-2019.1.0-ubuntu-18.04-mlnx-ofed-4.9-4.1.7.0-openmpi-3.1.6
+    IMAGE_MD5 e322ab11215fc0bbcd48ad1f28603c96
+    IMAGE_SHA256 c10dedf4eebd2ba91b0e0aa5f7a5980347fb265c705233d747a2276494e2c714
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20220428
+
+%setup
+
+%environment
+
+    # Set locale environment
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8
+    export LANGUAGE=C.UTF-8
+
+    # Set paths to HDF5 binaries and libraries
+    export PATH="/opt/hdf5-1.10.1/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/hdf5-1.10.1/lib:${LD_LIBRARY_PATH}"
+
+    # Set path to PETSC libraries 
+    export PETSC_DIR='/opt/petsc-3.12.3'
+    export LD_LIBRARY_PATH="${PETSC_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    # Set path to SLEPC libraries
+    export SLEPC_DIR='/opt/slepc-3.12.1'
+    export LD_LIBRARY_PATH="${SLEPC_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    # Set FEniCS environment variables
+    export OPENBLAS_NUM_THREADS=1
+    export OPENBLAS_VERBOSE=0
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='bionic'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set Mellanox OFED version, operating system, and hardware platform
+    export MLNX_ROOT_URL='http://www.mellanox.com/downloads/ofed'
+    export MLNX_OFED_VERSION='4.9-4.1.7.0'
+    export MLNX_OS_VERSION='ubuntu18.04'
+    export MLNX_PLATFORM='x86_64'
+
+    # Set OpenMPI major, minor, and revision numbers, root and
+    # installation directories
+    export OMPI_ROOT_URL='https://download.open-mpi.org/release/open-mpi'
+    export OMPI_MAJOR='3'
+    export OMPI_MINOR='1'
+    export OMPI_REVISION='6'
+    export OMPI_VERSION="${OMPI_MAJOR}.${OMPI_MINOR}.${OMPI_REVISION}"
+    export OMPI_ROOT_DIR='/opt/openmpi'
+    export OMPI_INSTALL_DIR="${OMPI_ROOT_DIR}/${OMPI_VERSION}"
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="${OMPI_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${OMPI_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    # Upgrade all packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    # Install all base FEniCS dependencies
+    apt-get -y install locales
+
+    # Set locale environment
+    echo "C.UTF-8 UTF-8" > /etc/locale.gen
+    locale-gen
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8
+    export LANGUAGE=C.UTF-8
+
+    # Install all core (dev-env) FEniCS dependencies available via apt-get
+    # https://bitbucket.org/fenics-project/docker/src/master/dockerfiles/dev-env/Dockerfile
+    # Non-Python utilities and libraries
+    apt-get -y install bison
+    apt-get -y install curl
+    apt-get -y install ccache
+    apt-get -y install cmake
+    apt-get -y install doxygen
+    apt-get -y install flex
+    apt-get -y install g++
+    apt-get -y install gfortran
+    apt-get -y install git
+    apt-get -y install git-lfs
+    apt-get -y install graphviz
+    apt-get -y install libboost-dev
+    apt-get -y install libboost-filesystem-dev
+    apt-get -y install libboost-iostreams-dev
+    apt-get -y install libboost-math-dev
+    apt-get -y install libboost-program-options-dev
+    apt-get -y install libboost-system-dev
+    apt-get -y install libboost-thread-dev
+    apt-get -y install libboost-timer-dev
+    apt-get -y install libeigen3-dev
+    apt-get -y install libfreetype6-dev
+    apt-get -y install liblapack-dev
+    apt-get -y install libopenblas-dev
+    apt-get -y install libpcre3-dev
+    apt-get -y install libpng-dev
+    apt-get -y install libgmp-dev
+    apt-get -y install libcln-dev
+    apt-get -y install libmpfr-dev
+    apt-get -y install man
+    apt-get -y install nano
+    apt-get -y install pkg-config
+    apt-get -y install wget
+    apt-get -y install bash-completion
+    apt-get -y install zlib1g-dev
+
+    git lfs install
+
+    # Install Python3 based environment
+    apt-get -y install python3-dev
+    apt-get -y install python3-flufl.lock
+    apt-get -y install python3-numpy
+    apt-get -y install python3-ply
+    apt-get -y install python3-pytest
+    apt-get -y install python3-scipy
+    apt-get -y install python3-tk
+    apt-get -y install python3-urllib3
+    apt-get -y install python3-minimal
+
+    cd /tmp
+
+    # Install setuptools
+    #wget https://bootstrap.pypa.io/get-pip.py
+    #python3 get-pip.py
+    # Singularity> python3 get-pip.py
+    # ERROR: This script does not work on Python 3.6 The minimum supported Python version is 3.7. Please use https://bootstrap.pypa.io/pip/3.6/get-pip.py instead.
+    apt-get -y install python3-pip
+    pip3 install --no-cache-dir setuptools
+
+    cd /tmp
+
+    # Download, build, and install HDF5
+    wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.1/src/hdf5-1.10.1.tar.gz
+    tar -xf hdf5-1.10.1.tar.gz
+    cd hdf5-1.10.1
+    ./configure CC=mpicc \
+                CXX=mpic++ \
+                --prefix='/opt/hdf5-1.10.1' \
+                --enable-parallel \
+                --enable-fortran \
+                --enable-shared \
+                --with-zlib 
+    make
+    make install
+
+    export PATH="/opt/hdf5-1.10.1/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/hdf5-1.10.1/lib:${LD_LIBRARY_PATH}"
+
+    cd /tmp
+
+    # Use symbolic link for python2/3-compatability
+    ln -s /usr/bin/python3 /usr/bin/python
+
+    # Recommended by PETSc installer 
+    apt-get -y install valgrind
+
+    # Download, build, and Install PETSc
+    wget https://gitlab.com/petsc/petsc/-/archive/v3.12.3/petsc-v3.12.3.tar.gz
+    tar -xf petsc-v3.12.3.tar.gz
+    cd petsc-v3.12.3
+    ./configure --prefix='/opt/petsc-3.12.3' \
+                --with-petsc-arch='arch-linux-c-opt' \
+                --COPTFLAGS='-O2' \
+                --CXXOPTFLAGS='-O2' \
+                --FOPTFLAGS='-O2' \
+                --with-fortran-bindings=no \
+                --with-debugging=0 \
+                --download-blacs \
+                --download-hypre \
+                --download-metis \
+                --download-mumps \
+                --download-ptscotch \
+                --download-scalapack \
+                --download-spai \
+                --download-suitesparse \
+                --download-superlu
+    make
+    make install
+
+    export PETSC_DIR='/opt/petsc-3.12.3'
+    export LD_LIBRARY_PATH="${PETSC_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    cd /tmp
+
+    # Download, build, and install SLEPc
+    wget https://gitlab.com/slepc/slepc/-/archive/v3.12.1/slepc-v3.12.1.tar.gz
+    tar -xf slepc-v3.12.1.tar.gz
+    cd slepc-v3.12.1
+    ./configure --prefix='/opt/slepc-3.12.1'
+    make
+    make install
+
+    export SLEPC_DIR='/opt/slepc-3.12.1'
+    export LD_LIBRARY_PATH="${SLEPC_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    cd /tmp
+
+    # Install pillow dependencies 
+    apt-get -y install libjpeg8-dev zlib1g-dev libtiff-dev libfreetype6 libfreetype6-dev libwebp-dev libopenjp2-7-dev libopenjp2-7-dev
+
+    # Install jupyterlab, sympy, mpi4py, petsc4py, slepc4py and pybind11
+    pip3 install --no-cache-dir jupyter jupyterlab matplotlib sympy==1.1.1 pkgconfig
+    pip3 install --no-cache-dir https://github.com/mpi4py/mpi4py/archive/3.0.3.tar.gz
+    pip3 install --no-cache-dir https://bitbucket.org/petsc/petsc4py/downloads/petsc4py-3.12.0.tar.gz
+    pip3 install --no-cache-dir https://bitbucket.org/slepc/slepc4py/downloads/slepc4py-3.12.0.tar.gz
+    pip3 install --no-cache-dir pybind11==2.4.3
+    wget https://github.com/pybind/pybind11/archive/v2.4.3.tar.gz
+    tar -xf v2.4.3.tar.gz
+    cd pybind11-2.4.3
+    mkdir build
+    cd build
+    cmake -DPYBIND11_TEST=False ../
+    make
+    make install
+
+    cd /tmp
+
+    # Download, build, and install FEnICs
+    PIP_NO_CACHE_DIR=off python3 -m pip install 'fenics>=2019.1.0,<2019.2.0'
+    git clone https://bitbucket.org/fenics-project/dolfin.git
+    cd dolfin
+    git checkout 2019.1.0.post0
+    mkdir build
+    cd build
+    cmake ../
+    make
+    make install
+
+    mv /usr/local/share/dolfin/demo /tmp/demo
+    mkdir -p /usr/local/share/dolfin/demo
+    mv /tmp/demo /usr/local/share/dolfin/demo/cpp
+    cd ../python
+    PIP_NO_CACHE_DIR=off python3 -m pip install .
+
+    cd demo
+    python3 generate-demo-files.py
+    mkdir -p /usr/local/share/dolfin/demo/python
+    cp -r documented /usr/local/share/dolfin/demo/python
+    cp -r undocumented /usr/local/share/dolfin/demo/python
+
+    cd /tmp
+
+    git clone https://bitbucket.org/fenics-project/mshr.git
+    cd mshr
+    git checkout 2019.1.0
+    mkdir build
+    cd build
+    cmake ../
+    make
+    make install
+    cd ../python
+    PIP_NO_CACHE_DIR=off python3 -m pip install .
+    ldconfig
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
