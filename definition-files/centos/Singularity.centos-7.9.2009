@@ -9,10 +9,14 @@ Include: yum
     APPLICATION_VERSION 7.9.2009
     APPLICATION_URL https://www.centos.org
 
+    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:centos-7.9.2009
+    IMAGE_MD5 8fbaeda21cc2840a0de5dc52d0584be4
+    IMAGE_SHA256 be5a05cb5e1884207c22c345c57157e2563b0022d139144645118c625aa38789
+
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20201227
+    LAST_UPDATED 20220428
 
 %setup
 
