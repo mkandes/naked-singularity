@@ -1,0 +1,306 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-mlnx-ofed-4.9-4.1.7.0-openmpi-3.1.6
+
+%labels
+
+    APPLICATION_NAME Paraview
+    APPLICATION_VERSION 5.9.0
+    APPLICATION_URL https://www.paraview.org
+
+    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:paraview-5.9.0-ubuntu-18.04-mlnx-ofed-4.9-4.1.7.0-openmpi-3.1.6-osmesa-20.1.5
+    IMAGE_MD5 ec9c6dc0d5d7bff26efa35701b6a083b 
+    IMAGE_SHA256 295b46e90998dfc41b50bd86c82bab174dc7bdf96c1aef041804a422fe02649d 
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20220429
+
+%setup
+
+%environment
+
+    # Set CMake version number, root and install directories, and repo URL
+    export CMAKE_VERSION='3.15.3'
+    export CMAKE_ROOT_DIR='/opt/cmake'
+    export CMAKE_INSTALL_DIR="${CMAKE_ROOT_DIR}/${CMAKE_VERSION}"
+
+    # Set paths to CMake binaries
+    export PATH="${CMAKE_INSTALL_DIR}/bin:${PATH}"
+
+    # Set LLVM version number, root and install directories
+    export LLVM_VERSION='11.1.0'
+    export LLVM_ROOT_DIR='/opt/llvm'
+    export LLVM_INSTALL_DIR="${LLVM_ROOT_DIR}/${LLVM_VERSION}"
+
+    # Set paths to LLVM binaries and libraries
+    export PATH="${LLVM_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${LLVM_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    # Set OSMESA version number, root and install directories
+    export OSMESA_VERSION='20.1.5'
+    export OSMESA_ROOT_DIR='/opt/osmesa'
+    export OSMESA_INSTALL_DIR="${OSMESA_ROOT_DIR}/${OSMESA_VERSION}"    
+
+    # Set path to OSMESA library
+    export LD_LIBRARY_PATH="${OSMESA_INSTALL_DIR}/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}"
+
+    # Set git-lfs version number, root and install directories
+    export GIT_LFS_VERSION='2.13.3'
+    export GIT_LFS_ROOT_DIR='/opt/git-lfs'
+    export GIT_LFS_INSTALL_DIR="${GIT_LFS_ROOT_DIR}/${GIT_LFS_VERSION}"
+
+    # Set path to git-lfs binary
+    export PATH="${GIT_LFS_ROOT_DIR}/${GIT_LFS_VERSION}/bin:${PATH}"
+
+    # Set Paraview version number, root and install directories
+    export PARAVIEW_VERSION='5.9.0'
+    export PARAVIEW_ROOT_DIR='/opt/paraview'
+    export PARAVIEW_INSTALL_DIR="${PARAVIEW_ROOT_DIR}/${PARAVIEW_VERSION}"
+
+    # Set paths to Paraview binaries, libraries, and supporting python packages
+    export PATH="${PARAVIEW_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${PARAVIEW_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+    export PYTHONPATH="${PARAVIEW_INSTALL_DIR}/lib:${PARAVIEW_INSTALL_DIR}/lib/python3.6/site-packages:${PYTHONPATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='bionic'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set Mellanox OFED version, operating system, and hardware platform
+    export MLNX_OFED_VERSION='4.9-4.1.7.0'
+    export MLNX_OS_VERSION='ubuntu18.04'
+    export MLNX_PLATFORM='x86_64'
+    export MLNX_ROOT_URL='http://www.mellanox.com/downloads/ofed'
+
+    # Set OpenMPI major, minor, and revision numbers, root and
+    # install directories, and root URL
+    export OMPI_MAJOR='3'
+    export OMPI_MINOR='1'
+    export OMPI_REVISION='6'
+    export OMPI_VERSION="${OMPI_MAJOR}.${OMPI_MINOR}.${OMPI_REVISION}"
+    export OMPI_ROOT_DIR='/opt/openmpi'
+    export OMPI_INSTALL_DIR="${OMPI_ROOT_DIR}/${OMPI_VERSION}"
+    export OMPI_ROOT_URL='https://download.open-mpi.org/release/open-mpi'
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="${OMPI_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${OMPI_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    cd /tmp
+
+    # Install dependencies and prerequisites for meson
+    apt-get -y install python3
+    apt-get -y install python3-dev
+    apt-get -y install python3-pip
+    apt-get -y install python3-setuptools
+    apt-get -y install python3-wheel
+    apt-get -y install ninja-build
+
+    # Install meson
+    pip3 install meson
+
+    # Install dependencies and prerequisites for OSMesa
+    apt-get -y install bison
+    apt-get -y install clang
+    apt-get -y install cmake
+    apt-get -y install flex
+    apt-get -y install gcc
+    apt-get -y install python3-mako
+
+    # Set CMake version number, root and install directories, and repo URL
+    export CMAKE_VERSION='3.15.3'
+    export CMAKE_ROOT_DIR='/opt/cmake'
+    export CMAKE_INSTALL_DIR="${CMAKE_ROOT_DIR}/${CMAKE_VERSION}"
+    export CMAKE_REPO_URL='https://github.com/Kitware/CMake.git'
+
+    git clone "${CMAKE_REPO_URL}"
+    cd CMake
+    git checkout "v${CMAKE_VERSION}"
+    ./bootstrap --prefix="${CMAKE_INSTALL_DIR}"
+    make
+    make install
+
+    # Set paths to CMake binaries
+    export PATH="${CMAKE_INSTALL_DIR}/bin:${PATH}"
+
+    cd /tmp
+
+    # Set LLVM version number, root and install directories, and repo URL
+    export LLVM_VERSION='11.1.0'
+    export LLVM_ROOT_DIR='/opt/llvm'
+    export LLVM_INSTALL_DIR="${LLVM_ROOT_DIR}/${LLVM_VERSION}"
+    export LLVM_REPO_URL='https://github.com/llvm/llvm-project.git'
+
+    # Download, build, and install a newer version of Clang/LLVM
+    git clone "${LLVM_REPO_URL}"
+    cd llvm-project
+    git checkout "llvmorg-${LLVM_VERSION}"
+    mkdir build
+    cd build
+    cmake -GNinja \
+      -DCMAKE_BUILD_TYPE='Release' \
+      -DCMAKE_INSTALL_PREFIX="${LLVM_INSTALL_DIR}" \
+      -DLLVM_ENABLE_PROJECTS='clang;libcxx;libcxxabi' \
+      -DBUILD_SHARED_LIBS='ON' \
+      -DLLVM_BUILD_LLVM_DYLIB='ON' \
+      -DLLVM_ENABLE_RTTI='ON' \
+      -DLLVM_INSTALL_UTILS='ON' \
+      -DLLVM_TARGETS_TO_BUILD='X86' \
+      ../llvm
+    ninja
+    ninja install
+
+    # Set paths to LLVM binaries and libraries
+    export PATH="${LLVM_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${LLVM_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    cd /tmp
+
+    # Remove LLVM build directory
+    rm -rf llvm-project
+
+    # Set OSMESA version number, root and install directories, and root URL
+    export OSMESA_VERSION='20.1.5'
+    export OSMESA_ROOT_DIR='/opt/osmesa'
+    export OSMESA_INSTALL_DIR="${OSMESA_ROOT_DIR}/${OSMESA_VERSION}"
+    export OSMESA_ROOT_URL='https://archive.mesa3d.org'
+
+    # Download, build, and install OSMesa
+    wget "${OSMESA_ROOT_URL}/mesa-${OSMESA_VERSION}.tar.xz"
+    tar -xf "mesa-${OSMESA_VERSION}.tar.xz"
+    cd "mesa-${OSMESA_VERSION}"
+    mkdir build
+    meson --buildtype=release \
+      -Dprefix="${OSMESA_INSTALL_DIR}" \
+      -Dopengl='true' \
+      -Dgles1='false' \
+      -Dgles2='false' \
+      -Dgallium-omx='disabled' \
+      -Dgallium-va='false' \
+      -Dgallium-xa='false' \
+      -Dgallium-xvmc='false' \
+      -Dgallium-vdpau='false' \
+      -Dshared-glapi='true' \
+      -Dllvm='true' \
+      -Dshared-llvm='true' \
+      -Dosmesa='gallium' \
+      -Dgallium-drivers='swrast,swr' \
+      -Ddri3='false' \
+      -Ddri-drivers=[] \
+      -Degl='false' \
+      -Dplatforms=[] \
+      -Dgbm='false' \
+      -Dglx='disabled' \
+      -Dvulkan-drivers=[] \
+      -Dshader-cache='auto' \
+      build
+    ninja -C build
+    meson install -C build
+
+    # Set path to OSMESA library
+    export LD_LIBRARY_PATH="${OSMESA_INSTALL_DIR}/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}"
+
+    cd /tmp
+
+    # Remove OSMESA build directory and source tarball
+    rm -rf "mesa-${OSMESA_VERSION}"
+    rm "mesa-${OSMESA_VERSION}.tar.xz"
+
+    # Install dependencies and prerequisites required for Paraview
+    apt-get -y install cmake
+    apt-get -y install ffmpeg
+    apt-get -y install python3-dev
+    apt-get -y install python3-numpy
+    apt-get -y install python3-matplotlib
+    apt-get -y install python3-scipy
+    apt-get -y install libtbb-dev
+
+    # Set git-lfs version number, root and install directories, and root URL
+    export GIT_LFS_VERSION='2.13.3'
+    export GIT_LFS_ROOT_DIR='/opt/git-lfs'
+    export GIT_LFS_INSTALL_DIR="${GIT_LFS_ROOT_DIR}/${GIT_LFS_VERSION}"
+    export GIT_LFS_ROOT_URL='https://github.com/git-lfs/git-lfs/releases/download'
+
+    # Download and install git-lfs, which is a prerequiste for VTK-m
+    mkdir -p "${GIT_LFS_ROOT_DIR}/${GIT_LFS_VERSION}"
+    cd "${GIT_LFS_ROOT_DIR}/${GIT_LFS_VERSION}"
+    wget "${GIT_LFS_ROOT_URL}/v${GIT_LFS_VERSION}/git-lfs-linux-amd64-v${GIT_LFS_VERSION}.tar.gz"
+    tar -xf "git-lfs-linux-amd64-v${GIT_LFS_VERSION}.tar.gz"
+    ./install.sh
+
+    # Set path to git-lfs binary
+    export PATH="${GIT_LFS_ROOT_DIR}/${GIT_LFS_VERSION}/bin:${PATH}"
+
+    cd /tmp
+
+    # Set Paraview version number, root and install directories, and repo URL
+    export PARAVIEW_VERSION='5.9.0'
+    export PARAVIEW_ROOT_DIR='/opt/paraview'
+    export PARAVIEW_INSTALL_DIR="${PARAVIEW_ROOT_DIR}/${PARAVIEW_VERSION}"
+    export PARAVIEW_REPO_URL='https://gitlab.kitware.com/paraview/paraview.git'
+
+    # Download, build, and install Paraview
+    git clone "${PARAVIEW_REPO_URL}"
+    cd paraview
+    git checkout "v${PARAVIEW_VERSION}"
+    git submodule update --init --recursive
+    cd ../
+    mkdir build
+    cd build
+    cmake -GNinja \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_INSTALL_PREFIX="${PARAVIEW_INSTALL_DIR}" \
+      -DPARAVIEW_BUILD_EDITION='CANONICAL' \
+      -DPARAVIEW_BUILD_SHARED_LIBS=ON \
+      -DPARAVIEW_USE_PYTHON=ON \
+      -DPARAVIEW_USE_MPI=ON \
+      -DPARAVIEW_USE_QT=OFF \
+      -DVTK_USE_X=OFF \
+      -DVTK_OPENGL_HAS_OSMESA=ON \
+      -DOSMESA_INCLUDE_DIR="${OSMESA_INSTALL_DIR}/include" \
+      -DOSMESA_LIBRARY="${OSMESA_INSTALL_DIR}/lib/x86_64-linux-gnu/libOSMesa.so" \
+      -DVTK_DEFAULT_RENDER_WINDOW_OFFSCREEN=ON \
+      -DVTK_OPENGL_USE_GLES=OFF \
+      -DVTK_OPENGL_HAS_EGL=OFF \
+      -DVTK_SMP_IMPLEMENTATION_TYPE=TBB \
+      ../paraview
+    ninja
+    ninja install
+
+    # Set paths to Paraview binaries, libraries, and supporting python packages
+    export PATH="${PARAVIEW_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${PARAVIEW_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+    export PYTHONPATH="${PARAVIEW_INSTALL_DIR}/lib:${PARAVIEW_INSTALL_DIR}/lib/python3.6/site-packages:${PYTHONPATH}"
+
+    cd /tmp
+
+    # Remove Paraview build and source directories
+    rm -rf build
+    rm -rf paraview
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
