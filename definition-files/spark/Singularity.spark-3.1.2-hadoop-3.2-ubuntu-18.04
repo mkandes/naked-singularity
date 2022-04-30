@@ -1,5 +1,5 @@
-Bootstrap: shub
-From: mkandes/naked-singularity:ubuntu-18.04
+Bootstrap: oras
+From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04
 
 %labels
 
@@ -7,10 +7,14 @@ From: mkandes/naked-singularity:ubuntu-18.04
     APPLICATION_VERSION 3.1.2 + 3.2
     APPLICATION_URL https://spark.apache.org
 
+    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:spark-3.1.2-hadoop-3.2-ubuntu-18.04
+    IMAGE_MD5 658480755f66ca2b908f67349ca1451a
+    IMAGE_SHA256 994719f4af0a7239a34980c9e438e1bd9d18743b1c6102209ceee2891d0d6717
+
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20210604
+    LAST_UPDATED 20220429
 
 %setup
 
