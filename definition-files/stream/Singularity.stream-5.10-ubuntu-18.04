@@ -1,5 +1,5 @@
-Bootstrap: shub
-From: mkandes/naked-singularity:ubuntu-18.04
+Bootstrap: oras
+From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04
 
 %labels
 
@@ -7,10 +7,14 @@ From: mkandes/naked-singularity:ubuntu-18.04
     APPLICATION_VERSION 5.10
     APPLICATION_URL http://www.cs.virginia.edu/stream
 
+    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:stream-5.10-ubuntu-18.04
+    IMAGE_MD5 c1ae980fff10975ad708c8e908c682cc 
+    IMAGE_SHA256 ae15cf68ca64f6baf37193fc08d7291bb118ae256a42cd6d39723214ca913445
+
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20201229
+    LAST_UPDATED 20220429
 
 %setup
 
