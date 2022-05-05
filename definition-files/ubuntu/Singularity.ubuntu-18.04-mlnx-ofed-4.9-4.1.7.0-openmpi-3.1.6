@@ -8,13 +8,13 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-mlnx-ofed-4.9-4.1.7.0
     APPLICATION_URL https://www.open-mpi.org
 
     IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:ubuntu-18.04-mlnx-ofed-4.9-4.1.7.0-openmpi-3.1.6
-    IMAGE_MD5 5c1db3be2098890fccd24d39bc644420
-    IMAGE_SHA256 765e0b3aba71a09411bf15728ea090ff4f6bd842a5aaa143a359bb84b99791a7
+    IMAGE_MD5 797a58cf3ccbfc13c22b49fa9c59df29
+    IMAGE_SHA256 8516b5d4b33700c978573ec996509a18188c6510c6777607006d5ac2db5df941
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20220421
+    LAST_UPDATED 20220505
 
 %setup
 
@@ -69,16 +69,16 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-mlnx-ofed-4.9-4.1.7.0
     wget "${OMPI_ROOT_URL}/v${OMPI_MAJOR}.${OMPI_MINOR}/openmpi-${OMPI_VERSION}.tar.gz"
     tar -xf "openmpi-${OMPI_VERSION}.tar.gz"
     cd "openmpi-${OMPI_VERSION}"
-    ./configure --prefix="${OMPI_INSTALL_DIR}" --enable-shared \
-      --disable-silent-rules --disable-builtin-atomics --enable-static \
-      --without-hcoll --without-psm --without-knem --without-psm2 \
-      --with-verbs=/usr --without-ofi --without-mxm --without-fca \
-      --without-xpmem --without-ucx --without-cma --without-slurm \
-      --without-tm --without-loadleveler --without-alps --without-lsf \
-      --without-sge --disable-memchecker  --disable-java \
-      --disable-mpi-java --without-cuda --enable-mpi-cxx \
-      --enable-cxx-exceptions
-    #--enable-mpi1-compatibility
+    ./configure --prefix="${OMPI_INSTALL_DIR}" #--enable-shared \
+      #--disable-silent-rules --disable-builtin-atomics --enable-static \
+      #--without-hcoll --without-psm --without-knem --without-psm2 \
+      #--with-verbs=/usr --without-ofi --without-mxm --without-fca \
+      #--without-xpmem --without-ucx --without-cma --without-slurm \
+      #--without-tm --without-loadleveler --without-alps --without-lsf \
+      #--without-sge --disable-memchecker  --disable-java \
+      #--disable-mpi-java --without-cuda --enable-mpi-cxx \
+      #--enable-cxx-exceptions
+      #--enable-mpi1-compatibility
     make all install
 
     cd /tmp
