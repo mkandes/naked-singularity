@@ -1,16 +1,20 @@
-Bootstrap: shub
-From: mkandes/naked-singularity:ubuntu-18.04-openmpi-3.1.6
+Bootstrap: oras
+From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-mlnx-ofed-4.9-4.1.7.0-openmpi-3.1.6
 
 %labels
 
     APPLICATION_NAME VisIt
     APPLICATION_VERSION 3.1.4
-    APPLICATION_URL https://wci.llnl.gov/simulation/computer-codes/visit
+    APPLICATION_URL https://visit-dav.github.io/visit-website
+
+    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:visit-3.1.4-ubuntu-18.04-mlnx-ofed-4.9-4.1.7.0-openmpi-3.1.6
+    IMAGE_MD5 e6864827f586044a3eac7f7098c6e7c3
+    IMAGE_SHA256 afe5c31b64681b96f7c69e46f7dfcf54e4b5f13e9fca1ceb10194204c55bf8d2
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20210501
+    LAST_UPDATED 20220505
 
 %setup
 
@@ -43,12 +47,12 @@ From: mkandes/naked-singularity:ubuntu-18.04-openmpi-3.1.6
 
     # Set Mellanox OFED version, operating system, and hardware platform
     export MLNX_ROOT_URL='http://www.mellanox.com/downloads/ofed'
-    export MLNX_OFED_VERSION='4.7-3.2.9.0'
+    export MLNX_OFED_VERSION='4.9-4.1.7.0'
     export MLNX_OS_VERSION='ubuntu18.04'
     export MLNX_PLATFORM='x86_64'
 
     # Set OpenMPI major, minor, and revision numbers, root and
-    # install directories
+    # installation directories
     export OMPI_ROOT_URL='https://download.open-mpi.org/release/open-mpi'
     export OMPI_MAJOR='3'
     export OMPI_MINOR='1'
