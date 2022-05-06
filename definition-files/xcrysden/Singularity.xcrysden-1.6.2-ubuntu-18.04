@@ -1,5 +1,5 @@
-Bootstrap: shub
-From: mkandes/naked-singularity:ubuntu-18.04
+Bootstrap: oras
+From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04
 
 %labels
 
@@ -7,13 +7,14 @@ From: mkandes/naked-singularity:ubuntu-18.04
     APPLICATION_VERSION 1.6.2
     APPLICATION_URL http://www.xcrysden.org
 
-    SINGULARITY_VERSION 2.6.1
-    SINGULARITY_IMAGE_SIZE 2048
+    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:xcrysden-1.6.2-ubuntu-18.04
+    IMAGE_MD5 bc7f668c908dcbd07c20e2ad557e4946
+    IMAGE_SHA256 fc168a194483d141f48016e247fb82bb7616fc3b0f0e5006e21648523788834c
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20210614
+    LAST_UPDATED 20220506
 
 %setup
 
@@ -36,8 +37,8 @@ From: mkandes/naked-singularity:ubuntu-18.04
     # Set debian frontend interface
     export DEBIAN_FRONTEND='noninteractive'
 
-    # Set path to miniconda
-    export PATH="/opt/miniconda3/bin:${PATH}"
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
 
     # Install XCrySDen dependencies
     apt-get -y install xorg
