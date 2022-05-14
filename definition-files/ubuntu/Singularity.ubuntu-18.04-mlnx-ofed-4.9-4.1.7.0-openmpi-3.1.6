@@ -8,13 +8,13 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-mlnx-ofed-4.9-4.1.7.0
     APPLICATION_URL https://www.open-mpi.org
 
     IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:ubuntu-18.04-mlnx-ofed-4.9-4.1.7.0-openmpi-3.1.6
-    IMAGE_MD5 797a58cf3ccbfc13c22b49fa9c59df29
-    IMAGE_SHA256 8516b5d4b33700c978573ec996509a18188c6510c6777607006d5ac2db5df941
+    IMAGE_MD5 28d83da38e814964e104241a51e8a863
+    IMAGE_SHA256 031b3a577e710e1dc48a1284d86cd55bea1e59f702040dca6ce716e2938a3bfa
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20220505
+    LAST_UPDATED 20220513
 
 %setup
 
@@ -78,7 +78,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-mlnx-ofed-4.9-4.1.7.0
       #--without-sge --disable-memchecker  --disable-java \
       #--disable-mpi-java --without-cuda --enable-mpi-cxx \
       #--enable-cxx-exceptions
-      #--enable-mpi1-compatibility
+    #--enable-mpi1-compatibility
     make all install
 
     cd /tmp

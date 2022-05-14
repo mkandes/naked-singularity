@@ -8,13 +8,13 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-cuda-10.2-mlnx-ofed-4.9-4.1
     APPLICATION_URL https://www.open-mpi.org
 
     IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:ubuntu-18.04-cuda-10.2-mlnx-ofed-4.9-4.1.7.0-openmpi-3.1.6 
-    IMAGE_MD5 64f40a5a9bc67a7f2d46628e91d48fc0
-    IMAGE_SHA256 bc87b3074fee2a3609988db3c672275d4db4be5ce3d0a96ebdb08dc72de05017 
+    IMAGE_MD5 888064bd132530ef378b53bc903c134c
+    IMAGE_SHA256 85ffd151932f5c8613b40b6b4f809520461c4213c0e6a79d7542c2bb14652d84
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20220424
+    LAST_UPDATED 20220513
 
 %setup
 
@@ -48,9 +48,9 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-cuda-10.2-mlnx-ofed-4.9-4.1
     export DEBIAN_FRONTEND='noninteractive'
 
     # Set NVIDIA driver and CUDA versions
-    export NVIDIA_DRIVER_MAJOR='470'
-    export NVIDIA_DRIVER_MINOR='57'
-    export NVIDIA_DRIVER_REVISION='02'
+    export NVIDIA_DRIVER_MAJOR='510'
+    export NVIDIA_DRIVER_MINOR='39'
+    export NVIDIA_DRIVER_REVISION='01'
     export NVIDIA_DRIVER_VERSION="${NVIDIA_DRIVER_MAJOR}.${NVIDIA_DRIVER_MINOR}.${NVIDIA_DRIVER_REVISION}"
 
     export CUDA_MAJOR='10'
@@ -59,23 +59,23 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-cuda-10.2-mlnx-ofed-4.9-4.1
     export CUDA_VERSION="${CUDA_MAJOR}.${CUDA_MINOR}.${CUDA_REVISION}"
 
     export CUDNN_MAJOR='8'
-    export CUDNN_MINOR='2'
-    export CUDNN_REVISION='4.15'
+    export CUDNN_MINOR='1'
+    export CUDNN_REVISION='1.33'
     export CUDNN_VERSION="${CUDNN_MAJOR}.${CUDNN_MINOR}.${CUDNN_REVISION}"
 
     export NCCL_MAJOR='2'
-    export NCCL_MINOR='11'
+    export NCCL_MINOR='8'
     export NCCL_REVISION='4'
     export NCCL_VERSION="${NCCL_MAJOR}.${NCCL_MINOR}.${NCCL_REVISION}"
 
     export TENSORRT_MAJOR='8'
-    export TENSORRT_MINOR='2'
-    export TENSORRT_REVISION='4'
+    export TENSORRT_MINOR='0'
+    export TENSORRT_REVISION='3'
     export TENSORRT_VERSION="${TENSORRT_MAJOR}.${TENSORRT_MINOR}.${TENSORRT_REVISION}"
 
     export CUTENSOR_MAJOR='1'
-    export CUTENSOR_MINOR='5'
-    export CUTENSOR_REVISION='0.3'
+    export CUTENSOR_MINOR='3'
+    export CUTENSOR_REVISION='3.2'
     export CUTENSOR_VERSION="${CUTENSOR_MAJOR}.${CUTENSOR_MINOR}.${CUTENSOR_REVISION}"
 
     # Set paths to CUDA binaries and libraries
@@ -122,15 +122,15 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-cuda-10.2-mlnx-ofed-4.9-4.1
     wget "${OMPI_ROOT_URL}/v${OMPI_MAJOR}.${OMPI_MINOR}/openmpi-${OMPI_VERSION}.tar.gz"
     tar -xf "openmpi-${OMPI_VERSION}.tar.gz"
     cd "openmpi-${OMPI_VERSION}"
-    ./configure --prefix="${OMPI_INSTALL_DIR}" --enable-shared \
-      --disable-silent-rules --disable-builtin-atomics --enable-static \
-      --without-hcoll --without-psm --without-knem --without-psm2 \
-      --with-verbs=/usr --without-ofi --without-mxm --without-fca \
-      --without-xpmem --without-ucx --without-cma --without-slurm \
-      --without-tm --without-loadleveler --without-alps --without-lsf \
-      --without-sge --disable-memchecker  --disable-java \
-      --disable-mpi-java --with-cuda --enable-mpi-cxx \
-      --enable-cxx-exceptions
+    ./configure --prefix="${OMPI_INSTALL_DIR}" --with-cuda #--enable-shared \
+      #--disable-silent-rules --disable-builtin-atomics --enable-static \
+      #--without-hcoll --without-psm --without-knem --without-psm2 \
+      #--with-verbs=/usr --without-ofi --without-mxm --without-fca \
+      #--without-xpmem --without-ucx --without-cma --without-slurm \
+      #--without-tm --without-loadleveler --without-alps --without-lsf \
+      #--without-sge --disable-memchecker  --disable-java \
+      #--disable-mpi-java --with-cuda --enable-mpi-cxx \
+      #--enable-cxx-exceptions
     #--enable-mpi1-compatibility
     make all install
 

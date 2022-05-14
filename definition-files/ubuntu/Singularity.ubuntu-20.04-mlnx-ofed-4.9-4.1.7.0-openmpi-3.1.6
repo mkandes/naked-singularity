@@ -8,13 +8,13 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-mlnx-ofed-4.9-4.1.7.0
     APPLICATION_URL https://www.open-mpi.org
 
     IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:ubuntu-20.04-mlnx-ofed-4.9-4.1.7.0-openmpi-3.1.6
-    IMAGE_MD5 caf043527a69d07834a0230a7070ed84
-    IMAGE_SHA256 46cf84e5678b5ac3497e3d2ed85ad845dd5e6d8ad96bfdec4de8c7ecec13ba24
+    IMAGE_MD5 086c5d2014abccad85482a4feb5e6c56
+    IMAGE_SHA256 b98521a8372c4e0d6b280a139923eda93ebef1af8c6144b6419c56563cf05a13
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20220421
+    LAST_UPDATED 20220513
 
 %setup
 
@@ -39,7 +39,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-mlnx-ofed-4.9-4.1.7.0
     export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
 
     # Set operating system version
-    export OSVERSION='bionic'
+    export OSVERSION='focal'
 
     # Set system locale
     export LC_ALL='C'
@@ -69,15 +69,15 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-mlnx-ofed-4.9-4.1.7.0
     wget "${OMPI_ROOT_URL}/v${OMPI_MAJOR}.${OMPI_MINOR}/openmpi-${OMPI_VERSION}.tar.gz"
     tar -xf "openmpi-${OMPI_VERSION}.tar.gz"
     cd "openmpi-${OMPI_VERSION}"
-    ./configure --prefix="${OMPI_INSTALL_DIR}" --enable-shared \
-      --disable-silent-rules --disable-builtin-atomics --enable-static \
-      --without-hcoll --without-psm --without-knem --without-psm2 \
-      --with-verbs=/usr --without-ofi --without-mxm --without-fca \
-      --without-xpmem --without-ucx --without-cma --without-slurm \
-      --without-tm --without-loadleveler --without-alps --without-lsf \
-      --without-sge --disable-memchecker  --disable-java \
-      --disable-mpi-java --without-cuda --enable-mpi-cxx \
-      --enable-cxx-exceptions
+    ./configure --prefix="${OMPI_INSTALL_DIR}" #--enable-shared \
+      #--disable-silent-rules --disable-builtin-atomics --enable-static \
+      #--without-hcoll --without-psm --without-knem --without-psm2 \
+      #--with-verbs=/usr --without-ofi --without-mxm --without-fca \
+      #--without-xpmem --without-ucx --without-cma --without-slurm \
+      #--without-tm --without-loadleveler --without-alps --without-lsf \
+      #--without-sge --disable-memchecker  --disable-java \
+      #--disable-mpi-java --without-cuda --enable-mpi-cxx \
+      #--enable-cxx-exceptions
     #--enable-mpi1-compatibility
     make all install
 

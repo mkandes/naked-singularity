@@ -1,15 +1,15 @@
 Bootstrap: oras
-From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04
+From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04
 
 %labels
 
     APPLICATION_NAME ubuntu + cuda
-    APPLICATION_VERSION 18.04 + 10.2
+    APPLICATION_VERSION 20.04 + 11.2
     APPLICATION_URL https://docs.nvidia.com/cuda
 
-    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:ubuntu-18.04-cuda-10.2
-    IMAGE_MD5 89f36d4dab981ef42ddbd1cfab28d6b5
-    IMAGE_SHA256 7d0143b4d375ea87e9e712a3d2f7e2eb97929b1a58fb603721454b4893e15115
+    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:ubuntu-20.04-cuda-11.2
+    IMAGE_MD5 0f7f308c2b10937e54660298f4444b02
+    IMAGE_SHA256 dda42622aa0fd60e074496dde9ce5bfe8cefee9ff493f4157fdb90768bdff44e
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
@@ -26,9 +26,9 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04
     export NVIDIA_DRIVER_REVISION='01'
     export NVIDIA_DRIVER_VERSION="${NVIDIA_DRIVER_MAJOR}.${NVIDIA_DRIVER_MINOR}.${NVIDIA_DRIVER_REVISION}"
 
-    export CUDA_MAJOR='10'
+    export CUDA_MAJOR='11'
     export CUDA_MINOR='2'
-    export CUDA_REVISION='89'
+    export CUDA_REVISION='2'
     export CUDA_VERSION="${CUDA_MAJOR}.${CUDA_MINOR}.${CUDA_REVISION}"
 
     export CUDNN_MAJOR='8'
@@ -41,9 +41,9 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04
     export NCCL_REVISION='4'
     export NCCL_VERSION="${NCCL_MAJOR}.${NCCL_MINOR}.${NCCL_REVISION}"
 
-    export TENSORRT_MAJOR='8'
-    export TENSORRT_MINOR='0'
-    export TENSORRT_REVISION='3'
+    export TENSORRT_MAJOR=''
+    export TENSORRT_MINOR=''
+    export TENSORRT_REVISION=''
     export TENSORRT_VERSION="${TENSORRT_MAJOR}.${TENSORRT_MINOR}.${TENSORRT_REVISION}"
 
     export CUTENSOR_MAJOR='1'
@@ -79,7 +79,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04
     export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
 
     # Set operating system version
-    export OSVERSION='bionic'
+    export OSVERSION='focal'
 
     # Set system locale
     export LC_ALL='C'
@@ -92,7 +92,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04
 
     # Location of NVIDIA/CUDA repositories
     export CUDA_ROOT_URL='http://developer.download.nvidia.com/compute'
-    export CUDA_DISTRO='ubuntu1804'
+    export CUDA_DISTRO='ubuntu2004'
     export CUDA_ARCH='x86_64'
     export CUDA_REPO_URL="${CUDA_ROOT_URL}/cuda/repos/${CUDA_DISTRO}/${CUDA_ARCH}"
     export CUDA_GPG_PUBKEY='3bf863cc.pub'
@@ -103,9 +103,9 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04
     export NVIDIA_DRIVER_REVISION='01'
     export NVIDIA_DRIVER_VERSION="${NVIDIA_DRIVER_MAJOR}.${NVIDIA_DRIVER_MINOR}.${NVIDIA_DRIVER_REVISION}"
 
-    export CUDA_MAJOR='10'
+    export CUDA_MAJOR='11'
     export CUDA_MINOR='2'
-    export CUDA_REVISION='89'
+    export CUDA_REVISION='2'
     export CUDA_VERSION="${CUDA_MAJOR}.${CUDA_MINOR}.${CUDA_REVISION}"
 
     export CUDNN_MAJOR='8'
@@ -118,9 +118,9 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04
     export NCCL_REVISION='4'
     export NCCL_VERSION="${NCCL_MAJOR}.${NCCL_MINOR}.${NCCL_REVISION}"
 
-    export TENSORRT_MAJOR='8'
-    export TENSORRT_MINOR='0'
-    export TENSORRT_REVISION='3'
+    export TENSORRT_MAJOR=''
+    export TENSORRT_MINOR=''
+    export TENSORRT_REVISION=''
     export TENSORRT_VERSION="${TENSORRT_MAJOR}.${TENSORRT_MINOR}.${TENSORRT_REVISION}"
 
     export CUTENSOR_MAJOR='1'
@@ -301,6 +301,12 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04
     # Install cuTensor - https://developer.nvidia.com/cutensor
     apt-get -y install "libcutensor1=${CUTENSOR_VERSION}-1"
     apt-get -y install "libcutensor-dev=${CUTENSOR_VERSION}-1"
+
+    # Install AmgX - https://github.com/NVIDIA/AMGX ?
+
+    # Install cuQuantum - https://docs.nvidia.com/cuda/cuquantum ?
+    #apt-get -y install cuquantum
+    #apt-get -y install cuquantum-dev
 
     # Install third-party libraries required for CUDA samples
     # https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#install-libraries

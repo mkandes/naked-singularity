@@ -8,13 +8,13 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04
     APPLICATION_URL https://www.mellanox.com/products/infiniband-drivers/linux/mlnx_ofed
 
     IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:ubuntu-18.04-mlnx-ofed-4.9-4.1.7.0
-    IMAGE_MD5 02c6069c907ad1002cf61bb04c753338
-    IMAGE_SHA256 c2e9d3511bbf16b3b97a420b320cf3fafffc371f9116aee2c8433a7718b0ea75
+    IMAGE_MD5 acab3b697902b8884024d00b751c14a4
+    IMAGE_SHA256 24c07226cfa40ac719942519648add761a9f16e2ee7e3aaa5b87ff1710f6e1df
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20220413
+    LAST_UPDATED 20220513
 
 %setup
 

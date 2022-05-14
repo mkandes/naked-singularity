@@ -8,13 +8,13 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04
     APPLICATION_URL https://network.nvidia.com/products/infiniband-drivers/linux/mlnx_ofed
 
     IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:ubuntu-20.04-mlnx-ofed-4.9-4.1.7.0
-    IMAGE_MD5 9a3678c32c699a9fe3259bb6c3c2bd59
-    IMAGE_SHA256 8f8d6ebac236dae79d2790f7854d786b6ab1dab5d66640f7d86d1eedfb6a24c7
+    IMAGE_MD5 bc664e5d51a9ed4957ef6ec459351e8e
+    IMAGE_SHA256 aff55c944c05b7e50861fb038e06c98a21d6320f54b5e766176d9588f08c7ea4
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20220420
+    LAST_UPDATED 20220513
 
 %setup
 

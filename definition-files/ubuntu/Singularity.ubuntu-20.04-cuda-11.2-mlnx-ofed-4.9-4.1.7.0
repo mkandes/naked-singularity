@@ -1,15 +1,15 @@
 Bootstrap: oras
-From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-cuda-10.2
+From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-cuda-11.2
 
 %labels
 
     APPLICATION_NAME ubuntu + cuda + mlnx-ofed
-    APPLICATION_VERSION 18.04 + 10.2 + 4.9-4.1.7.0
-    APPLICATION_URL https://www.mellanox.com/products/infiniband-drivers/linux/mlnx_ofed
+    APPLICATION_VERSION 20.04 + 11.2 + 4.9-4.1.7.0
+    APPLICATION_URL https://network.nvidia.com/products/infiniband-drivers/linux/mlnx_ofed
 
-    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:ubuntu-18.04-cuda-10.2-mlnx-ofed-4.9-4.1.7.0
-    IMAGE_MD5 5af16e2a0d5c8da35483dffd1ec68d98
-    IMAGE_SHA256 9291848411284c8ed6e3f199fce724f66357be1241d9ba1a963e205ce59de17c
+    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:ubuntu-20.04-cuda-11.2-mlnx-ofed-4.9-4.1.7.0
+    IMAGE_MD5 ce2745b11b9082472f7d8042ef2d7b27
+    IMAGE_SHA256 f5f3740378c4be9a1eec99969c0992f3792fcce460615157110d640d827afd94
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
@@ -22,7 +22,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-cuda-10.2
 
     # Set Mellanox OFED version, operating system, and hardware platform
     export MLNX_OFED_VERSION='4.9-4.1.7.0'
-    export MLNX_OS_VERSION='ubuntu18.04'
+    export MLNX_OS_VERSION='ubuntu20.04'
     export MLNX_PLATFORM='x86_64'
 
 %post -c /bin/bash
@@ -31,7 +31,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-cuda-10.2
     export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
 
     # Set operating system version
-    export OSVERSION='bionic'
+    export OSVERSION='focal'
 
     # Set system locale
     export LC_ALL='C'
@@ -60,7 +60,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-cuda-10.2
     # Set Mellanox OFED version, operating system, and hardware platform
     export MLNX_ROOT_URL='http://www.mellanox.com/downloads/ofed'
     export MLNX_OFED_VERSION='4.9-4.1.7.0'
-    export MLNX_OS_VERSION='ubuntu18.04'
+    export MLNX_OS_VERSION='ubuntu20.04'
     export MLNX_PLATFORM='x86_64'
 
     # Download and install Mellanox OFED drivers and supporting
