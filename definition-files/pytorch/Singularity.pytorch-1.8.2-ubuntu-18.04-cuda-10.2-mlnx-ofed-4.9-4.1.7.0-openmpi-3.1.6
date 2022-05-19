@@ -8,13 +8,13 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-cuda-10.2-mlnx-ofed-4.9-4.1
     APPLICATION_URL https://pytorch.org
 
     IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:pytorch-1.8.2-ubuntu-18.04-cuda-10.2-mlnx-ofed-4.9-4.1.7.0-openmpi-3.1.6
-    IMAGE_MD5 a86fcddbbdb39882b07fffcf155142f8
-    IMAGE_SHA256 c43c8ccfd2f422fffbfb9d197463dbbfe37157f7d470764ed688c99722b669d5
+    IMAGE_MD5 33566c16e40b37335edc8e324bc2cfd9
+    IMAGE_SHA256 4d843ad1a182576cbeea4f5df40056182f04aba14c4e8289d68b8c37c567b022
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20220429
+    LAST_UPDATED 20220518
 
 %setup
 
@@ -264,8 +264,40 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-cuda-10.2-mlnx-ofed-4.9-4.1
 
     cd /tmp
 
+    # Set TensorBoard version number
+    export TENSORBOARD_VERSION='2.7.0'
+
+    # Install prerequisities and dependencies for TensorBoard
+    conda install -y protobuf
+
+    # Install tensorboard
+    pip install tensorboard=="${TENSORBOARD_VERSION}"
+
+    cd /tmp
+
+    # Set TorchMetrics version number
+    # 
+    # PyTorch Lightning seems to not version control their submodules very 
+    # well at this time. This led to too new a version of TorchMetrics 
+    # being installed, which caused a problem. Pre-installing/downgrading 
+    # to TorchMetrics v0.6.0 appears to have resolved the problem.
+    # https://github.com/NVIDIA/DeepLearningExamples/issues/1113
+    #
+    export TORCHMETRICS_VERSION='0.6.0'
+
+    # Download, build and install TorchMetrics
+    git clone https://github.com/PyTorchLightning/metrics.git
+    cd metrics
+    git checkout "v${TORCHMETRICS_VERSION}"
+    python setup.py clean install
+
+    cd /tmp
+
     # Set PyTorch Lightning version number
     export PYTORCH_LIGHTNING_VERSION='1.4.9'
+
+    # Install PyTorch Lightning dependencies
+    apt-get -y install git-lfs
 
     # Download, build and install PyTorch Lightning
     # https://github.com/PyTorchLightning/pytorch-lightning

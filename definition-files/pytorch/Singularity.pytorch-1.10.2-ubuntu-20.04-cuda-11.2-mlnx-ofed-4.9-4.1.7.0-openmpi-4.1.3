@@ -1,5 +1,5 @@
 Bootstrap: oras
-From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-cuda-11.4-mlnx-ofed-4.9-4.1.7.0-openmpi-4.1.3
+From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-cuda-11.2-mlnx-ofed-4.9-4.1.7.0-openmpi-4.1.3
 
 %labels
 
@@ -7,14 +7,14 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-cuda-11.4-mlnx-ofed-4.9-4.1
     APPLICATION_VERSION 1.10.2
     APPLICATION_URL https://pytorch.org
 
-    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:pytorch-1.10.2-ubuntu-20.04-cuda-11.4-mlnx-ofed-4.9-4.1.7.0-openmpi-4.1.3
-    IMAGE_MD5 0f051565624b41d1600afd39d88f89b9 
-    IMAGE_SHA256 d7ab02a4fbf626f372a61bbe770e873ec30c952b838a4820586b7c29edd68d99 
+    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:pytorch-1.10.2-ubuntu-20.04-cuda-11.2-mlnx-ofed-4.9-4.1.7.0-openmpi-4.1.3
+    IMAGE_MD5 dcadd5fff20f25bfa21513d6226ff63b
+    IMAGE_SHA256 d997ced2089de55cc9c336a27a8acb1b2d03e1321a2cbf8dd5d422792c4f6238 
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20220511
+    LAST_UPDATED 20220519
 
 %setup
 
@@ -44,28 +44,28 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-cuda-11.4-mlnx-ofed-4.9-4.1
     export NVIDIA_DRIVER_VERSION="${NVIDIA_DRIVER_MAJOR}.${NVIDIA_DRIVER_MINOR}.${NVIDIA_DRIVER_REVISION}"
 
     export CUDA_MAJOR='11'
-    export CUDA_MINOR='4'
-    export CUDA_REVISION='4'
+    export CUDA_MINOR='2'
+    export CUDA_REVISION='2'
     export CUDA_VERSION="${CUDA_MAJOR}.${CUDA_MINOR}.${CUDA_REVISION}"
 
     export CUDNN_MAJOR='8'
-    export CUDNN_MINOR='2'
-    export CUDNN_REVISION='4.15'
+    export CUDNN_MINOR='1'
+    export CUDNN_REVISION='1.33'
     export CUDNN_VERSION="${CUDNN_MAJOR}.${CUDNN_MINOR}.${CUDNN_REVISION}"
 
     export NCCL_MAJOR='2'
-    export NCCL_MINOR='11'
+    export NCCL_MINOR='8'
     export NCCL_REVISION='4'
     export NCCL_VERSION="${NCCL_MAJOR}.${NCCL_MINOR}.${NCCL_REVISION}"
 
-    export TENSORRT_MAJOR='8'
-    export TENSORRT_MINOR='2'
-    export TENSORRT_REVISION='4'
+    export TENSORRT_MAJOR=''
+    export TENSORRT_MINOR=''
+    export TENSORRT_REVISION=''
     export TENSORRT_VERSION="${TENSORRT_MAJOR}.${TENSORRT_MINOR}.${TENSORRT_REVISION}"
 
     export CUTENSOR_MAJOR='1'
-    export CUTENSOR_MINOR='5'
-    export CUTENSOR_REVISION='0.3'
+    export CUTENSOR_MINOR='3'
+    export CUTENSOR_REVISION='3.2'
     export CUTENSOR_VERSION="${CUTENSOR_MAJOR}.${CUTENSOR_MINOR}.${CUTENSOR_REVISION}"
 
     # Set paths to CUDA binaries and libraries
@@ -170,7 +170,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-cuda-11.4-mlnx-ofed-4.9-4.1
     conda install -y dataclasses
 
     # Add LAPACK support for the GPU
-    conda install -y magma-cuda113 -c pytorch
+    conda install -y magma-cuda112 -c pytorch
 
     cd /tmp
 
@@ -230,10 +230,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-cuda-11.4-mlnx-ofed-4.9-4.1
     export PYTORCH_VISION_VERSION='0.11.3'
 
     # Download, build and install TorchVision
-    git clone https://github.com/pytorch/vision.git
-    cd vision
-    git checkout "v${PYTORCH_VISION_VERSION}"
-    python setup.py install
+    pip install torchvision=="${PYTORCH_VISION_VERSION}"
 
     cd /tmp
 
@@ -241,11 +238,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-cuda-11.4-mlnx-ofed-4.9-4.1
     export PYTORCH_TEXT_VERSION='0.11.2'
 
     # Download, build and install TorchText
-    git clone https://github.com/pytorch/text.git
-    cd text
-    git checkout "v${PYTORCH_TEXT_VERSION}"
-    git submodule update --init --recursive
-    python setup.py clean install
+    pip install torchtext=="${PYTORCH_TEXT_VERSION}"
 
     cd /tmp
 
@@ -253,11 +246,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-cuda-11.4-mlnx-ofed-4.9-4.1
     export PYTORCH_AUDIO_VERSION='0.10.2'
 
     # Download, build and install TorchAudio
-    git clone https://github.com/pytorch/audio.git
-    cd audio
-    git checkout "v${PYTORCH_AUDIO_VERSION}"
-    git submodule update --init --recursive
-    BUILD_SOX=1 python setup.py clean install
+    pip install torchaudio=="${PYTORCH_AUDIO_VERSION}"
 
     cd /tmp
 
@@ -278,12 +267,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-cuda-11.4-mlnx-ofed-4.9-4.1
 
     # Download, build and install PyTorch Lightning
     # https://github.com/PyTorchLightning/pytorch-lightning
-    git clone https://github.com/PyTorchLightning/pytorch-lightning.git
-    cd pytorch-lightning
-    git checkout "${PYTORCH_LIGHTNING_VERSION}"
-    git submodule sync
-    git submodule update --init --recursive
-    python setup.py clean install
+    pip install pytorch-lightning=="${PYTORCH_LIGHTNING_VERSION}"
 
     cd /tmp
 
