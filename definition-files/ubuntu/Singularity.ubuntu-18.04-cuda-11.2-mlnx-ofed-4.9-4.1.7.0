@@ -1,0 +1,95 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-cuda-11.2
+
+%labels
+
+    APPLICATION_NAME ubuntu + cuda + mlnx-ofed
+    APPLICATION_VERSION 18.04 + 11.2 + 4.9-4.1.7.0
+    APPLICATION_URL https://www.mellanox.com/products/infiniband-drivers/linux/mlnx_ofed
+
+    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:ubuntu-18.04-cuda-11.2-mlnx-ofed-4.9-4.1.7.0
+    IMAGE_MD5 af936eb3699c27c1f8329d8351845c77
+    IMAGE_SHA256 6151acb06e8841dbe831c377b9b9254f64ee977bed58a272f20f592d70d43221
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20220521
+
+%setup
+
+%environment
+
+    # Set Mellanox OFED version, operating system, and hardware platform
+    export MLNX_OFED_VERSION='4.9-4.1.7.0'
+    export MLNX_OS_VERSION='ubuntu18.04'
+    export MLNX_PLATFORM='x86_64'
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='bionic'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # DO NOT Upgrade all software packages to their latest versions
+    # apt-get -y update && apt-get -y upgrade
+
+    # Install all dependencies and/or prerequisites for Mellanox OFED
+    apt-get -y install bison
+    apt-get -y install chrpath
+    apt-get -y install debhelper
+    apt-get -y install dpatch
+    apt-get -y install flex
+    apt-get -y install graphviz
+    apt-get -y install libnl-3-dev
+    apt-get -y install libnl-route-3-200
+    apt-get -y install tcl-dev
+    apt-get -y install tk-dev
+    apt-get -y install swig
+
+    cd /tmp
+
+    # Set Mellanox OFED version, operating system, and hardware platform
+    export MLNX_ROOT_URL='http://www.mellanox.com/downloads/ofed'
+    export MLNX_OFED_VERSION='4.9-4.1.7.0'
+    export MLNX_OS_VERSION='ubuntu18.04'
+    export MLNX_PLATFORM='x86_64'
+
+    # Download and install Mellanox OFED drivers and supporting
+    # libraries for user space access to Ethernet, RDMA, and Infiniband.
+    # https://docs.mellanox.com/pages/releaseview.action?pageId=15049785
+    wget "${MLNX_ROOT_URL}/MLNX_OFED-${MLNX_OFED_VERSION}/MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-${MLNX_OS_VERSION}-${MLNX_PLATFORM}.tgz"
+    tar -xf "MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-${MLNX_OS_VERSION}-${MLNX_PLATFORM}.tgz"
+    cd "MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-${MLNX_OS_VERSION}-${MLNX_PLATFORM}"
+    ./mlnxofedinstall --user-space-only --without-fw-update --force
+
+    cd /tmp
+
+    # Remove Mellanox OFED archive directory and tarball
+    rm -rf "MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-${MLNX_OS_VERSION}-${MLNX_PLATFORM}"
+    rm "MLNX_OFED_LINUX-${MLNX_OFED_VERSION}-${MLNX_OS_VERSION}-${MLNX_PLATFORM}.tgz"
+
+    # Install additional tools
+    apt-get -y install numactl
+    apt-get -y install libnuma-dev
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
