@@ -1,0 +1,154 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/naked-singularity:ubuntu-18.04-cuda-11.2-mlnx-ofed-4.9-4.1.7.0
+
+%labels
+
+    APPLICATION_NAME ubuntu + cuda + mlnx-ofed + openmpi
+    APPLICATION_VERSION 18.04 + 11.2 + 4.9-4.1.7.0 + 3.1.6
+    APPLICATION_URL https://www.open-mpi.org
+
+    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:ubuntu-18.04-cuda-11.2-mlnx-ofed-4.9-4.1.7.0-openmpi-3.1.6 
+    IMAGE_MD5 ae4b36a704b131fa978f3c956f269aba
+    IMAGE_SHA256 bca21593e770af24f9c35d4c66fa61feab411b434ac69415097f050f6165a7ea
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20220521
+
+%setup
+
+%environment
+
+    # Set OpenMPI major, minor, and revision numbers, root and
+    # installation directories
+    export OMPI_MAJOR='3'
+    export OMPI_MINOR='1'
+    export OMPI_REVISION='6'
+    export OMPI_VERSION="${OMPI_MAJOR}.${OMPI_MINOR}.${OMPI_REVISION}"
+    export OMPI_ROOT_DIR='/opt/openmpi'
+    export OMPI_INSTALL_DIR="${OMPI_ROOT_DIR}/${OMPI_VERSION}"
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="${OMPI_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${OMPI_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='bionic'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set NVIDIA driver and CUDA versions
+    export NVIDIA_DRIVER_MAJOR='510'
+    export NVIDIA_DRIVER_MINOR='39'
+    export NVIDIA_DRIVER_REVISION='01'
+    export NVIDIA_DRIVER_VERSION="${NVIDIA_DRIVER_MAJOR}.${NVIDIA_DRIVER_MINOR}.${NVIDIA_DRIVER_REVISION}"
+
+    export CUDA_MAJOR='11'
+    export CUDA_MINOR='2'
+    export CUDA_REVISION='2'
+    export CUDA_VERSION="${CUDA_MAJOR}.${CUDA_MINOR}.${CUDA_REVISION}"
+
+    export CUDNN_MAJOR='8'
+    export CUDNN_MINOR='1'
+    export CUDNN_REVISION='1.33'
+    export CUDNN_VERSION="${CUDNN_MAJOR}.${CUDNN_MINOR}.${CUDNN_REVISION}"
+
+    export NCCL_MAJOR='2'
+    export NCCL_MINOR='8'
+    export NCCL_REVISION='4'
+    export NCCL_VERSION="${NCCL_MAJOR}.${NCCL_MINOR}.${NCCL_REVISION}"
+
+    export TENSORRT_MAJOR=''
+    export TENSORRT_MINOR=''
+    export TENSORRT_REVISION=''
+    export TENSORRT_VERSION="${TENSORRT_MAJOR}.${TENSORRT_MINOR}.${TENSORRT_REVISION}"
+
+    export CUTENSOR_MAJOR='1'
+    export CUTENSOR_MINOR='3'
+    export CUTENSOR_REVISION='3.2'
+    export CUTENSOR_VERSION="${CUTENSOR_MAJOR}.${CUTENSOR_MINOR}.${CUTENSOR_REVISION}"
+
+    # Set paths to CUDA binaries and libraries
+    export CUDA_HOME="/usr/local/cuda-${CUDA_MAJOR}.${CUDA_MINOR}"
+
+    export CUDNN_INCLUDE='/usr/include'
+    export CUDNN_LIB='/usr/lib/x86_64-linux-gnu'
+
+    export NCCL_INCLUDE='/usr/include'
+    export NCCL_LIB='/usr/lib/x86_64-linux-gnu'
+
+    export TENSORRT_INCLUDE='/usr/include'
+    export TENSORRT_LIB='/usr/lib/x86_64-linux-gnu'
+
+    export CUTENSOR_INCLUDE='/usr/include'
+    export CUTENSOR_LIB='/usr/lib/x86_64-linux-gnu'
+
+    export PATH="${CUDA_HOME}/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="${CUDA_HOME}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+    export LD_LIBRARY_PATH="${CUDNN_LIB}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${NCCL_LIB}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${TENSORRT_LIB}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${CUTENSOR_LIB}:${LD_LIBRARY_PATH}"
+
+    # DO NOT Upgrade all software packages to their latest versions
+    # apt-get -y update && apt-get -y upgrade
+
+    # Install OpenMPI dependencies
+    apt-get -y install zlib1g-dev
+
+    # Set OpenMPI major, minor, and revision numbers, root and
+    # installation directories
+    export OMPI_ROOT_URL='https://download.open-mpi.org/release/open-mpi'
+    export OMPI_MAJOR='3'
+    export OMPI_MINOR='1'
+    export OMPI_REVISION='6'
+    export OMPI_VERSION="${OMPI_MAJOR}.${OMPI_MINOR}.${OMPI_REVISION}"
+    export OMPI_ROOT_DIR='/opt/openmpi'
+    export OMPI_INSTALL_DIR="${OMPI_ROOT_DIR}/${OMPI_VERSION}"
+
+    cd /tmp
+
+    # Download, build, and install OpenMPI
+    wget "${OMPI_ROOT_URL}/v${OMPI_MAJOR}.${OMPI_MINOR}/openmpi-${OMPI_VERSION}.tar.gz"
+    tar -xf "openmpi-${OMPI_VERSION}.tar.gz"
+    cd "openmpi-${OMPI_VERSION}"
+    ./configure --prefix="${OMPI_INSTALL_DIR}" --with-cuda #--enable-shared \
+      #--disable-silent-rules --disable-builtin-atomics --enable-static \
+      #--without-hcoll --without-psm --without-knem --without-psm2 \
+      #--with-verbs=/usr --without-ofi --without-mxm --without-fca \
+      #--without-xpmem --without-ucx --without-cma --without-slurm \
+      #--without-tm --without-loadleveler --without-alps --without-lsf \
+      #--without-sge --disable-memchecker  --disable-java \
+      #--disable-mpi-java --with-cuda --enable-mpi-cxx \
+      #--enable-cxx-exceptions
+    #--enable-mpi1-compatibility
+    make all install
+
+    cd /tmp
+
+    # Remove OpenMPI build directory and source tarball
+    rm -rf "openmpi-${OMPI_VERSION}"
+    rm "openmpi-${OMPI_VERSION}.tar.gz"
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
