@@ -1,9 +1,8 @@
 # naked-singularity
 
-A repository of definition files for building 
-[Singularity](https://sylabs.io/guides/latest/user-guide) containers
-around the software applications, frameworks, and libraries you need to
-run on high-performance computing systems.
+A repository of definition files for building [Singularity](https://sylabs.io/guides/latest/user-guide) 
+containers around the software applications, frameworks, and libraries 
+you need to run on high-performance computing systems.
 
 ## Install Singularity
 
@@ -15,30 +14,42 @@ sudo ./naked-singularity.sh install
 
 ## Build a Singularity container from a definition file
 
-Build an Ubuntu Singularity container from one of the definition files
-available in this repository.
+Build a Singularity container from one of the definition files available 
+in this repository.
 
 ```bash
-sudo singularity build ubuntu.sif definition-files/ubuntu/Singularity.ubuntu-18.04
+sudo singularity build ubuntu-18.04.sif definition-files/ubuntu/Singularity.ubuntu-18.04
 ```
 
 ## Download an existing Singularity container
 
-A number of pre-built containers from this repository are also now 
-hosted at Singularity Hub.
+A number of Singularity containers built from definition files in this 
+repository are now registered and distributed via the [GitHub Container Registry (GHCR)](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry). 
 
 ```bash
-singularity pull shub://mkandes/naked-singularity:ubuntu-18.04
+singularity pull oras://ghcr.io/mkandes/naked-singularity:ubuntu-20.04
 ```
 
-IMPORTANT: [Singularity Hub has been archived](https://vsoch.github.io/2021/singularity-hub-archive). 
-For the time being, naked-singularity definition files that rely on 
-containers that were built and hosted on Singularity Hub prior to it 
-being archived will continue to pull in these container dependencies and
-build properly. Note, however, new pre-built containers of the latest 
-naked-singularity definition files are currently being updated to be 
-hosted via the [GitHub Container Registry](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry).
+You can find a complete list of the Singularity containers available on
+the GHCR [here](https://github.com/users/mkandes/packages/container/naked-singularity/versions). 
+Each tag listed in this GitHub package corresponds to an individual 
+Singularity container built from its matching naked-singularity 
+(Singularity.tag) definition file. Note, however, since these containers 
+are still built manually and then pushed manually to the GHCR, you 
+should not assume a container available from the GHCR was built using 
+the latest version of its definition file available in the 
+naked-singularity repository. 
 
+## Additional Information
+
+[Singularity Hub was archived](https://vsoch.github.io/2021/singularity-hub-archive). 
+Some naked-singularity definition files that you find in this repository 
+may still depend on bootstrapping from containers that were built and 
+hosted on Singularity Hub prior to it being archived. These definition 
+files should continue to be able to pull in these container dependencies 
+from the Singularity Hub Archive and build successfully. However, it is
+unknown how long the Singularity Hub Archive will be available to 
+support these legacy naked-singularity definition files. 
 
 ## Status
 
@@ -60,8 +71,8 @@ University of California, San Diego
 
 ## Version
 
-2.9.4
+2.9.5
 
 ## Last Updated
 
-Friday, May 27th, 2022
+Wednesday, June 29th, 2022
