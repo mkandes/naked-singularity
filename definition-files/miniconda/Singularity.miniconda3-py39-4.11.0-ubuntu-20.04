@@ -7,14 +7,14 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04
     APPLICATION_VERSION py39-4.11.0-Linux-x86_64
     APPLICATION_URL https://docs.conda.io
 
-    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:miniconda3-py39-4.11.0-ubuntu-20.04 
-    IMAGE_MD5 df8b1c1f3eccd59a557922f627b72488
-    IMAGE_SHA256 69dfa9a7f149146c5ada0d1fa8a5890b971b3578c83b86cfe50486c7579536e8
+    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:miniconda-astropy
+    IMAGE_MD5 9525ff19afc14f8c950d2016d4db5253
+    IMAGE_SHA256 38e69990c24082e64407ee5800c55168d922833d2fe3dbcde41102c150b53f1d 
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20220427
+    LAST_UPDATED 20220909
 
 %setup
 
@@ -73,6 +73,10 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04
 
     # Remove conda installer
     rm "${CONDA_INSTALLER}"
+
+    # Modify with custom changes
+    conda install -y -c conda-forge numpy matplotlib astropy
+    conda clean -afy
 
     # Cleanup
     apt-get -y autoremove --purge
