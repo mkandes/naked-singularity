@@ -4,17 +4,17 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-cuda-11.2-mlnx-ofed-4.9-4.1
 %labels
 
     APPLICATION_NAME pytorch
-    APPLICATION_VERSION 1.10.2
+    APPLICATION_VERSION 1.12.1
     APPLICATION_URL https://pytorch.org
 
-    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:pytorch-1.10.2-ubuntu-20.04-cuda-11.2-mlnx-ofed-4.9-4.1.7.0-openmpi-4.1.3
-    IMAGE_MD5 d3365ab4a9b5930983309980c01a3e52
-    IMAGE_SHA256 810f692a955964c43a605054f0148eb9988a5d34b1d7d41d29d9d0f2655cddbb
+    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:pytorch-1.12.1-ubuntu-20.04-cuda-11.2-mlnx-ofed-4.9-4.1.7.0-openmpi-4.1.3
+    IMAGE_MD5 6d643aa0d9902099de95912a42293645
+    IMAGE_SHA256 34a599917a2a2af77a60439c9f3a1b35316d80bece32153a8820b6e55b131720
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20221011
+    LAST_UPDATED 20221009
 
 %setup
 
@@ -29,7 +29,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-cuda-11.2-mlnx-ofed-4.9-4.1
     export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
 
     # Set operating system version
-    export OSVERSION='bionic'
+    export OSVERSION='focal'
 
     # Set system locale
     export LC_ALL='C'
@@ -175,7 +175,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-cuda-11.2-mlnx-ofed-4.9-4.1
     cd /tmp
 
     # Set PyTorch version number
-    export PYTORCH_VERSION='1.10.2'
+    export PYTORCH_VERSION='1.12.1'
 
     # Download, build and install PyTorch
     git clone --recursive https://github.com/pytorch/pytorch
@@ -202,6 +202,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-cuda-11.2-mlnx-ofed-4.9-4.1
     export USE_C10D_MPI=1
     export USE_NCCL=1
     export USE_SYSTEM_NCCL=1
+    export NCCL_INCLUDE_DIR="${NCCL_INCLUDE}"
     #sed -i '77,80 s/^/#/' cmake/Modules/FindNCCL.cmake
 
     export USE_OPENMP=1
@@ -217,17 +218,17 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-cuda-11.2-mlnx-ofed-4.9-4.1
     export USE_OPENCV=0
 
     # https://github.com/pytorch/pytorch/pull/69904/commits/9af2edb158b3603c44eff6e12896f1d215e8b898
-    sed -i 's/from setuptools import distutils  # type: ignore\[import\]/from distutils.version import LooseVersion/' tools/setup_helpers/cmake.py
-    sed -i 's/distutils.version.LooseVersion/LooseVersion/g' tools/setup_helpers/cmake.py
-    sed -i 's/from setuptools import distutils/from distutils.version import LooseVersion/' torch/testing/_internal/common_methods_invocations.py
-    sed -i 's/distutils.version.LooseVersion/LooseVersion/g' torch/testing/_internal/common_methods_invocations.py
+    #sed -i 's/from setuptools import distutils  # type: ignore\[import\]/from distutils.version import LooseVersion/' tools/setup_helpers/cmake.py
+    #sed -i 's/distutils.version.LooseVersion/LooseVersion/g' tools/setup_helpers/cmake.py
+    #sed -i 's/from setuptools import distutils/from distutils.version import LooseVersion/' torch/testing/_internal/common_methods_invocations.py
+    #sed -i 's/distutils.version.LooseVersion/LooseVersion/g' torch/testing/_internal/common_methods_invocations.py
 
     python setup.py install
 
     cd /tmp
 
     # Set TorchVision version number
-    export PYTORCH_VISION_VERSION='0.11.3'
+    export PYTORCH_VISION_VERSION='0.13.1'
 
     # Download, build and install TorchVision
     git clone https://github.com/pytorch/vision.git
@@ -238,7 +239,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-cuda-11.2-mlnx-ofed-4.9-4.1
     cd /tmp
 
     # Set TorchText version number
-    export PYTORCH_TEXT_VERSION='0.11.2'
+    export PYTORCH_TEXT_VERSION='0.13.1'
 
     # Download, build and install TorchText
     git clone https://github.com/pytorch/text.git
@@ -250,7 +251,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-cuda-11.2-mlnx-ofed-4.9-4.1
     cd /tmp
 
     # Set TorchAudio version number
-    #export PYTORCH_AUDIO_VERSION='0.10.2'
+    export PYTORCH_AUDIO_VERSION='0.12.1'
 
     # Download, build and install TorchAudio
     #git clone https://github.com/pytorch/audio.git
@@ -262,7 +263,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-cuda-11.2-mlnx-ofed-4.9-4.1
     cd /tmp
 
     # Set PyTorch Ignite version number
-    export PYTORCH_IGNITE_VERSION='0.4.9'
+    export PYTORCH_IGNITE_VERSION='0.4.10'
 
     # Install PyTorch Ignite
     # https://github.com/pytorch/ignite
@@ -271,7 +272,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-cuda-11.2-mlnx-ofed-4.9-4.1
     cd /tmp
 
     # Set PyTorch Lightning version number
-    export PYTORCH_LIGHTNING_VERSION='1.5.10'
+    export PYTORCH_LIGHTNING_VERSION='1.6.4'
 
     # Install PyTorch Lightning dependencies
     apt-get -y install git-lfs
@@ -288,7 +289,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-cuda-11.2-mlnx-ofed-4.9-4.1
     cd /tmp
 
     # Set Horovod version number
-    export HOROVOD_VERSION=0.23.0
+    export HOROVOD_VERSION=0.24.3
 
     # Download, build and install Horovod with PyTorch + NVIDIA GPU support 
     export HOROVOD_WITH_PYTORCH=1
@@ -315,7 +316,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-cuda-11.2-mlnx-ofed-4.9-4.1
     cd /tmp
 
     # Set ONNX version number
-    #export ONNX_VERSION='1.11.0'
+    #export ONNX_VERSION='1.12.0'
 
     # Install prerequisites and dependencies for ONNX
     #apt-get -y install libprotobuf-dev
