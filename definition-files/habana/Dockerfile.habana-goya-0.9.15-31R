@@ -1,0 +1,38 @@
+FROM demo-goya-installer:0.9.15-31R
+
+LABEL APPLICATION_NAME='habana-goya'
+LABEL APPLICATION_VERSION='0.9.15'
+LABEL APPLICATION_URL='https://habana.ai'
+
+LABEL AUTHOR_NAME='Marty Kandes'
+LABEL AUTHOR_EMAIL='mkandes@sdsc.edu'
+
+LABEL LAST_UPDATED='20221212' 
+
+ENV MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+ENV OSVERSION='bionic'
+ENV LC_ALL=C
+ENV DEBIAN_FRONTEND='noninteractive'
+
+RUN sudo apt-get -y update \
+ && apt-get -y install zip
+
+RUN python3 -m pip install --upgrade pip \
+ && python3 -m pip install scipy \
+ && python3 -m pip install matplotlib \
+ && python3 -m pip install ipython \
+ && python3 -m pip install jupyter \
+ && python3 -m pip install jupyterlab \
+ && python3 -m pip install pandas \
+ && python3 -m pip install sympy \
+ && python3 -m pip install nose \
+ && python3 -m pip install dask[complete] \
+ && python3 -m pip install scikit-learn \
+ && python3 -m pip install scikit-image \
+ && python3 -m pip install statsmodels \
+ && python3 -m pip install seaborn \
+ && python3 -m pip install opencv-python \
+ && python3 -m pip install biopython \
+ && python3 -m pip install nltk \
+ && python3 -m pip install spacy \
+ && python3 -m pip install onnx
