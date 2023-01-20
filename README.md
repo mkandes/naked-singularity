@@ -1,6 +1,7 @@
 # naked-singularity
 
-A repository of definition files for building [Singularity](https://sylabs.io/guides/latest/user-guide) 
+A repository of definition files for building 
+[Singularity](https://sylabs.io/guides/latest/user-guide) 
 containers around the software applications, frameworks, and libraries 
 you need to run on high-performance computing systems.
 
@@ -18,7 +19,7 @@ Build a Singularity container from one of the definition files available
 in this repository.
 
 ```bash
-sudo singularity build ubuntu-18.04.sif definition-files/ubuntu/Singularity.ubuntu-18.04
+sudo singularity build ubuntu-20.04.sif definition-files/ubuntu/Singularity.ubuntu-20.04
 ```
 
 ## Download an existing Singularity container
@@ -35,10 +36,10 @@ the GHCR [here](https://github.com/users/mkandes/packages/container/naked-singul
 Each tag listed in this GitHub package corresponds to an individual 
 Singularity container built from its matching naked-singularity 
 (Singularity.tag) definition file. Note, however, since these containers 
-are still built manually and then pushed manually to the GHCR, you 
-should not assume a container available from the GHCR was built using 
-the latest version of its definition file available in the 
-naked-singularity repository. 
+are still built manually and then pushed to the GHCR, you should not 
+assume a container available from the GHCR was built using the latest 
+version of its definition file available in the naked-singularity 
+repository. 
 
 ## Additional Information
 
@@ -71,8 +72,8 @@ University of California, San Diego
 
 ## Version
 
-3.0.2
+3.0.3
 
 ## Last Updated
 
-Monday, December 12th, 2022
+Friday, January 20th, 2023

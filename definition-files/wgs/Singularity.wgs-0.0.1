@@ -1,0 +1,201 @@
+Bootstrap: docker
+From: ubuntu:focal
+
+%environment
+  export PATH="$PATH:/opt/samtools-1.16.1/:/opt/samtools-1.16.1/htslib:/opt/manta/bin:/opt/strelka2/bin:/opt/bwa-0.7.17:/opt/gatk-4.3.0.0:/opt/sambamba:/opt/samtools-1.16.1/bcftools:/opt/delly:/opt/bedtools2/bin:/opt/fastp:/opt/samblaster-v.0.1.26"
+  export BCFTOOLS_PLUGINS=/opt/samtools-1.16.1/bcftools/plugins
+
+%runscript
+  echo "Here is the list of installed WGS tools."
+  echo "samtools version: 1.16.1"
+  echo "tabix & htslib version: 1.16-20-g3f67e7e"
+  echo "java openjdk version: 1.8.0_352"
+  echo "bwa version: 0.7.17-r1188"
+  echo "manta version: 1.6.0"
+  echo "strelka2 version: 2.9.10"
+  echo "sambamba version: 0.8.2 (sambamba-0.8.2-linux-amd64-static)"
+  echo "gatk version: 4.3.0.0"
+  echo "lumpy version: 0.2.13"
+  echo "svtyper version: 0.7.1"
+  echo "python version: 2.7.16"
+  echo "bcftools version: 1.16-29-g815fd54"
+  echo "delly version: 1.1.6 (delly_v1.1.6_linux_x86_64bit)"
+  echo "bedtools version: 2.30.0"
+  echo "sv2 version: 1.5.0"
+  echo "samblaster version: 0.1.26"
+  echo "fastp version: 0.23.2"
+
+
+%setup
+  #Create the .condarc file where the environments/channels from conda are specified, these are pulled with preference to root
+  cd /
+  touch .condarc
+
+%post
+  export DEBIAN_FRONTEND=noninteractive 
+  apt-get update &&  apt-get install -y build-essential libssl-dev uuid-dev libgpgme11-dev squashfs-tools libseccomp-dev libncurses5-dev  wget curl  openjdk-8-jdk zip unzip git vim bsdmainutils gawk
+
+  ### bsdmainutils contains hexdump that is needed by lumpexpress.
+  
+  wget -c https://repo.anaconda.com/archive/Anaconda2-2019.10-Linux-x86_64.sh
+  /bin/bash Anaconda2-2019.10-Linux-x86_64.sh -bfp /usr/local
+
+  conda config --file /.condarc --add channels defaults
+  conda config --file /.condarc --add channels conda-forge
+  conda update conda
+  #List installed environments
+  conda list
+
+  cd /opt/
+  mkdir manta
+  cd manta
+  wget https://github.com/Illumina/manta/releases/download/v1.6.0/manta-1.6.0.release_src.tar.bz2
+  tar -xjf manta-1.6.0.release_src.tar.bz2
+
+  mkdir build && cd build
+  ../manta-1.6.0.release_src/configure --jobs=4 --prefix=/opt/manta
+  make -j4 install
+
+  ###rm -rf /opt/manta/manta-1.6.0.release_src.tar.bz2
+
+  ###BWA:
+  cd /opt
+  wget https://github.com/lh3/bwa/releases/download/v0.7.17/bwa-0.7.17.tar.bz2
+  tar -xjf bwa-0.7.17.tar.bz2
+  cd bwa-0.7.17
+  make 
+
+  ###GATK:
+  cd /opt
+  wget https://github.com/broadinstitute/gatk/releases/download/4.3.0.0/gatk-4.3.0.0.zip
+  unzip gatk-4.3.0.0.zip
+
+  rm -rf gatk-4.3.0.0.zip
+
+  ###STRELKA
+  cd /opt
+  mkdir strelka2
+  cd strelka2
+  wget https://github.com/Illumina/strelka/releases/download/v2.9.10/strelka-2.9.10.release_src.tar.bz2
+  tar -xjf strelka-2.9.10.release_src.tar.bz2
+
+  mkdir build && cd build
+  ../strelka-2.9.10.release_src/configure --jobs=4 --prefix=/opt/strelka2
+  make -j4 install
+
+ 
+  ###SAMBAMBA:
+  cd /opt
+  mkdir sambamba
+  cd sambamba
+  
+  wget https://github.com/biod/sambamba/releases/download/v0.8.2/sambamba-0.8.2-linux-amd64-static.gz
+  gunzip sambamba-0.8.2-linux-amd64-static.gz
+  chmod +x sambamba-0.8.2-linux-amd64-static
+
+  ###SAMTOOLS HTSLIB BCFTOOLS:
+  ###samtools depenency: https://gist.github.com/adefelicibus/f6fd06df1b4bb104ceeaccdd7325b856
+  apt-get install -y  autoconf automake  make gcc perl zlib1g-dev libbz2-dev liblzma-dev libcurl4-gnutls-dev
+  # libssl-dev libncurses5-dev excluded because there are already installed.
+
+  cd /opt
+  wget https://github.com/samtools/samtools/releases/download/1.16.1/samtools-1.16.1.tar.bz2
+  tar -xjf samtools-1.16.1.tar.bz2
+  cd samtools-1.16.1
+
+  rm -rf htslib-1.16
+
+  git clone --recurse-submodules https://github.com/samtools/htslib.git
+  git clone https://github.com/samtools/bcftools.git
+
+  ./configure
+  make  
+
+  cd bcftools
+  autoheader && autoconf && ./configure
+  make
+  
+  cd ../htslib
+  autoheader && autoconf && ./configure
+  make
+
+  ###LUMPY SVTYPER:
+  cd /opt
+  git clone --recursive https://github.com/arq5x/lumpy-sv.git
+  cd lumpy-sv
+  make
+  cp bin/* /usr/local/bin/.
+
+  ### Removing lumpyexpress.config that comes with lumpy because somefields are empty.
+  rm -rf /opt/lumpy-sv/bin/lumpyexpress.config
+  rm -rf /usr/local/bin/lumpyexpress.config
+  ### This file is copied again from home folder to /opt because all the values are filled in when %file tag is used.
+  cp /opt/lumpyexpress.config /usr/local/bin
+  mv /opt/lumpyexpress.config /opt/lumpy-sv/bin
+
+  ###https://anaconda.org/bioconda/svtyper
+  pip install  pysam -q
+  conda install -yc bioconda svtyper 
+
+  ###CNVPYTOR
+  ###pip install cnvpytor
+  ###cnvpytor -download 
+
+  ### DELLY
+  cd /opt
+  mkdir delly
+  cd delly
+  wget https://github.com/dellytools/delly/releases/download/v1.1.6/delly_v1.1.6_linux_x86_64bit
+  chmod +x delly_v1.1.6_linux_x86_64bit 
+
+  ### bedtools
+  cd /opt
+  wget https://github.com/arq5x/bedtools2/releases/download/v2.30.0/bedtools-2.30.0.tar.gz
+  tar xvfz bedtools-2.30.0.tar.gz
+  cd bedtools2
+  make
+
+  ### sv2
+  pip install sv2 
+
+  ### samblaster
+  cd /opt
+  wget https://github.com/GregoryFaust/samblaster/releases/download/v.0.1.26/samblaster-v.0.1.26.tar.gz
+  tar xvfz samblaster-v.0.1.26.tar.gz
+  cd samblaster-v.0.1.26
+  make
+
+  ### fastp
+  cd /opt
+  mkdir fastp
+  cd fastp
+  wget http://opengene.org/fastp/fastp
+  chmod a+x ./fastp
+
+%labels
+  Author M. Gujral
+  Version 0.0.1
+  Last updated 20230120
+
+%help
+  This container supports most of the tools required for WGS data
+  processing and analysis. Type './ubuntuWGS.sif' on commandline
+  to see the tools available.
+
+%startscript
+  echo "Started new instance on $(date)"
+
+%test
+  grep -q NAME=\"Ubuntu\" /etc/os-release
+  if [ $? -eq 0 ]; then
+echo "Container base is Ubuntu as expected."
+  else
+echo "Container base is not Ubuntu."
+  fi
+
+%files
+  /home/exouser/lumpyexpress.config
+  /home/exouser/lumpyexpress.config /opt
+
+  ###lumpyexpress.config is copied to /opt and then copied/moved to two folders though lumpyexpress uses it from /usr/local/bin folder.
+
