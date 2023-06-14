@@ -18,7 +18,7 @@
 #
 # LAST UPDATED
 #
-#   Thursday, April 28th, 2022
+#   Tuesday, June 13th, 2023
 #
 # ----------------------------------------------------------------------
 
@@ -46,9 +46,9 @@ source log.sh
 
 naked::install() {
 
-  local singularity_version='3.7.4'
+  local singularity_version='3.9.9'
   local apptainer_version='1.0.1'
-  local go_version='1.15.6'
+  local go_version='1.17.13'
   local use_rpm='false'
   local rpm_repo='epel'
 
@@ -154,10 +154,12 @@ naked::install() {
     apt-get -y install libgpgme-dev
     apt-get -y install squashfs-tools
     apt-get -y install libseccomp-dev
+    apt-get -y install libglib2.0-dev
     apt-get -y install wget
     apt-get -y install pkg-config
     apt-get -y install git
-    apt-get -y install cryptsetup-bin
+    apt-get -y install cryptsetup
+    apt-get -y install runc
     apt-get -y install debootstrap
 
     # No longer available after Ubuntu 18.04; used previously to build 
@@ -219,9 +221,9 @@ naked::install() {
     cd /tmp
 
     log::output 'Installing Singularity ...'
-    wget "https://github.com/hpcng/singularity/releases/download/v${singularity_version}/singularity-${singularity_version}.tar.gz"
-    tar -xf "singularity-${singularity_version}.tar.gz"
-    cd singularity
+    wget "https://github.com/sylabs/singularity/releases/download/v${singularity_version}/singularity-ce-${singularity_version}.tar.gz"
+    tar -xf "singularity-ce-${singularity_version}.tar.gz"
+    cd "singularity-ce-${singularity_version}"
     ./mconfig #--prefix=/opt/singularity <- include prefix as used-defined option?
     make -C ./builddir
     make -C ./builddir install
