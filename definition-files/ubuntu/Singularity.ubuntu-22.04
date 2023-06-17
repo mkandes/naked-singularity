@@ -1,0 +1,103 @@
+Bootstrap: debootstrap
+MirrorURL: http://us.archive.ubuntu.com/ubuntu
+OSVersion: jammy
+
+%labels
+
+    APPLICATION_NAME ubuntu
+    APPLICATION_VERSION 22.04
+    APPLICATION_URL https://www.ubuntu.com
+
+    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:ubuntu-22.04
+    IMAGE_MD5 33ba27c483e7674f3512c24f9935ad8e
+    IMAGE_SHA256 d591153dce4cfcaf9c791814f7c5249cb92439aa9f0323c610de67292bf11aa1
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20230614
+
+%setup
+
+%environment
+ 
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='jammy'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='jammy'
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Install system metapackages
+    apt-get -y install ubuntu-standard
+    apt-get -y install ubuntu-server
+
+    # Add repositories
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} restricted"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-updates restricted"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-backports restricted"
+
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security main"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security universe"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security multiverse"
+    add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION}-security restricted"
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    # Install common packages from 'main'
+    apt-get -y install autoconf
+    apt-get -y install automake
+    apt-get -y install build-essential
+    apt-get -y install cmake
+    apt-get -y install evince
+    apt-get -y install expect
+    apt-get -y install gfortran
+    apt-get -y install libtool
+    apt-get -y install mlocate
+    apt-get -y install pkg-config
+    apt-get -y install wget
+    apt-get -y install zip
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
