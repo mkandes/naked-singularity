@@ -9,13 +9,13 @@ OSVersion: focal
     APPLICATION_URL https://www.ubuntu.com
 
     IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:ubuntu-20.04
-    IMAGE_MD5 9ee0abcaa7da0fbd28900a13b6f3f39e
-    IMAGE_SHA256 62e6e0e1842459ee785749502b5951e04850100da7b73f2128500ed7a1963519
+    IMAGE_MD5
+    IMAGE_SHA256
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20220513
+    LAST_UPDATED 20230622
 
 %setup
 
