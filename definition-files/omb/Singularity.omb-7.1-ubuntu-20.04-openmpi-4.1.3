@@ -1,5 +1,5 @@
 Bootstrap: oras
-From: ghcr.io/mkandes/naked-singularity:ubuntu-22.04-openmpi-4.1.3
+From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-openmpi-4.1.3
 
 %labels
 
@@ -7,14 +7,14 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-22.04-openmpi-4.1.3
     APPLICATION_VERSION 7.1
     APPLICATION_URL http://mvapich.cse.ohio-state.edu/benchmarks
 
-    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:omb-7.1-ubuntu-22.04-openmpi-4.1.3 
+    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:omb-7.1-ubuntu-20.04-openmpi-4.1.3 
     IMAGE_MD5
     IMAGE_SHA256
 
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20230621
+    LAST_UPDATED 20230622
 
 %setup
 
@@ -41,7 +41,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-22.04-openmpi-4.1.3
     export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
 
     # Set operating system version
-    export OSVERSION='jammy'
+    export OSVERSION='focal'
 
     # Set system locale
     export LC_ALL='C'

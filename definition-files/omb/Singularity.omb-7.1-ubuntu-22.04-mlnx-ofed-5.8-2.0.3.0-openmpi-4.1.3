@@ -14,7 +14,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-22.04-mlnx-ofed-5.8-2.0.3.0-openm
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20230621
+    LAST_UPDATED 20230622
 
 %setup
 
@@ -48,6 +48,19 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-22.04-mlnx-ofed-5.8-2.0.3.0-openm
 
     # Set debian frontend interface
     export DEBIAN_FRONTEND='noninteractive'
+
+    # Set UCX major, minor, and revision numbers, root and installation
+    # directories
+    export UCX_MAJOR='1'
+    export UCX_MINOR='10'
+    export UCX_REVISION='1'
+    export UCX_VERSION="${UCX_MAJOR}.${UCX_MINOR}.${UCX_REVISION}"
+    export UCX_ROOT_DIR='/opt/ucx'
+    export UCX_INSTALL_DIR="${UCX_ROOT_DIR}/${UCX_VERSION}"
+
+    # Set paths to UCX binaries and libraries
+    export PATH="${UCX_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${UCX_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
 
     # Set OpenMPI major, minor, and revision numbers, root and
     # installation directories
