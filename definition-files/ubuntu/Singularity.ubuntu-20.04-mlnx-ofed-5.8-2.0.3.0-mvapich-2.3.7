@@ -1,0 +1,90 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-mlnx-ofed-5.8-2.0.3.0
+
+%labels
+
+    APPLICATION_NAME ubuntu + mlnx-ofed + mvapich
+    APPLICATION_VERSION 20.04 + 5.8-2.0.3.0 + 2.3.7
+    APPLICATION_URL https://www.open-mpi.org
+
+    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:ubuntu-20.04-mlnx-ofed-5.8-2.0.3.0-mvapich-2.3.7
+    IMAGE_MD5
+    IMAGE_SHA256
+
+    AUTHOR_NAME Marty Kandes
+    AUTHOR_EMAIL mkandes@sdsc.edu
+
+    LAST_UPDATED 20230717
+
+%setup
+
+%environment
+
+    # Set MVAPICH major, minor, and revision numbers, root and
+    # installation directories
+    export MV2_MAJOR='2'
+    export MV2_MINOR='3'
+    export MV2_REVISION='7'
+    export MV2_VERSION="${MV2_MAJOR}.${MV2_MINOR}.${MV2_REVISION}"
+    export MV2_ROOT_DIR='/opt/mvapich'
+    export MV2_INSTALL_DIR="${MV2_ROOT_DIR}/${MV2_VERSION}"
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="${MV2_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${MV2_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='focal'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    # Set MVAPICH major, minor, and revision numbers, root and
+    # installation directories
+    export MV2_ROOT_URL='http://mvapich.cse.ohio-state.edu/download/mvapich/mv2'
+    export MV2_MAJOR='2'
+    export MV2_MINOR='3'
+    export MV2_REVISION='7'
+    export MV2_VERSION="${MV2_MAJOR}.${MV2_MINOR}.${MV2_REVISION}"
+    export MV2_ROOT_DIR='/opt/mvapich'
+    export MV2_INSTALL_DIR="${MV2_ROOT_DIR}/${MV2_VERSION}"
+
+    cd /tmp
+
+    # Download, build, and install OpenMPI with UCX support
+    wget "${MV2_ROOT_URL}/mvapich2-${MV2_VERSION}.tar.gz"
+    tar -xf "mvapich2-${MV2_VERSION}.tar.gz"
+    cd "mvapich2-${MV2_VERSION}"
+    ./configure --prefix="${MV2_INSTALL_DIR}" 
+    make -j8
+    make install
+
+    cd /tmp
+
+    # Remove MVAPICH build directory and source tarball
+    #rm -rf "mvapich2-${MV2_VERSION}"
+    #rm "mvapich2-${MV2_VERSION}.tar.gz"
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
