@@ -14,7 +14,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-mlnx-ofed-5.8-2.0.3.0
     AUTHOR_NAME Marty Kandes
     AUTHOR_EMAIL mkandes@sdsc.edu
 
-    LAST_UPDATED 20230717
+    LAST_UPDATED 20230718
 
 %setup
 
@@ -29,7 +29,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-mlnx-ofed-5.8-2.0.3.0
     export MV2_ROOT_DIR='/opt/mvapich'
     export MV2_INSTALL_DIR="${MV2_ROOT_DIR}/${MV2_VERSION}"
 
-    # Set paths to OpenMPI binaries and libraries
+    # Set paths to MVAPICH binaries and libraries
     export PATH="${MV2_INSTALL_DIR}/bin:${PATH}"
     export LD_LIBRARY_PATH="${MV2_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
 
@@ -62,7 +62,7 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-mlnx-ofed-5.8-2.0.3.0
 
     cd /tmp
 
-    # Download, build, and install OpenMPI with UCX support
+    # Download, build, and install MVAPICH
     wget "${MV2_ROOT_URL}/mvapich2-${MV2_VERSION}.tar.gz"
     tar -xf "mvapich2-${MV2_VERSION}.tar.gz"
     cd "mvapich2-${MV2_VERSION}"
@@ -73,8 +73,8 @@ From: ghcr.io/mkandes/naked-singularity:ubuntu-20.04-mlnx-ofed-5.8-2.0.3.0
     cd /tmp
 
     # Remove MVAPICH build directory and source tarball
-    #rm -rf "mvapich2-${MV2_VERSION}"
-    #rm "mvapich2-${MV2_VERSION}.tar.gz"
+    rm -rf "mvapich2-${MV2_VERSION}"
+    rm "mvapich2-${MV2_VERSION}.tar.gz"
 
     # Cleanup
     apt-get -y autoremove --purge
