@@ -93,6 +93,9 @@ OSVersion: jammy
     apt-get -y install wget
     apt-get -y install zip
 
+    # Store information about the CPU arch of the build system
+    lscpu > /.singularity.d/lscpu.txt
+
     # Cleanup
     apt-get -y autoremove --purge
     apt-get -y clean
