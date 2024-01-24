@@ -4,19 +4,22 @@ OSVersion: jammy
 
 %labels
 
-    OS_NAME ubuntu
-    OS_VERSION 22.04
-    OS_ARCH x86_64
-    OS_URL https://www.ubuntu.com
+    org.opencontainers.image.ref.name ghcr.io/mkandes/ubuntu:22.04-x86_64-2024-01-24
 
-    IMAGE_URI oras://ghcr.io/mkandes/naked-singularity:ubuntu-22.04-x86_64-20240123
-    IMAGE_MD5 deff5340f7e7867c90da65324a486622
-    IMAGE_SHA256 a35ef10be74f1ff2a640873d0bc314f94750c7518e9757ac1e5281548691e6d8
+    org.opencontainers.image.base.name
+    org.opencontainers.image.base.digest
 
-    AUTHOR_NAME Marty Kandes
-    AUTHOR_EMAIL mkandes@sdsc.edu
+    org.opencontainers.image.title ubuntu
+    org.opencontainers.image.description Ubuntu is a Debian-based Linux operating system based on free software.
+    org.opencontainers.image.url https://ubuntu.com
+    org.opencontainers.image.documentation https://ubuntu.com/server/docs
+    org.opencontainers.image.source https://github.com/ubuntu
+    org.opencontainers.image.vendor Canonical Ltd. (https://canonical.com)
+    org.opencontainers.image.licenses https://ubuntu.com/legal/intellectual-property-policy
+    org.opencontainers.image.version 22.04
+    org.opencontainers.image.revision 3
 
-    LAST_UPDATED 20240123
+    org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
 
 %setup
 
