@@ -4,7 +4,7 @@ OSVersion: jammy
 
 %labels
 
-    org.opencontainers.image.ref.name ghcr.io/mkandes/ubuntu:22.04-x86_64-2024-01-24
+    org.opencontainers.image.ref.name ghcr.io/mkandes/ubuntu:22.04-x86_64-2024-01-27
 
     org.opencontainers.image.base.name
     org.opencontainers.image.base.digest

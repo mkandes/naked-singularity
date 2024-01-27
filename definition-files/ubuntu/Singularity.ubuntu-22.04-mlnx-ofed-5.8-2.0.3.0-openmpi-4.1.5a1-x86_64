@@ -3,20 +3,20 @@ From: ghcr.io/mkandes/ubuntu:22.04-x86_64-2024-01-27
 
 %labels
 
-    org.opencontainers.image.ref.name ghcr.io/mkandes/ubuntu:22.04-mlnx-ofed-5.8-2.0.3.0-x86_64-2024-01-27
+    org.opencontainers.image.ref.name ghcr.io/mkandes/ubuntu:22.04-mlnx-ofed-5.8-2.0.3.0-openmpi-4.1.5a1-x86_64-2024-01-27
 
     org.opencontainers.image.base.name ghcr.io/mkandes/ubuntu:22.04-x86_64-2024-01-27
     org.opencontainers.image.base.digest sha256:8e42778c7cd0631b5567db203ebaddaa850a7c61f8c8cffadaec7bbaa6ac2c48
 
-    org.opencontainers.image.title mlnx-ofed 
-    org.opencontainers.image.description NVIDIA OpenFabrics Enterprise Distribution for Linux
-    org.opencontainers.image.url https://network.nvidia.com/products/infiniband-drivers/linux/mlnx_ofed/
-    org.opencontainers.image.documentation https://docs.nvidia.com/networking/display/mlnxofedv584150lts
+    org.opencontainers.image.title openmpi
+    org.opencontainers.image.description Open MPI is an open source Message Passing Interface (MPI) implementation
+    org.opencontainers.image.url https://www.open-mpi.org
+    org.opencontainers.image.documentation https://www-lb.open-mpi.org/doc/v4.1
     org.opencontainers.image.source http://www.mellanox.com/downloads/ofed/MLNX_OFED-5.8-2.0.3.0/MLNX_OFED_LINUX-5.8-2.0.3.0-ubuntu22.04-x86_64.tgz
-    org.opencontainers.image.vendor NVIDIA Corporation (https://www.nvidia.com)
-    org.opencontainers.image.licenses https://docs.nvidia.com/networking/display/mlnxofedv584150lts/legal+notices+and+3rd+party+licenses
-    org.opencontainers.image.version 5.8
-    org.opencontainers.image.revision 2.0.3.0
+    org.opencontainers.image.vendor The Open MPI Project
+    org.opencontainers.image.licenses BSD-3-Clause-Open-MPI
+    org.opencontainers.image.version 4.1.5a1
+    org.opencontainers.image.revision 1.58101
 
     org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
 
