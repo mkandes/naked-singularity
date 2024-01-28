@@ -1,0 +1,171 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/ubuntu:22.04-x86_64-2024-01-27
+
+%labels
+
+    org.opencontainers.image.ref.name ghcr.io/mkandes/ubuntu:22.04-cuda-12.1-x86_64-2024-01-28
+
+    org.opencontainers.image.base.name ghcr.io/mkandes/ubuntu:22.04-x86_64-2024-01-27
+    org.opencontainers.image.base.digest sha256:8e42778c7cd0631b5567db203ebaddaa850a7c61f8c8cffadaec7bbaa6ac2c48
+
+    org.opencontainers.image.title cuda
+    org.opencontainers.image.description NVIDIA CUDA is a parallel computing platform and programming model for creating high performance GPU-accelerated applications
+    org.opencontainers.image.url https://developer.nvidia.com/cuda-toolkit
+    org.opencontainers.image.documentation https://docs.nvidia.com/cuda/archive/12.1.1
+    org.opencontainers.image.source https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-12-1_12.1.1-1_amd64.deb
+    org.opencontainers.image.vendor NVIDIA Corporation (https://www.nvidia.com)
+    org.opencontainers.image.licenses https://docs.nvidia.com/cuda/archive/12.1.1/eula/index.html
+    org.opencontainers.image.version 12.1
+    org.opencontainers.image.revision 1
+
+    org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
+
+%setup
+
+%environment
+
+    # Set NVIDIA CUDA versions
+    export CUDA_MAJOR='12'
+    export CUDA_MINOR='1'
+    export CUDA_REVISION='1'
+    export CUDA_VERSION="${CUDA_MAJOR}.${CUDA_MINOR}.${CUDA_REVISION}"
+
+    export CUDNN_MAJOR='8'
+    export CUDNN_MINOR='9'
+    export CUDNN_REVISION='0.131'
+    export CUDNN_VERSION="${CUDNN_MAJOR}.${CUDNN_MINOR}.${CUDNN_REVISION}"
+
+    export NCCL_MAJOR='2'
+    export NCCL_MINOR='18'
+    export NCCL_REVISION='3'
+    export NCCL_VERSION="${NCCL_MAJOR}.${NCCL_MINOR}.${NCCL_REVISION}"
+
+    export TENSORRT_MAJOR='8'
+    export TENSORRT_MINOR='6'
+    export TENSORRT_REVISION='1.6'
+    export TENSORRT_VERSION="${TENSORRT_MAJOR}.${TENSORRT_MINOR}.${TENSORRT_REVISION}"
+
+    export CUTENSOR_MAJOR='2'
+    export CUTENSOR_MINOR='0'
+    export CUTENSOR_REVISION='0.7'
+    export CUTENSOR_VERSION="${CUTENSOR_MAJOR}.${CUTENSOR_MINOR}.${CUTENSOR_REVISION}"
+
+    # Set paths to CUDA binaries and libraries
+    export CUDA_HOME="/usr/local/cuda-${CUDA_MAJOR}.${CUDA_MINOR}"
+
+    export CUDNN_INCLUDE='/usr/include'
+    export CUDNN_LIB='/usr/lib/x86_64-linux-gnu'
+
+    export NCCL_INCLUDE='/usr/include'
+    export NCCL_LIB='/usr/lib/x86_64-linux-gnu'
+
+    export TENSORRT_INCLUDE='/usr/include'
+    export TENSORRT_LIB='/usr/lib/x86_64-linux-gnu'
+
+    export CUTENSOR_INCLUDE='/usr/include'
+    export CUTENSOR_LIB='/usr/lib/x86_64-linux-gnu'
+
+    export PATH="${CUDA_HOME}/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="${CUDA_HOME}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+    export LD_LIBRARY_PATH="${CUDNN_LIB}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${NCCL_LIB}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${TENSORRT_LIB}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${CUTENSOR_LIB}:${LD_LIBRARY_PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='jammy'
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    # Location of NVIDIA/CUDA repositories
+    export CUDA_ROOT_URL='http://developer.download.nvidia.com/compute'
+    export CUDA_DISTRO='ubuntu2204'
+    export CUDA_ARCH='x86_64'
+    export CUDA_REPO_URL="${CUDA_ROOT_URL}/cuda/repos/${CUDA_DISTRO}/${CUDA_ARCH}"
+    export CUDA_KEYRING_PKG='cuda-keyring_1.1-1_all.deb'
+
+    # Set NVIDIA CUDA versions
+    export CUDA_MAJOR='12'
+    export CUDA_MINOR='1'
+    export CUDA_REVISION='1'
+    export CUDA_VERSION="${CUDA_MAJOR}.${CUDA_MINOR}.${CUDA_REVISION}"
+
+    export CUDNN_MAJOR='8'
+    export CUDNN_MINOR='9'
+    export CUDNN_REVISION='0.131'
+    export CUDNN_VERSION="${CUDNN_MAJOR}.${CUDNN_MINOR}.${CUDNN_REVISION}"
+
+    export NCCL_MAJOR='2'
+    export NCCL_MINOR='18'
+    export NCCL_REVISION='3'
+    export NCCL_VERSION="${NCCL_MAJOR}.${NCCL_MINOR}.${NCCL_REVISION}"
+
+    export TENSORRT_MAJOR='8'
+    export TENSORRT_MINOR='6'
+    export TENSORRT_REVISION='1.6'
+    export TENSORRT_VERSION="${TENSORRT_MAJOR}.${TENSORRT_MINOR}.${TENSORRT_REVISION}"
+
+    export CUTENSOR_MAJOR='2'
+    export CUTENSOR_MINOR='0'
+    export CUTENSOR_REVISION='0.7'
+    export CUTENSOR_VERSION="${CUTENSOR_MAJOR}.${CUTENSOR_MINOR}.${CUTENSOR_REVISION}"
+
+    cd /tmp
+
+    # Install the new cuda-keyring package
+    # https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#network-repo-installation-for-ubuntu
+    wget "${CUDA_REPO_URL}/${CUDA_KEYRING_PKG}"
+    dpkg -i "${CUDA_KEYRING_PKG}"
+    rm "${CUDA_KEYRING_PKG}"
+
+    # Update the apt repository cache
+    apt-get update
+
+    # Install CUDA toolkit meta-package - https://developer.nvidia.com/cuda-toolkit
+    apt-get -y install "cuda-toolkit-${CUDA_MAJOR}-${CUDA_MINOR}=${CUDA_VERSION}-1"
+
+    # Install the cuDNN library - https://developer.nvidia.com/cudnn
+    apt-get -y install "libcudnn${CUDNN_MAJOR}=${CUDNN_VERSION}-1+cuda${CUDA_MAJOR}.${CUDA_MINOR}"
+    apt-get -y install "libcudnn${CUDNN_MAJOR}-dev=${CUDNN_VERSION}-1+cuda${CUDA_MAJOR}.${CUDA_MINOR}"
+
+    # Install NCCL - https://developer.nvidia.com/nccl
+    apt-get -y install "libnccl${NCCL_MAJOR}=${NCCL_VERSION}-1+cuda${CUDA_MAJOR}.${CUDA_MINOR}"
+    apt-get -y install "libnccl-dev=${NCCL_VERSION}-1+cuda${CUDA_MAJOR}.${CUDA_MINOR}"
+
+    # Install TensorRT - https://docs.nvidia.com/deeplearning/tensorrt/index.html
+    export CUDA_MINOR='0'
+    apt-get -y install "tensorrt=${TENSORRT_VERSION}-1+cuda${CUDA_MAJOR}.${CUDA_MINOR}"
+    apt-get -y install "tensorrt-dev=${TENSORRT_VERSION}-1+cuda${CUDA_MAJOR}.${CUDA_MINOR}"
+    apt-get -y install "tensorrt-libs=${TENSORRT_VERSION}-1+cuda${CUDA_MAJOR}.${CUDA_MINOR}"
+
+    # Install cuTensor - https://developer.nvidia.com/cutensor
+    apt-get -y install "libcutensor${CUTENSOR_MAJOR}=${CUTENSOR_VERSION}-1"
+    apt-get -y install "libcutensor-dev=${CUTENSOR_VERSION}-1"
+
+    # Store information about the CPU arch of the build system
+    lscpu > /.singularity.d/lscpu.txt
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
