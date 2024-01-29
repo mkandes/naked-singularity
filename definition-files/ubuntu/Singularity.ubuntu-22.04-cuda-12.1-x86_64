@@ -3,7 +3,7 @@ From: ghcr.io/mkandes/ubuntu:22.04-x86_64-2024-01-27
 
 %labels
 
-    org.opencontainers.image.ref.name ghcr.io/mkandes/ubuntu:22.04-cuda-12.1-x86_64-2024-01-28
+    org.opencontainers.image.ref.name ghcr.io/mkandes/ubuntu:22.04-cuda-12.1-x86_64-2024-01-29
 
     org.opencontainers.image.base.name ghcr.io/mkandes/ubuntu:22.04-x86_64-2024-01-27
     org.opencontainers.image.base.digest sha256:8e42778c7cd0631b5567db203ebaddaa850a7c61f8c8cffadaec7bbaa6ac2c48
@@ -25,6 +25,11 @@ From: ghcr.io/mkandes/ubuntu:22.04-x86_64-2024-01-27
 %environment
 
     # Set NVIDIA CUDA versions
+    export NVIDIA_DRIVER_MAJOR='525'
+    export NVIDIA_DRIVER_MINOR='85'
+    export NVIDIA_DRIVER_REVISION='12'
+    export NVIDIA_DRIVER_VERSION="${NVIDIA_DRIVER_MAJOR}.${NVIDIA_DRIVER_MINOR}.${NVIDIA_DRIVER_REVISION}"
+
     export CUDA_MAJOR='12'
     export CUDA_MINOR='1'
     export CUDA_REVISION='1'
@@ -97,6 +102,11 @@ From: ghcr.io/mkandes/ubuntu:22.04-x86_64-2024-01-27
     export CUDA_KEYRING_PKG='cuda-keyring_1.1-1_all.deb'
 
     # Set NVIDIA CUDA versions
+    export NVIDIA_DRIVER_MAJOR='525'
+    export NVIDIA_DRIVER_MINOR='85'
+    export NVIDIA_DRIVER_REVISION='12'
+    export NVIDIA_DRIVER_VERSION="${NVIDIA_DRIVER_MAJOR}.${NVIDIA_DRIVER_MINOR}.${NVIDIA_DRIVER_REVISION}"
+
     export CUDA_MAJOR='12'
     export CUDA_MINOR='1'
     export CUDA_REVISION='1'
@@ -132,6 +142,12 @@ From: ghcr.io/mkandes/ubuntu:22.04-x86_64-2024-01-27
 
     # Update the apt repository cache
     apt-get update
+
+    # Install NVIDIA libcompute package
+    # This package provides a set of libraries which enable the NVIDIA
+    # driver to use GPUs for parallel general purpose computation through CUDA and
+    # OpenCL. Also REQUIRED by MLNX_OFED ucx-cuda package.
+    apt-get -y install "libnvidia-compute-${NVIDIA_DRIVER_MAJOR}=${NVIDIA_DRIVER_VERSION}-0ubuntu1"
 
     # Install CUDA toolkit meta-package - https://developer.nvidia.com/cuda-toolkit
     apt-get -y install "cuda-toolkit-${CUDA_MAJOR}-${CUDA_MINOR}=${CUDA_VERSION}-1"

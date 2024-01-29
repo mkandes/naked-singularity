@@ -80,6 +80,7 @@ OSVersion: jammy
     apt-get -y update && apt-get -y upgrade
 
     # Install common packages from 'main'
+    apt-get -y install apt-utils
     apt-get -y install autoconf
     apt-get -y install automake
     apt-get -y install build-essential
