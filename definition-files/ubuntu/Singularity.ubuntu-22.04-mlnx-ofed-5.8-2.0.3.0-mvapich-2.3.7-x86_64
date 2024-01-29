@@ -1,0 +1,98 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/ubuntu:22.04-mlnx-ofed-5.8-2.0.3.0-x86_64-2024-01-27
+
+%labels
+
+    org.opencontainers.image.ref.name ghcr.io/mkandes/ubuntu:22.04-mlnx-ofed-5.8-2.0.3.0-mvapich-2.3.7-x86_64-2024-01-29
+
+    org.opencontainers.image.base.name ghcr.io/mkandes/ubuntu:22.04-mlnx-ofed-5.8-2.0.3.0-x86_64-2024-01-27
+    org.opencontainers.image.base.digest sha256:1f23167d7a774bcef54bbaea3eb399b43ba40db569e5bde411b07bb44bae647b
+
+    org.opencontainers.image.title mvapich
+    org.opencontainers.image.description MVAPICH2 is an open source implementation of Message Passing Interface (MPI) 
+    org.opencontainers.image.url https://mvapich.cse.ohio-state.edu
+    org.opencontainers.image.documentation https://mvapich.cse.ohio-state.edu/static/media/mvapich/mvapich2-userguide.html
+    org.opencontainers.image.source https://mvapich.cse.ohio-state.edu/download/mvapich/mv2/mvapich2-2.3.7-1.tar.gz
+    org.opencontainers.image.vendor Network-Based Computing Laboratory (NBCL), Ohio State Univeristy
+    org.opencontainers.image.licenses https://mvapich.cse.ohio-state.edu/static/media/mvapich/LICENSE-MV2.TXT
+    org.opencontainers.image.version 2.3.7
+    org.opencontainers.image.revision
+
+    org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
+
+%setup
+
+%environment
+
+    # Set MVAPICH major, minor, and revision numbers, root and
+    # installation directories
+    export MV2_MAJOR='2'
+    export MV2_MINOR='3'
+    export MV2_REVISION='7'
+    export MV2_VERSION="${MV2_MAJOR}.${MV2_MINOR}.${MV2_REVISION}"
+    export MV2_ROOT_DIR='/opt/mvapich'
+    export MV2_INSTALL_DIR="${MV2_ROOT_DIR}/${MV2_VERSION}"
+
+    # Set paths to MVAPICH binaries and libraries
+    export PATH="${MV2_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${MV2_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='jammy'
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    # Set MVAPICH major, minor, and revision numbers, root and
+    # installation directories
+    export MV2_ROOT_URL='http://mvapich.cse.ohio-state.edu/download/mvapich/mv2'
+    export MV2_MAJOR='2'
+    export MV2_MINOR='3'
+    export MV2_REVISION='7'
+    export MV2_VERSION="${MV2_MAJOR}.${MV2_MINOR}.${MV2_REVISION}"
+    export MV2_ROOT_DIR='/opt/mvapich'
+    export MV2_INSTALL_DIR="${MV2_ROOT_DIR}/${MV2_VERSION}"
+
+    cd /tmp
+
+    # Download, build, and install MVAPICH
+    wget "${MV2_ROOT_URL}/mvapich2-${MV2_VERSION}.tar.gz"
+    tar -xf "mvapich2-${MV2_VERSION}.tar.gz"
+    cd "mvapich2-${MV2_VERSION}"
+    export FFLAGS='-fallow-argument-mismatch'
+    ./configure --prefix="${MV2_INSTALL_DIR}"
+    make -j8
+    make install
+
+    cd /tmp
+
+    # Remove MVAPICH build directory and source tarball
+    rm -rf "mvapich2-${MV2_VERSION}"
+    rm "mvapich2-${MV2_VERSION}.tar.gz"
+
+    # Store information about the CPU arch of the build system
+    lscpu > /.singularity.d/lscpu.txt
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
