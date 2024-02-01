@@ -1,15 +1,15 @@
 Bootstrap: oras
-From: ghcr.io/mkandes/ubuntu:22.04-mlnx-ofed-5.8-2.0.3.0-x86_64-2024-01-27
+From: ghcr.io/mkandes/ubuntu:22.04-cuda-12.1-mlnx-ofed-5.8-2.0.3.0-x86_64-2024-01-29
 
 %labels
 
-    org.opencontainers.image.ref.name ghcr.io/mkandes/ubuntu:22.04-mlnx-ofed-5.8-2.0.3.0-mvapich-2.3.7-x86_64-2024-01-29
+    org.opencontainers.image.ref.name ghcr.io/mkandes/ubuntu:22.04-cuda-12.1-mlnx-ofed-5.8-2.0.3.0-mvapich-2.3.7-x86_64-2024-01-31
 
-    org.opencontainers.image.base.name ghcr.io/mkandes/ubuntu:22.04-mlnx-ofed-5.8-2.0.3.0-x86_64-2024-01-27
-    org.opencontainers.image.base.digest sha256:1f23167d7a774bcef54bbaea3eb399b43ba40db569e5bde411b07bb44bae647b
+    org.opencontainers.image.base.name ghcr.io/mkandes/ubuntu:22.04-cuda-12.1-mlnx-ofed-5.8-2.0.3.0-x86_64-2024-01-29
+    org.opencontainers.image.base.digest sha256:be13ce06c595381baf6f7766adf0c19f18e299156c360ab3050caeecf36130ea
 
     org.opencontainers.image.title mvapich
-    org.opencontainers.image.description MVAPICH2 is an open source implementation of Message Passing Interface (MPI) 
+    org.opencontainers.image.description MVAPICH2 is an open source implementation of Message Passing Interface (MPI)
     org.opencontainers.image.url https://mvapich.cse.ohio-state.edu
     org.opencontainers.image.documentation https://mvapich.cse.ohio-state.edu/static/media/mvapich/mvapich2-userguide.html
     org.opencontainers.image.source https://mvapich.cse.ohio-state.edu/download/mvapich/mv2/mvapich2-2.3.7-1.tar.gz
@@ -51,8 +51,8 @@ From: ghcr.io/mkandes/ubuntu:22.04-mlnx-ofed-5.8-2.0.3.0-x86_64-2024-01-27
     # Set debian frontend interface
     export DEBIAN_FRONTEND='noninteractive'
 
-    # Upgrade all software packages to their latest versions
-    apt-get -y update && apt-get -y upgrade
+    # DO NOT Upgrade all software packages to their latest versions
+    # apt-get -y update && apt-get -y upgrade
 
     # Set MVAPICH major, minor, and revision numbers, root and
     # installation directories
@@ -71,7 +71,7 @@ From: ghcr.io/mkandes/ubuntu:22.04-mlnx-ofed-5.8-2.0.3.0-x86_64-2024-01-27
     tar -xf "mvapich2-${MV2_VERSION}.tar.gz"
     cd "mvapich2-${MV2_VERSION}"
     export FFLAGS='-fallow-argument-mismatch'
-    ./configure --prefix="${MV2_INSTALL_DIR}" --enable-fast
+    ./configure --prefix="${MV2_INSTALL_DIR}" --enable-cuda --with-cuda="${CUDA_HOME}" --with-cuda-include="${CUDA_HOME}/include" --with-cuda-libpath="${CUDA_HOME}/lib64" --enable-fast=all --with-hwloc=v2
     make -j8
     make install
 
