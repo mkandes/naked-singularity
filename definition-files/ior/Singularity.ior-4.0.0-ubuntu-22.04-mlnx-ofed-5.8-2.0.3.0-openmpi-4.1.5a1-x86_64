@@ -1,0 +1,96 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/ubuntu:22.04-mlnx-ofed-5.8-2.0.3.0-openmpi-4.1.5a1-x86_64-2024-01-27
+
+%labels
+
+    org.opencontainers.image.ref.name ghcr.io/mkandes/ior:4.0.0-ubuntu-22.04-mlnx-ofed-5.8-2.0.3.0-openmpi-4.1.5a1-x86_64
+
+    org.opencontainers.image.base.name ghcr.io/mkandes/ubuntu:22.04-mlnx-ofed-5.8-2.0.3.0-openmpi-4.1.5a1-x86_64-2024-02-05
+    org.opencontainers.image.base.digest sha256:1f23167d7a774bcef54bbaea3eb399b43ba40db569e5bde411b07bb44bae647b
+
+    org.opencontainers.image.title ior
+    org.opencontainers.image.description IOR is a parallel IO benchmark that can be used to test the performance of parallel storage systems using various interfaces and access patterns.
+    org.opencontainers.image.url https://ior.readthedocs.io/en/latest/index.html
+    org.opencontainers.image.documentation https://ior.readthedocs.io/en/latest/index.html
+    org.opencontainers.image.source https://github.com/hpc/ior.git
+    org.opencontainers.image.vendor https://github.com/hpc
+    org.opencontainers.image.licenses https://github.com/hpc/ior/blob/main/COPYRIGHT
+    org.opencontainers.image.version 4.0.0
+    org.opencontainers.image.revision 967a9f65109760db8a3ac14a7fdd007f337d2960 
+
+    org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
+
+%setup
+
+%environment
+
+    # Set IOR version number, root and installation directories
+    export IOR_REPO_URL='https://github.com/hpc/ior.git'
+    export IOR_MAJOR='4'
+    export IOR_MINOR='0'
+    export IOR_REVISION='0'
+    export IOR_VERSION="${IOR_MAJOR}.${IOR_MINOR}.${IOR_REVISION}"
+    export IOR_ROOT_DIR='/opt/ior'
+    export IOR_INSTALL_DIR="${IOR_ROOT_DIR}/${IOR_VERSION}"
+
+    # Set path to IOR binary and libraries
+    export PATH="${IOR_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${IOR_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='jammy'
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    # Set IOR version number, root and installation directories
+    export IOR_REPO_URL='https://github.com/hpc/ior.git'
+    export IOR_MAJOR='4'
+    export IOR_MINOR='0'
+    export IOR_REVISION='0'
+    export IOR_VERSION="${IOR_MAJOR}.${IOR_MINOR}.${IOR_REVISION}"
+    export IOR_ROOT_DIR='/opt/ior'
+    export IOR_INSTALL_DIR="${IOR_ROOT_DIR}/${IOR_VERSION}"
+
+    cd /tmp
+
+    # Download, build, and install IOR
+    git clone "${IOR_REPO_URL}"
+    cd ior
+    git checkout "${IOR_VERSION}"
+    ./bootstrap
+    ./configure --prefix="${IOR_INSTALL_DIR}"
+    make
+    make install
+
+    cd /tmp
+
+    # Remove IOR build directory and source repository
+    rm -rf ior
+
+    # Store information about the CPU arch of the build system
+    lscpu > /.singularity.d/lscpu.txt
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
