@@ -1,0 +1,106 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/ubuntu:22.04-x86_64-2024-01-27
+
+%labels
+
+    org.opencontainers.image.ref.name ghcr.io/mkandes/stream:5.10-ubuntu-22.04-x86_64-2024-02-07
+
+    org.opencontainers.image.base.name ghcr.io/mkandes/ubuntu:22.04-x86_64-2024-01-27
+    org.opencontainers.image.base.digest sha256:8e42778c7cd0631b5567db203ebaddaa850a7c61f8c8cffadaec7bbaa6ac2c48
+
+    org.opencontainers.image.title stream
+    org.opencontainers.image.description STREAM is a simple synthetic benchmark program that measures sustainable memory bandwidth (in MB/s) and the corresponding computation rate for simple vector kernels. 
+    org.opencontainers.image.url https://www.cs.virginia.edu/stream
+    org.opencontainers.image.documentation https://www.cs.virginia.edu/stream/ref.html
+    org.opencontainers.image.source https://www.cs.virginia.edu/stream/FTP/Code
+    org.opencontainers.image.vendor John D. McCalpin, Department of Computer Science, School of Engineering and Applied Science, University of Virginia, Charlottesville
+    org.opencontainers.image.licenses https://www.cs.virginia.edu/stream/FTP/Code/LICENSE.txt
+    org.opencontainers.image.version 5.10
+    org.opencontainers.image.revision
+
+    org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
+
+%setup
+
+%environment
+
+    # Set STREAM version number, root and installation directories
+    export STREAM_ROOT_URL='http://www.cs.virginia.edu/stream/FTP/Code/'
+    export STREAM_MAJOR='5'
+    export STREAM_MINOR='10'
+    export STREAM_VERSION="${STREAM_MAJOR}.${STREAM_MINOR}"
+    export STREAM_ROOT_DIR='/opt/stream'
+    export STREAM_INSTALL_DIR="${STREAM_ROOT_DIR}/${STREAM_VERSION}"
+
+    # Set path to stream binary
+    export PATH="${STREAM_INSTALL_DIR}/bin:${PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='jammy'
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    # Set STREAM version number, root and installation directories
+    export STREAM_ROOT_URL='http://www.cs.virginia.edu/stream/FTP/Code/'
+    export STREAM_MAJOR='5'
+    export STREAM_MINOR='10'
+    export STREAM_VERSION="${STREAM_MAJOR}.${STREAM_MINOR}"
+    export STREAM_ROOT_DIR='/opt/stream'
+    export STREAM_INSTALL_DIR="${STREAM_ROOT_DIR}/${STREAM_VERSION}"
+
+    cd /opt
+
+    # Download, build, and install STREAM
+    mkdir -p "${STREAM_INSTALL_DIR}/bin"
+    cd "${STREAM_INSTALL_DIR}"
+    wget -r -np -nH --cut-dirs=1 --reject "index.html*" \
+      "http://www.cs.virginia.edu/stream/FTP/Code/"
+
+    STREAM_ARRAY_SIZE_EXPONENT_BEGIN=13
+    STREAM_ARRAY_SIZE_EXPONENT_END=36
+    for (( n = "${STREAM_ARRAY_SIZE_EXPONENT_BEGIN}"; \
+           n <= "${STREAM_ARRAY_SIZE_EXPONENT_END}"; \
+           n++ )); do
+      STREAM_ARRAY_SIZES+=("$((2**${n}))")
+    done
+
+    STREAM_NTIMES=100
+    STREAM_OFFSET=0
+
+    for STREAM_ARRAY_SIZE in "${STREAM_ARRAY_SIZES[@]}"; do
+      gcc -Ofast -march=native -fopenmp -mcmodel=large \
+        -DSTREAM_ARRAY_SIZE="${STREAM_ARRAY_SIZE}" \
+        -DNTIMES="${STREAM_NTIMES}" \
+        -DOFFSET="${STREAM_OFFSET}" \
+        -o stream_omp."${STREAM_ARRAY_SIZE}.x" FTP/Code/stream.c
+    done
+
+    mv *.x "${STREAM_INSTALL_DIR}/bin"
+
+    # Store information about the CPU arch of the build system
+    lscpu > /.singularity.d/lscpu.txt
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
