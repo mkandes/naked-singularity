@@ -1,0 +1,227 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/ubuntu:22.04-cuda-12.1-mlnx-ofed-5.8-2.0.3.0-openmpi-4.1.5a1-x86_64-2024-01-29
+
+%labels
+
+    org.opencontainers.image.ref.name ghcr.io/mkandes/tensorflow:2.15.0-ubuntu-22.04-cuda-12.1-mlnx-ofed-5.8-2.0.3.0-openmpi-4.1.5a1-x86_64-2024-02-11
+
+    org.opencontainers.image.base.name ghcr.io/mkandes/ubuntu:22.04-cuda-12.1-mlnx-ofed-5.8-2.0.3.0-openmpi-4.1.5a1-x86_64-2024-01-29
+    org.opencontainers.image.base.digest sha256:be13ce06c595381baf6f7766adf0c19f18e299156c360ab3050caeecf36130ea
+
+    org.opencontainers.image.title tensorflow
+    org.opencontainers.image.description TensorFlow is an end-to-end open source platform for machine learning
+    org.opencontainers.image.url https://www.tensorflow.org
+    org.opencontainers.image.documentation https://www.tensorflow.org/guide
+    org.opencontainers.image.source https://github.com/tensorflow/tensorflow.git
+    org.opencontainers.image.vendor Google
+    org.opencontainers.image.licenses Apache-2.0
+    org.opencontainers.image.version 2.15.0
+    org.opencontainers.image.revision 6887368d6d46223f460358323c4b76d61d1558a8
+
+    org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
+
+%setup
+
+%environment
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='jammy'
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # DO NOT Upgrade all software packages to their latest versions
+    # apt-get -y update && apt-get -y upgrade
+
+    # Install Python and the TensorFlow package dependencies
+    # https://www.tensorflow.org/install/source#install_python_and_the_tensorflow_package_dependencies
+    apt-get -y install python3-dev
+    apt-get -y install python3-pip
+    pip3 install numpy 
+    pip3 install wheel 
+    pip3 install packaging 
+    pip3 install requests 
+    pip3 install opt_einsum
+
+    # Install Bazel dependencies and prerequisites
+    # https://bazel.build/install/compile-source#bootstrap-bazel
+    apt-get -y install g++
+    apt-get -y install unzip
+    apt-get -y install zip
+    apt-get -y install git
+    apt-get -y install git-lfs
+    apt-get -y install openjdk-11-jdk
+
+    # Set Bazel version number
+    export BAZEL_VERSION='6.1.0'
+
+    cd /tmp
+
+    # Download, build, and install Bazel
+    mkdir -p "bazel/${BAZEL_VERSION}"
+    cd "bazel/${BAZEL_VERSION}"
+    wget "https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/bazel-${BAZEL_VERSION}-dist.zip"
+    unzip -o "bazel-${BAZEL_VERSION}-dist.zip"
+    export EXTRA_BAZEL_ARGS="--tool_java_runtime_version=local_jdk"
+    ln -s /usr/bin/python3 /usr/bin/python
+    ./compile.sh
+
+    # Set path to Bazel
+    export PATH="/tmp/bazel/${BAZEL_VERSION}/output:${PATH}"
+
+    # Download and install Clang
+    # https://www.tensorflow.org/install/source#install_clang_recommended_linux_only
+    add-apt-repository -y deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-16 main
+    wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+    apt-get -y update
+    apt-get -y install llvm-16 
+    apt-get -y install clang-16
+
+    # Install common mathematical and scientific python3 packages
+    pip3 install scipy
+    pip3 install pandas
+    pip3 install scikit-learn
+    pip3 install scikit-image
+    pip3 install scikit-optimize
+    pip3 install statsmodels
+    pip3 install matplotlib
+    pip3 install plotly
+    pip3 install seaborn
+    pip3 install astropy
+    pip3 install biopython
+    pip3 install h5py
+    pip3 install nltk
+    pip3 install sympy
+    pip3 install netcdf4
+
+    # Install JupyterLab
+    pip3 install jupyter
+    pip3 install jupyterlab
+
+    # Install mpi4py
+    pip3 install mpi4py
+
+    # Install additional dependencies for TensorFlow
+    pip3 install keras_preprocessing --no-deps
+    pip3 install patchelf
+
+    # Set TensorFlow version number
+    export TF_MAJOR='2'
+    export TF_MINOR='15'
+    export TF_REVISION='0'
+    export TF_VERSION="${TF_MAJOR}.${TF_MINOR}.${TF_REVISION}"
+
+    cd /tmp
+
+    # Download, build, and install TensorFlow
+    # https://www.tensorflow.org/install/source#download_the_tensorflow_source_code
+    git clone https://github.com/tensorflow/tensorflow.git
+    cd tensorflow
+    git checkout "v${TF_VERSION}"
+    export PYTHON_BIN_PATH='/usr/bin/python3'
+    export PYTHON_LIB_PATH='/usr/lib/python3/dist-packages'
+    export TF_ENABLE_XLA=1
+    export TF_NEED_ROCM=0
+    export TF_NEED_OPENCL_SYCL=0
+    export TF_NEED_CUDA=1
+    export TF_NEED_TENSORRT=1
+    export TF_CUDA_CLANG=0
+    export TF_CUDA_COMPUTE_CAPABILITIES='7.0,8.0'
+    export CUDA_TOOLKIT_PATH="${CUDA_HOME}"
+    #export CLANG_CUDA_COMPILER_PATH='/usr/lib/llvm-16/bin/clang'
+    export CC_OPT_FLAGS='-mtune=generic'
+    export TF_SET_ANDROID_WORKSPACE=0
+    export TF_NEED_MPI=1
+    export MPI_HOME="${OMPI_INSTALL_DIR}"
+    #bazel build --local_ram_resources 8192 --local_cpu_resources 4 --compilation_mode='opt' --config='cuda_clang' --config='xla' --config='v2' --copt='-Xclang' --copt='-fcuda-allow-variadic-functions' --verbose_failures //tensorflow/tools/pip_package:build_pip_package
+    bazel build --local_ram_resources 8192 --local_cpu_resources 4 --compilation_mode='opt' --config='cuda' --config='xla' --config='v2' --verbose_failures //tensorflow/tools/pip_package:build_pip_package
+    bazel-bin/tensorflow/tools/pip_package/build_pip_package tensorflow_pkg
+    pip3 install "tensorflow_pkg/tensorflow-${TF_VERSION}-cp310-cp310-linux_x86_64.whl"
+
+    # Set Horovod version number
+    export HOROVOD_MAJOR='0'
+    export HOROVOD_MINOR='28'
+    export HOROVOD_REVISION='1'
+    export HOROVOD_VERSION="${HOROVOD_MAJOR}.${HOROVOD_MINOR}.${HOROVOD_REVISION}"
+
+    cd /tmp
+
+    # Download, build, and install Horovod with TensorFlow + NVIDIA GPU support 
+    git clone --recursive https://github.com/horovod/horovod.git
+    cd horovod
+    git checkout "v${HOROVOD_VERSION}"
+    export HOROVOD_WITHOUT_PYTORCH=1
+    export HOROVOD_WITHOUT_MXNET=1
+    export HOROVOD_WITH_TENSORFLOW=1
+    export HOROVOD_WITH_MPI=1
+    export HOROVOD_WITH_GLOO=1
+    export HOROVOD_GPU='CUDA'
+    export HOROVOD_CUDA_HOME="${CUDA_HOME}"
+    export HOROVOD_BUILD_CUDA_CC_LIST='70,80'
+    export HOROVOD_GPU_OPERATIONS='NCCL'
+    export HOROVOD_NCCL_INCLUDE="${NCCL_INCLUDE}"
+    export HOROVOD_NCCL_LIB="${NCCL_LIB}"
+    pip3 install -v -e .
+
+    # Install TensorFlow tools, extentions, and related packages.
+    pip3 install tensorboard==2.15.2
+    pip3 install tensorboard-plugin-profile==2.15.1
+    pip3 install tensorflow-compression==2.15.0
+    pip3 install tensorflow-datasets==4.9.4
+    pip3 install tensorflow-decision-forests==1.8.1
+    pip3 install tensorflow-hub==0.16.1
+    pip3 install tensorflow-lattice==2.0.13
+    pip3 install tensorflow-model-optimization==0.8.0
+    pip3 install tensorflow-recommenders==0.7.3
+    pip3 install tensorflow-text==2.15.0
+    pip3 install tensorflow-addons==0.23.0
+    pip3 install tensorflow-io==0.36.0
+
+    #pip3 install tensorflow-data-validation==1.14.0
+    #pip3 install tensorflow-gan==2.1.0
+    #pip install tensorflow-gnn==1.0.2
+    #pip3 install tensorflow-privacy==0.8.12
+    #pip install tensorflow-probability==0.23.0
+    #pip3 install tensorflow-transform==1.14.0
+    #pip install tf-agents==0.19.0
+
+    # Intall Keras Tuner
+    pip3 install keras-tuner==1.4.6
+
+    # Set tf2onnx version
+    export TF2ONNX_MAJOR='1'
+    export TF2ONNX_MINOR='16'
+    export TF2ONNX_REVISION='1'
+    export TF2ONNX_VERSION="${TF2ONNX_MAJOR}.${TF2ONNX_MINOR}.${TF2ONNX_REVISION}"
+  
+    cd /tmp
+
+    # Download, build, and install tf2onnx
+    git clone https://github.com/onnx/tensorflow-onnx.git
+    cd tensorflow-onnx
+    git checkout "v${TF2ONNX_VERSION}"
+    python3 setup.py install
+
+    # Store information about the CPU arch of the build system
+    lscpu > /.singularity.d/lscpu.txt
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test

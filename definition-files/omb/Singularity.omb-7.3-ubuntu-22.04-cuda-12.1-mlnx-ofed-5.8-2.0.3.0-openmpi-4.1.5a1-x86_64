@@ -5,7 +5,7 @@ From: ghcr.io/mkandes/ubuntu:22.04-cuda-12.1-mlnx-ofed-5.8-2.0.3.0-openmpi-4.1.5
 
     org.opencontainers.image.ref.name ghcr.io/mkandes/omb:7.3-ubuntu-22.04-cuda-12.1-mlnx-ofed-5.8-2.0.3.0-openmpi-4.1.5a1-x86_64-2024-01-30
 
-    org.opencontainers.image.base.name ghcr.io/mkandes/ubuntu:22.04-mlnx-ofed-5.8-2.0.3.0-openmpi-4.1.5a1-x86_64-2024-01-29
+    org.opencontainers.image.base.name ghcr.io/mkandes/ubuntu:22.04-cuda-12.1-mlnx-ofed-5.8-2.0.3.0-openmpi-4.1.5a1-x86_64-2024-01-29
     org.opencontainers.image.base.digest sha256:be13ce06c595381baf6f7766adf0c19f18e299156c360ab3050caeecf36130ea
 
     org.opencontainers.image.title omb
