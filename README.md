@@ -67,13 +67,14 @@ an existing container definition, then please submit a pull request.
 Marty Kandes, Ph.D.  
 Computational & Data Science Research Specialist  
 High-Performance Computing User Services Group  
+Data-Enabled Scientific Computing Division
 San Diego Supercomputer Center  
 University of California, San Diego  
 
 ## Version
 
-3.3.7
+3.3.8
 
 ## Last Updated
 
-Sunday, February 11th, 2024
+Tuesday, February 20th, 2024

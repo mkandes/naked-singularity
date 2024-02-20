@@ -40,8 +40,9 @@ From: ghcr.io/mkandes/ubuntu:22.04-x86_64-2024-01-27
     export OMPI_INSTALL_DIR="${OMPI_ROOT_DIR}/openmpi-${OMPI_VERSION}"
 
     # Set paths to OpenMPI binaries and libraries
-    export PATH="${OMPI_INSTALL_DIR}/bin:${PATH}"
-    export LD_LIBRARY_PATH="${OMPI_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+    export MPI_HOME="${OMPI_INSTALL_DIR}"
+    export PATH="${MPI_HOME}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${MPI_HOME}/lib:${LD_LIBRARY_PATH}"
 
 %post -c /bin/bash
 
