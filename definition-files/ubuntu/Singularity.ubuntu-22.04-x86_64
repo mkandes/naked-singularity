@@ -4,7 +4,7 @@ OSVersion: jammy
 
 %labels
 
-    org.opencontainers.image.ref.name ghcr.io/mkandes/ubuntu:22.04-x86_64-2024-01-27
+    org.opencontainers.image.ref.name ghcr.io/mkandes/ubuntu:22.04-x86_64
 
     org.opencontainers.image.base.name
     org.opencontainers.image.base.digest
@@ -17,7 +17,7 @@ OSVersion: jammy
     org.opencontainers.image.vendor Canonical Ltd. (https://canonical.com)
     org.opencontainers.image.licenses https://ubuntu.com/legal/intellectual-property-policy
     org.opencontainers.image.version 22.04
-    org.opencontainers.image.revision 3
+    org.opencontainers.image.revision 4
 
     org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
 
@@ -94,8 +94,8 @@ OSVersion: jammy
     apt-get -y install wget
     apt-get -y install zip
 
-    # Store information about the CPU arch of the build system
-    lscpu > /.singularity.d/lscpu.txt
+    # Store information about the container image build system
+    lscpu > /opt/lscpu.txt
 
     # Cleanup
     apt-get -y autoremove --purge
