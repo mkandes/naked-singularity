@@ -65,15 +65,15 @@ an existing container definition, then please submit a pull request.
 ## Author
 
 Marty Kandes, Ph.D.  
-Computational & Data Science Research Specialist  
-High-Performance Computing User Services Group  
-Data-Enabled Scientific Computing Division
+Computational & Data Science Research Specialist 
+High-Performance Computing User Services Group 
+Data-Enabled Scientific Computing Division 
 San Diego Supercomputer Center  
 University of California, San Diego  
 
 ## Version
 
-3.4.3
+3.4.5
 
 ## Last Updated
 
