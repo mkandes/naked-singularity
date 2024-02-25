@@ -6,7 +6,7 @@ From: ghcr.io/mkandes/ubuntu:22.04-x86_64
     org.opencontainers.image.ref.name ghcr.io/mkandes/cuda:12.1-ubuntu-22.04-x86_64
 
     org.opencontainers.image.base.name ghcr.io/mkandes/ubuntu:22.04-x86_64
-    org.opencontainers.image.base.digest sha256:d98530d984a7f63a2b6567d03c3b242434360010659bca0178557926d2052563
+    org.opencontainers.image.base.digest sha256:c2337050c2d059c894318659bf5fcc9edb459b17f23bc2274bc6c1c4cc279d36
 
     org.opencontainers.image.title cuda
     org.opencontainers.image.description NVIDIA CUDA is a parallel computing platform and programming model for creating high performance GPU-accelerated applications
@@ -110,6 +110,8 @@ From: ghcr.io/mkandes/ubuntu:22.04-x86_64
 
     # Upgrade all software packages to their latest versions
     apt-get -y update && apt-get -y upgrade
+
+    cd /tmp
 
     # Set NVIDIA driver version
     export NV_DRIVER_MAJ='525'
