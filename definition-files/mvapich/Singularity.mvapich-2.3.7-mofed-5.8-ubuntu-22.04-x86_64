@@ -1,0 +1,109 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/mofed:5.8-ubuntu-22.04-x86_64
+
+%labels
+
+    org.opencontainers.image.ref.name ghcr.io/mkandes/mvapich:2.3.7-mofed-5.8-ubuntu-22.04-x86_64
+
+    org.opencontainers.image.base.name ghcr.io/mkandes/mofed:5.8-ubuntu-22.04-x86_64
+    org.opencontainers.image.base.digest sha256:5f3ccde49a9811edb1b55310ef6a443c901773a684259e413975126d01b79d74
+
+    org.opencontainers.image.title mvapich
+    org.opencontainers.image.description MVAPICH2 is an open source implementation of Message Passing Interface (MPI)
+    org.opencontainers.image.url https://mvapich.cse.ohio-state.edu
+    org.opencontainers.image.documentation https://mvapich.cse.ohio-state.edu/static/media/mvapich/mvapich2-userguide.html
+    org.opencontainers.image.source https://mvapich.cse.ohio-state.edu/download/mvapich/mv2/mvapich2-2.3.7-1.tar.gz
+    org.opencontainers.image.vendor Network-Based Computing Laboratory (NBCL), Ohio State Univeristy
+    org.opencontainers.image.licenses https://mvapich.cse.ohio-state.edu/static/media/mvapich/LICENSE-MV2.TXT
+    org.opencontainers.image.version 2.3.7-1
+    org.opencontainers.image.revision
+
+    org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
+
+%setup
+
+%environment
+
+    # Set MVAPICH version and install path
+    export MV2_MAJOR='2'
+    export MV2_MINOR='3'
+    export MV2_REVISION='7-1'
+    export MV2_VERSION="${MV2_MAJOR}.${MV2_MINOR}.${MV2_REVISION}"
+    export MV2_ROOT_DIR='/opt/mvapich'
+    export MV2_INSTALL_DIR="${MV2_ROOT_DIR}/${MV2_VERSION}"
+
+    # Set paths to MVAPICH binaries and libraries
+    export PATH="${MV2_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${MV2_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='jammy'
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set Mellanox OFED version, operating system, and platform architecture
+    export MOFED_MAJ='5'
+    export MOFED_MIN='8'
+    export MOFED_REV='2.0.3.0'
+    export MOFED_VER="${MOFED_MAJ}.${MOFED_MIN}-${MOFED_REV}"
+    export MOFED_OS='ubuntu22.04'
+    export MOFED_ARCH='x86_64'
+
+    # Set paths to additional Mellanox OFED binaries and libraries
+    export PATH="/opt/mellanox/hcoll/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/mellanox/hcoll/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/mellanox/sharp/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/mellanox/sharp/lib:${LD_LIBRARY_PATH}"
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    cd /tmp
+
+    # Set MVAPICH version and install path
+    export MV2_MAJOR='2'
+    export MV2_MINOR='3'
+    export MV2_REVISION='7-1'
+    export MV2_VERSION="${MV2_MAJOR}.${MV2_MINOR}.${MV2_REVISION}"
+    export MV2_ROOT_DIR='/opt/mvapich'
+    export MV2_INSTALL_DIR="${MV2_ROOT_DIR}/${MV2_VERSION}"
+
+    # Download, build, and install MVAPICH
+    wget "http://mvapich.cse.ohio-state.edu/download/mvapich/mv2/mvapich2-${MV2_VERSION}.tar.gz"
+    tar -xf "mvapich2-${MV2_VERSION}.tar.gz"
+    cd "mvapich2-${MV2_VERSION}"
+    export FFLAGS='-fallow-argument-mismatch'
+    ./configure --prefix="${MV2_INSTALL_DIR}" --enable-fast
+    make -j4
+    make install
+
+    cd /tmp
+
+    # Remove MVAPICH build directory and source tarball
+    rm -rf "mvapich2-${MV2_VERSION}"
+    rm "mvapich2-${MV2_VERSION}.tar.gz"
+
+    # Store information about the container image build system
+    lscpu > /opt/lscpu.txt
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
