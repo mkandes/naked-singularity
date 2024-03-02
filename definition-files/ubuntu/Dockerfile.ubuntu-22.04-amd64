@@ -14,7 +14,7 @@ LABEL org.opencontainers.image.source='https://launchpad.net/ubuntu/jammy'
 LABEL org.opencontainers.image.vendor='Canonical Ltd. https://canonical.com'
 LABEL org.opencontainers.image.licenses='https://ubuntu.com/legal/intellectual-property-policy'
 LABEL org.opencontainers.image.version='22.04'
-LABEL org.opencontainers.image.revision='3'
+LABEL org.opencontainers.image.revision='4'
 LABEL org.opencontainers.image.authors='Marty Kandes mkandes@sdsc.edu'
 
 ENV MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
