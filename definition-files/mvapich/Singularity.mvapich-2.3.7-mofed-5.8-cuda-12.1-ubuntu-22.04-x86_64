@@ -1,0 +1,179 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/mofed:5.8-cuda-12.1-ubuntu-22.04-x86_64
+
+%labels
+
+    org.opencontainers.image.ref.name ghcr.io/mkandes/mvapich:2.3.7-mofed-5.8-cuda-12.1-ubuntu-22.04-x86_64
+
+    org.opencontainers.image.base.name ghcr.io/mkandes/mofed:5.8-cuda-12.1-ubuntu-22.04-x86_64
+    org.opencontainers.image.base.digest sha256:59c538c41917686ed1d2117d626342009cbc44b7ebaacde40b6085bb46c1b9c4
+
+    org.opencontainers.image.title mvapich
+    org.opencontainers.image.description MVAPICH2 is an open source implementation of Message Passing Interface (MPI)
+    org.opencontainers.image.url https://mvapich.cse.ohio-state.edu
+    org.opencontainers.image.documentation https://mvapich.cse.ohio-state.edu/static/media/mvapich/mvapich2-userguide.html
+    org.opencontainers.image.source https://mvapich.cse.ohio-state.edu/download/mvapich/mv2/mvapich2-2.3.7-1.tar.gz
+    org.opencontainers.image.vendor Network-Based Computing Laboratory (NBCL), Ohio State Univeristy
+    org.opencontainers.image.licenses https://mvapich.cse.ohio-state.edu/static/media/mvapich/LICENSE-MV2.TXT
+    org.opencontainers.image.version 2.3.7-1
+    org.opencontainers.image.revision
+
+    org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
+
+%setup
+
+%environment
+
+    # Set MVAPICH version and install path
+    export MV2_MAJOR='2'
+    export MV2_MINOR='3'
+    export MV2_REVISION='7-1'
+    export MV2_VERSION="${MV2_MAJOR}.${MV2_MINOR}.${MV2_REVISION}"
+    export MV2_ROOT_DIR='/opt/mvapich'
+    export MV2_INSTALL_DIR="${MV2_ROOT_DIR}/${MV2_VERSION}"
+
+    # Set paths to MVAPICH binaries and libraries
+    export PATH="${MV2_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${MV2_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='jammy'
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set NVIDIA driver and CUDA versions
+    export NV_DRIVER_MAJ='525'
+    export NV_DRIVER_MIN='85'
+    export NV_DRIVER_REV='12'
+    export NV_DRIVER_VER="${NV_DRIVER_MAJ}.${NV_DRIVER_MIN}.${NV_DRIVER_REV}"
+
+    export CUDA_MAJ='12'
+    export CUDA_MIN='1'
+    export CUDA_REV='1'
+    export CUDA_VER="${CUDA_MAJ}.${CUDA_MIN}.${CUDA_REV}"
+
+    export CUDNN_MAJ='8'
+    export CUDNN_MIN='9'
+    export CUDNN_REV='0.131'
+    export CUDNN_VER="${CUDNN_MAJ}.${CUDNN_MIN}.${CUDNN_REV}"
+
+    export NCCL_MAJ='2'
+    export NCCL_MIN='18'
+    export NCCL_REV='3'
+    export NCCL_VER="${NCCL_MAJ}.${NCCL_MIN}.${NCCL_REV}"
+
+    export TENSORRT_MAJ='8'
+    export TENSORRT_MIN='6'
+    export TENSORRT_REV='1.6'
+    export TENSORRT_VER="${TENSORRT_MAJ}.${TENSORRT_MIN}.${TENSORRT_REV}"
+
+    export CUTENSOR_MAJ='2'
+    export CUTENSOR_MIN='0'
+    export CUTENSOR_REV='0.7'
+    export CUTENSOR_VER="${CUTENSOR_MAJ}.${CUTENSOR_MIN}.${CUTENSOR_REV}"
+
+    export CUSPARSELT_MAJ='0'
+    export CUSPARSELT_MIN='5'
+    export CUSPARSELT_REV='2.1'
+    export CUSPARSELT_VER="${CUSPARSELT_MAJ}.${CUSPARSELT_MIN}.${CUSPARSELT_REV}"
+
+    # Set paths to CUDA binaries and libraries
+    export CUDA_HOME="/usr/local/cuda-${CUDA_MAJ}.${CUDA_MIN}"
+    export CUDNN_INCLUDE_DIR='/usr/include'
+    export CUDNN_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+    export NCCL_INCLUDE_DIR='/usr/include'
+    export NCCL_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+    export TENSORRT_INCLUDE_DIR='/usr/include'
+    export TENSORRT_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+    export CUTENSOR_INCLUDE_DIR='/usr/include'
+    export CUTENSOR_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+    export CUSPARSELT_INCLUDE_DIR='/usr/include'
+    export CUSPARSELT_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+    export PATH="${CUDA_HOME}/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="${CUDA_HOME}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+    export LD_LIBRARY_PATH="${CUDNN_LIB_DIR}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${NCCL_LIB_DIR}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${TENSORRT_LIB_DIR}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${CUTENSOR_LIB_DIR}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${CUSPARSELT_LIB_DIR}:${LD_LIBRARY_PATH}"
+
+    # Set Mellanox OFED version, operating system, and platform architecture
+    export MOFED_MAJ='5'
+    export MOFED_MIN='8'
+    export MOFED_REV='2.0.3.0'
+    export MOFED_VER="${MOFED_MAJ}.${MOFED_MIN}-${MOFED_REV}"
+    export MOFED_OS='ubuntu22.04'
+    export MOFED_ARCH='x86_64'
+
+    # Set paths to additional Mellanox OFED binaries and libraries
+    export PATH="/opt/mellanox/hcoll/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/mellanox/hcoll/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/mellanox/sharp/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/mellanox/sharp/lib:${LD_LIBRARY_PATH}"
+
+    # DO NOT Upgrade all software packages to their latest versions
+    #apt-get -y update && apt-get -y upgrade
+
+    cd /tmp
+
+    # Set MVAPICH version and install path
+    export MV2_MAJOR='2'
+    export MV2_MINOR='3'
+    export MV2_REVISION='7-1'
+    export MV2_VERSION="${MV2_MAJOR}.${MV2_MINOR}.${MV2_REVISION}"
+    export MV2_ROOT_DIR='/opt/mvapich'
+    export MV2_INSTALL_DIR="${MV2_ROOT_DIR}/${MV2_VERSION}"
+
+    # Set paths to MVAPICH binaries and libraries
+    export PATH="${MV2_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${MV2_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    cd /tmp
+
+    # Set MVAPICH version and install path
+    export MV2_MAJOR='2'
+    export MV2_MINOR='3'
+    export MV2_REVISION='7-1'
+    export MV2_VERSION="${MV2_MAJOR}.${MV2_MINOR}.${MV2_REVISION}"
+    export MV2_ROOT_DIR='/opt/mvapich'
+    export MV2_INSTALL_DIR="${MV2_ROOT_DIR}/${MV2_VERSION}"
+
+    # Download, build, and install MVAPICH
+    wget "http://mvapich.cse.ohio-state.edu/download/mvapich/mv2/mvapich2-${MV2_VERSION}.tar.gz"
+    tar -xf "mvapich2-${MV2_VERSION}.tar.gz"
+    cd "mvapich2-${MV2_VERSION}"
+    export FFLAGS='-fallow-argument-mismatch'
+    ./configure --prefix="${MV2_INSTALL_DIR}" --enable-cuda --with-cuda="${CUDA_HOME}" --with-cuda-include="${CUDA_HOME}/include" --with-cuda-libpath="${CUDA_HOME}/lib64" --enable-fast=all --with-hwloc=v2
+    make -j4
+    make install
+
+    cd /tmp
+
+    # Remove MVAPICH build directory and source tarball
+    rm -rf "mvapich2-${MV2_VERSION}"
+    rm "mvapich2-${MV2_VERSION}.tar.gz"
+
+    # Store information about the container image build system
+    lscpu > /opt/lscpu.txt
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
