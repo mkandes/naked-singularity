@@ -1,15 +1,15 @@
 Bootstrap: oras
-From: ghcr.io/mkandes/ubuntu:22.04-x86_64-2024-01-27
+From: ghcr.io/mkandes/ubuntu:22.04-x86_64
 
 %labels
 
-    org.opencontainers.image.ref.name ghcr.io/mkandes/stream:5.10-ubuntu-22.04-x86_64-2024-02-07
+    org.opencontainers.image.ref.name ghcr.io/mkandes/stream:5.10-ubuntu-22.04-x86_64
 
-    org.opencontainers.image.base.name ghcr.io/mkandes/ubuntu:22.04-x86_64-2024-01-27
-    org.opencontainers.image.base.digest sha256:8e42778c7cd0631b5567db203ebaddaa850a7c61f8c8cffadaec7bbaa6ac2c48
+    org.opencontainers.image.base.name ghcr.io/mkandes/ubuntu:22.04-x86_64
+    org.opencontainers.image.base.digest sha256:c2337050c2d059c894318659bf5fcc9edb459b17f23bc2274bc6c1c4cc279d36
 
     org.opencontainers.image.title stream
-    org.opencontainers.image.description STREAM is a simple synthetic benchmark program that measures sustainable memory bandwidth (in MB/s) and the corresponding computation rate for simple vector kernels. 
+    org.opencontainers.image.description STREAM is a benchmark that measures sustainable memory bandwidth (in MB/s) and the corresponding computation rate for simple vector kernels. 
     org.opencontainers.image.url https://www.cs.virginia.edu/stream
     org.opencontainers.image.documentation https://www.cs.virginia.edu/stream/ref.html
     org.opencontainers.image.source https://www.cs.virginia.edu/stream/FTP/Code
