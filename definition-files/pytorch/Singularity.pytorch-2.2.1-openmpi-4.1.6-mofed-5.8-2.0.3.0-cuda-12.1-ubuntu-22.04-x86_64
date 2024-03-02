@@ -1,0 +1,452 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/openmpi:4.1.6-mofed-5.8-2.0.3.0-cuda-12.1-ubuntu-22.04-x86_64
+
+%labels
+
+    org.opencontainers.image.ref.name ghcr.io/mkandes/pytorch:2.2.1-openmpi-4.1.6-mofed-5.8-2.0.3.0-cuda-12.1-ubuntu-22.04-x86_64
+
+    org.opencontainers.image.base.name ghcr.io/mkandes/openmpi:4.1.6-mofed-5.8-2.0.3.0-cuda-12.1-ubuntu-22.04-x86_64
+    org.opencontainers.image.base.digest sha256:8490175b591b92da7a07b02cac9d18dace117242fa4818efc6801f562139a78d
+
+    org.opencontainers.image.title pytorch
+    org.opencontainers.image.description PyTorch is an optimized tensor library for deep learning
+    org.opencontainers.image.url https://pytorch.org
+    org.opencontainers.image.documentation https://pytorch.org/docs/stable/index.html
+    org.opencontainers.image.source https://github.com/pytorch/pytorch.git
+    org.opencontainers.image.vendor The PyTorch Foundation
+    org.opencontainers.image.licenses BSD-3-Clause
+    org.opencontainers.image.version 2.2.1
+    org.opencontainers.image.revision 8ac9b20d4b090c213799e81acf48a55ea8d437d6
+
+    org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
+
+%setup
+
+%environment
+
+    # Set Anaconda installer version(s), operating system , and system architecture
+    export CONDA_DISTRO='Miniconda3'
+    export CONDA_PYTHON_VER='py310'
+    export CONDA_MAJ='23'
+    export CONDA_MIN='11'
+    export CONDA_REV='0-2'
+    export CONDA_VER="${CONDA_MAJ}.${CONDA_MIN}.${CONDA_REV}"
+    export CONDA_OS='Linux'
+    export CONDA_ARCH='x86_64'
+    export CONDA_SHA256='c9ae82568e9665b1105117b4b1e499607d2a920f0aea6f94410e417a0eff1b9c'
+
+    # Setup conda environment
+    export PATH="/opt/${CONDA_DISTRO}-${CONDA_PYTHON_VER}_${CONDA_VER}-${CONDA_OS}-${CONDA_ARCH}/bin:${PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='jammy'
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set NVIDIA driver and CUDA version numbers
+    export NV_DRIVER_MAJ='525'
+    export NV_DRIVER_MIN='85'
+    export NV_DRIVER_REV='12'
+    export NV_DRIVER_VER="${NV_DRIVER_MAJ}.${NV_DRIVER_MIN}.${NV_DRIVER_REV}"
+
+    export CUDA_MAJ='12'
+    export CUDA_MIN='1'
+    export CUDA_REV='1'
+    export CUDA_VER="${CUDA_MAJ}.${CUDA_MIN}.${CUDA_REV}"
+
+    export CUDNN_MAJ='8'
+    export CUDNN_MIN='9'
+    export CUDNN_REV='0.131'
+    export CUDNN_VER="${CUDNN_MAJ}.${CUDNN_MIN}.${CUDNN_REV}"
+
+    export NCCL_MAJ='2'
+    export NCCL_MIN='18'
+    export NCCL_REV='3'
+    export NCCL_VER="${NCCL_MAJ}.${NCCL_MIN}.${NCCL_REV}"
+
+    export TENSORRT_MAJ='8'
+    export TENSORRT_MIN='6'
+    export TENSORRT_REV='1.6'
+    export TENSORRT_VER="${TENSORRT_MAJ}.${TENSORRT_MIN}.${TENSORRT_REV}"
+
+    export CUTENSOR_MAJ='2'
+    export CUTENSOR_MIN='0'
+    export CUTENSOR_REV='0.7'
+    export CUTENSOR_VER="${CUTENSOR_MAJ}.${CUTENSOR_MIN}.${CUTENSOR_REV}"
+
+    export CUSPARSELT_MAJ='0'
+    export CUSPARSELT_MIN='5'
+    export CUSPARSELT_REV='2.1'
+    export CUSPARSELT_VER="${CUSPARSELT_MAJ}.${CUSPARSELT_MIN}.${CUSPARSELT_REV}"
+
+    # Set paths to CUDA binaries and libraries
+    export CUDA_HOME="/usr/local/cuda-${CUDA_MAJ}.${CUDA_MIN}"
+
+    export CUDNN_INCLUDE_DIR='/usr/include'
+    export CUDNN_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+
+    export NCCL_INCLUDE_DIR='/usr/include'
+    export NCCL_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+
+    export TENSORRT_INCLUDE_DIR='/usr/include'
+    export TENSORRT_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+
+    export CUTENSOR_INCLUDE_DIR='/usr/include'
+    export CUTENSOR_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+
+    export CUSPARSELT_INCLUDE_DIR='/usr/include'
+    export CUSPARSELT_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+
+    export PATH="${CUDA_HOME}/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="${CUDA_HOME}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+    export LD_LIBRARY_PATH="${CUDNN_LIB_DIR}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${NCCL_LIB_DIR}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${TENSORRT_LIB_DIR}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${CUTENSOR_LIB_DIR}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${CUSPARSELT_LIB_DIR}:${LD_LIBRARY_PATH}"
+
+    # Set Mellanox OFED version, operating system, and platform architecture
+    export MOFED_VER='5.8-2.0.3.0'
+    export MOFED_DISTRO='ubuntu22.04'
+    export MOFED_ARCH='x86_64
+
+    # Set paths to additional Mellanox OFED binaries and libraries
+    export PATH="/opt/mellanox/hcoll/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/mellanox/hcoll/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/mellanox/sharp/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/mellanox/sharp/lib:${LD_LIBRARY_PATH}"
+
+    # Set OpenMPI version and install path
+    export OPENMPI_MAJ='4'
+    export OPENMPI_MIN='1'
+    export OPENMPI_REV='6'
+    export OPENMPI_VER="${OPENMPI_MAJ}.${OPENMPI_MIN}.${OPENMPI_REV}"
+    export OPENMPI_ROOT_DIR='/opt/openmpi'
+    export OPENMPI_INSTALL_DIR="${OPENMPI_ROOT_DIR}/${OPENMPI_VER}"
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="${OPENMPI_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${OPENMPI_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    # DO NOT Upgrade all software packages to their latest versions
+    # apt-get -y update && apt-get -y upgrade
+
+    # Set Anaconda installer version(s), operating system , and system architecture
+    export CONDA_DISTRO='Miniconda3'
+    export CONDA_PYTHON_VER='py310'
+    export CONDA_MAJ='23'
+    export CONDA_MIN='11'
+    export CONDA_REV='0-2'
+    export CONDA_VER="${CONDA_MAJ}.${CONDA_MIN}.${CONDA_REV}"
+    export CONDA_OS='Linux'
+    export CONDA_ARCH='x86_64'
+    export CONDA_SHA256='c9ae82568e9665b1105117b4b1e499607d2a920f0aea6f94410e417a0eff1b9c'
+    
+    cd /tmp
+
+    # Install miniconda3
+    # https://github.com/pytorch/pytorch/tree/v2.2.0?tab=readme-ov-file#prerequisites
+    wget "https://repo.anaconda.com/miniconda/${CONDA_DISTRO}-${CONDA_PYTHON_VER}_${CONDA_VER}-${CONDA_OS}-${CONDA_ARCH}.sh"
+    chmod +x "${CONDA_DISTRO}-${CONDA_PYTHON_VER}_${CONDA_VER}-${CONDA_OS}-${CONDA_ARCH}.sh"
+    "./${CONDA_DISTRO}-${CONDA_PYTHON_VER}_${CONDA_VER}-${CONDA_OS}-${CONDA_ARCH}.sh" -b -p "/opt/${CONDA_DISTRO}-${CONDA_PYTHON_VER}_${CONDA_VER}-${CONDA_OS}-${CONDA_ARCH}"
+
+    # Setup conda environment
+    export PATH="/opt/${CONDA_DISTRO}-${CONDA_PYTHON_VER}_${CONDA_VER}-${CONDA_OS}-${CONDA_ARCH}/bin:${PATH}"
+
+    # Install common python packages
+    conda install -y numpy
+    conda install -y pandas
+    conda install -y scipy
+    conda install -y scikit-learn
+    conda install -y matplotlib
+    conda install -y jupyterlab
+
+    # Install specialized python packages
+    conda install -y astropy
+    conda install -y biopython
+    conda install -y h5py
+    conda install -y netcdf4
+    conda install -y nltk
+    conda install -y scikit-image
+    conda install -y sympy
+    conda install -y spacy
+
+    # Install mpi4py
+    # 
+    # Note, however, there currently appears to be an issue that occurs
+    # when attempting to compile mpi4py within a conda environment and 
+    # link it against a non-conda installed MPI distribution.
+    # 
+    # See https://github.com/mpi4py/mpi4py/issues/335
+    #
+    #   ...
+    #
+    #   collect2: error: ld returned 1 exit status
+    #   failure.
+    #   removing: _configtest.c _configtest.o
+    #   error: Cannot link MPI programs. Check your configuration!!!
+    #   [end of output]
+    #
+    # note: This error originates from a subprocess, and is likely not a problem with pip.
+    # ERROR: Failed building wheel for mpi4py
+    # Failed to build mpi4py
+    # ERROR: Could not build wheels for mpi4py, which is required to install pyproject.toml-based projects
+    #
+    # The following 'quick fix' removing ld from the conda environment 
+    # works, but it is unclear what the implications of this might be 
+    # down the road. i.e., it's likely not ideal
+    #
+    #rm -rf /opt/Miniconda3-py310_23.11.0-2-Linux-x86_64/compiler_compat/ld
+    #python -m pip insall mpi4py
+
+    cd /tmp
+
+    # Set PyTorch version number
+    export TORCH_MAJ='2'
+    export TORCH_MIN='2'
+    export TORCH_REV='1'
+    export TORCH_VER="${TORCH_MAJ}.${TORCH_MIN}.${TORCH_REV}"
+
+    # Install PyTorch dependencies
+    # https://github.com/pytorch/pytorch/tree/v2.2.0?tab=readme-ov-file#install-dependencies
+    conda install -y cmake
+    conda install -y ninja
+    conda install -y astunparse
+    conda install -y expecttest
+    conda install -y hypothesis
+    conda install -y typing-extensions
+    conda install -y filelock
+    conda install -y fsspec
+    conda install -y mkl-include
+    conda install -y types-dataclasses -c conda-forge
+    conda install -y optree -c conda-forge
+
+    # Install (optional) PyTorch dependencies
+    #conda install -y ffmpeg -c conda-forge
+    #conda install -y opencv -c intel
+
+    # Add LAPACK support for the GPU
+    conda install -y magma-cuda121 -c pytorch
+
+    # Download PyTorch source code
+    git clone --recursive https://github.com/pytorch/pytorch.git
+    cd pytorch
+    git checkout "v${TORCH_VER}"
+    git submodule sync
+    git submodule update --init --recursive --jobs 0
+
+    # Apply patches and fixes found during PyTorch build process
+    # https://github.com/pytorch/pytorch/issues/103805
+    # https://github.com/microsoft/onnxruntime/issues/18029 
+    rm -r third_party/onnx-tensorrt
+    git clone --recursive https://github.com/onnx/onnx-tensorrt.git third_party/onnx-tensorrt
+
+    # Set PyTorch build configuration environment variables for distributed training
+    export BUILD_TEST=0
+    export MAX_JOBS=4
+
+    export CC='mpicc'
+    export CFLAGS='-O3 -mtune=generic'
+
+    export CXX='mpicxx'
+    export CXXFLAGS='-O3 -mtune=generic -std=gnu++17'
+
+    export FC='mpif90'
+    export FFLAGS='-O3 -mtune=generic'
+   
+    export BUILD_CAFFE2=0
+    export BUILD_CAFFE2_OPS=0
+
+    export BLAS='MKL'
+
+    export USE_MKL=1
+    export USE_MKLDNN=1
+    export USE_MKLDNN_ACL=0
+    export USE_MKLDNN_CBLAS=0
+
+    export USE_OPENMP=1
+    export MKL_THREADING='OMP'
+    export MKLDNN_CPU_RUNTIME='OMP'
+
+    export USE_FBGEMM=1
+    export USE_KINETO=1
+    export USE_NNPACK=1
+    export USE_NUMPY=1
+    export USE_QNNPACK=1
+
+    export TORCH_CUDA_ARCH_LIST='7.0;8.0'
+    export USE_CUDA=1
+    export USE_CUDNN=1
+    export USE_CUSPARSELT=0
+    export USE_NCCL=1
+    export USE_SYSTEM_NCCL=1
+    export USE_TENSORRT=1
+
+    export USE_DISTRIBUTED=1
+    export USE_MPI=1
+    export USE_GLOO=1
+    export USE_TENSORPIPE=1
+
+    export USE_FFMPEG=0
+    export USE_OPENCV=0
+
+    export CMAKE_PREFIX_PATH="${CONDA_PREFIX:-"$(dirname $(which conda))/../"}"
+
+    # Run PyTorch build and installation
+    python setup.py install
+
+    cd /tmp
+
+    # Set TorchData version number
+    export TORCHDATA_MAJ='0'
+    export TORCHDATA_MIN='7'
+    export TORCHDATA_REV='1'
+    export TORCHDATA_VER="${TORCHDATA_MAJ}.${TORCHDATA_MIN}.${TORCHDATA_REV}"
+
+    # Set TorchData build configuration environment variables
+    export BUILD_S3=1
+
+    # Download, build and install TorchText
+    # https://github.com/pytorch/data/tree/v0.7.1?tab=readme-ov-file#from-source
+    git clone https://github.com/pytorch/data.git
+    cd data
+    git checkout "v${TORCHDATA_VER}"
+    git submodule sync
+    git submodule update --init --recursive
+    pip install -v .
+
+    cd /tmp
+
+    # Set TorchText version number
+    export TORCHTEXT_MAJ='0'
+    export TORCHTEXT_MIN='17'
+    export TORCHTEXT_REV='1'
+    export TORCHTEXT_VER="${TORCHTEXT_MAJ}.${TORCHTEXT_MIN}.${TORCHTEXT_REV}"
+
+    # Download, build and install TorchText
+    # https://github.com/pytorch/text/tree/v0.17.0?tab=readme-ov-file#installation
+    git clone https://github.com/pytorch/text.git
+    cd text
+    git checkout "v${TORCHTEXT_VER}"
+    git submodule sync
+    git submodule update --init --recursive
+    python setup.py clean install
+
+    cd /tmp
+
+    # Set TorchVision version number
+    export TORCHVISION_MAJ='0'
+    export TORCHVISION_MIN='17'
+    export TORCHVISION_REV='1'
+    export TORCHVISION_VER="${TORCHVISION_MAJ}.${TORCHVISION_MIN}.${TORCHVISION_REV}"
+
+    # Install (optional) TorchVision dependencies
+    # https://github.com/pytorch/vision/blob/v0.17.0/CONTRIBUTING.md#development-installation
+    conda install -y libpng -c pytorch
+    conda install -y libjpeg-turbo -c pytorch
+
+    # Set TorchVision build configuration environment variables
+    export FORCE_CUDA=1
+
+    # Download, build and install TorchVision
+    git clone https://github.com/pytorch/vision.git
+    cd vision
+    git checkout "v${TORCHVISION_VER}"
+    git submodule sync
+    git submodule update --init --recursive
+    python setup.py clean install
+
+    cd /tmp
+
+    # Set TorchAudio version number
+    # https://pytorch.org/audio/main/build.html
+    export TORCHAUDIO_MAJ='2'
+    export TORCHAUDIO_MIN='2'
+    export TORCHAUDIO_REV='1'
+    export TORCHAUDIO_VER="${TORCHAUDIO_MAJ}.${TORCHAUDIO_MIN}.${TORCHAUDIO_REV}"
+
+    # Set TorchAudio build configuration environment variables
+    export TORCHAUDIO_USE_SOX=1
+    export BUILD_SOX=1
+
+    # Download, build and install TorchAudio
+    # https://pytorch.org/audio/main/build.html
+    git clone https://github.com/pytorch/audio.git
+    cd audio
+    git checkout "v${TORCHAUDIO_VER}"
+    git submodule sync
+    git submodule update --init --recursive
+    python setup.py clean install
+
+    cd /tmp
+
+    # Set Horovod version number
+    export HOROVOD_MAJ='0'
+    export HOROVOD_MIN='28'
+    export HOROVOD_REV='1'
+    export HOROVOD_VER="${HOROVOD_MAJ}.${HOROVOD_MIN}.${HOROVOD_REV}"
+
+    # Set Horovod build configuration environment variables
+    export HOROVOD_WITHOUT_MXNET=1
+    export HOROVOD_WITH_PYTORCH=1
+    export HOROVOD_WITHOUT_TENSORFLOW=1
+    export HOROVOD_WITH_MPI=1
+    export HOROVOD_WITH_GLOO=1
+    export HOROVOD_GPU='CUDA'
+    export HOROVOD_CUDA_HOME="${CUDA_HOME}"
+    export HOROVOD_BUILD_CUDA_CC_LIST='70,80'
+    export HOROVOD_GPU_OPERATIONS='NCCL'
+    export HOROVOD_NCCL_INCLUDE_DIR="${NCCL_INCLUDE_DIR}"
+    export HOROVOD_NCCL_LIB_DIR="${NCCL_LIB_DIR}"
+
+    # Download, build, and install Horovod for PyTorch with NVIDIA GPU support  
+    #git clone --recursive https://github.com/horovod/horovod.git
+    #cd horovod
+    #git checkout "v${HOROVOD_VER}"
+    #git submodule sync
+    #git submodule update --init --recursive
+    #pip install -v .
+
+    # https://github.com/horovod/horovod/pull/3998
+    pip install git+https://github.com/thomas-bouvier/horovod.git@compile-cpp17
+
+    cd /tmp
+
+    # Set PyTorch Lightning version number
+    export TORCH_LIGHTNING_MAJ='2'
+    export TORCH_LIGHTNING_MIN='2'
+    export TORCH_LIGHTNING_REV='0.post0'
+    export TORCH_LIGHTNING_VER="${TORCH_LIGHTNING_MAJ}.${TORCH_LIGHTNING_MIN}.${TORCH_LIGHTNING_REV}"
+
+    # Download, build and install PyTorch Lightning
+    #git clone https://github.com/Lightning-AI/pytorch-lightning.git
+    #cd pytorch-lightning
+    #git checkout "${TORCH_LIGHTNING_VER}"
+    #git submodule sync
+    #git submodule update --init --recursive
+    #pip install -v .
+
+    # Store information about the CPU arch of the build system
+    lscpu > /.singularity.d/lscpu.txt
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
