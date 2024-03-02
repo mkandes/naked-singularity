@@ -1,0 +1,318 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/openmpi:4.1.6-mofed-5.8-2.0.3.0-cuda-12.1-ubuntu-22.04-x86_64
+
+%labels
+
+    org.opencontainers.image.ref.name ghcr.io/mkandes/tensorflow:2.15.0-openmpi-4.1.6-mofed-5.8-2.0.3.0-cuda-12.1-ubuntu-22.04-x86_64
+
+    org.opencontainers.image.base.name ghcr.io/mkandes/openmpi:4.1.6-mofed-5.8-2.0.3.0-cuda-12.1-ubuntu-22.04-x86_64
+    org.opencontainers.image.base.digest sha256:8490175b591b92da7a07b02cac9d18dace117242fa4818efc6801f562139a78d
+
+    org.opencontainers.image.title tensorflow
+    org.opencontainers.image.description TensorFlow is an end-to-end open source platform for machine learning
+    org.opencontainers.image.url https://www.tensorflow.org
+    org.opencontainers.image.documentation https://www.tensorflow.org/guide
+    org.opencontainers.image.source https://github.com/tensorflow/tensorflow.git
+    org.opencontainers.image.vendor Google
+    org.opencontainers.image.licenses Apache-2.0
+    org.opencontainers.image.version 2.15.0
+    org.opencontainers.image.revision 6887368d6d46223f460358323c4b76d61d1558a8
+
+    org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
+
+%setup
+
+%environment
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='jammy'
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set NVIDIA driver and CUDA versions
+    export NV_DRIVER_MAJ='525'
+    export NV_DRIVER_MIN='85'
+    export NV_DRIVER_REV='12'
+    export NV_DRIVER_VER="${NV_DRIVER_MAJ}.${NV_DRIVER_MIN}.${NV_DRIVER_REV}"
+
+    export CUDA_MAJ='12'
+    export CUDA_MIN='1'
+    export CUDA_REV='1'
+    export CUDA_VER="${CUDA_MAJ}.${CUDA_MIN}.${CUDA_REV}"
+
+    export CUDNN_MAJ='8'
+    export CUDNN_MIN='9'
+    export CUDNN_REV='0.131'
+    export CUDNN_VER="${CUDNN_MAJ}.${CUDNN_MIN}.${CUDNN_REV}"
+
+    export NCCL_MAJ='2'
+    export NCCL_MIN='18'
+    export NCCL_REV='3'
+    export NCCL_VER="${NCCL_MAJ}.${NCCL_MIN}.${NCCL_REV}"
+
+    export TENSORRT_MAJ='8'
+    export TENSORRT_MIN='6'
+    export TENSORRT_REV='1.6'
+    export TENSORRT_VER="${TENSORRT_MAJ}.${TENSORRT_MIN}.${TENSORRT_REV}"
+
+    export CUTENSOR_MAJ='2'
+    export CUTENSOR_MIN='0'
+    export CUTENSOR_REV='0.7'
+    export CUTENSOR_VER="${CUTENSOR_MAJ}.${CUTENSOR_MIN}.${CUTENSOR_REV}"
+
+    export CUSPARSELT_MAJ='0'
+    export CUSPARSELT_MIN='5'
+    export CUSPARSELT_REV='2.1'
+    export CUSPARSELT_VER="${CUSPARSELT_MAJ}.${CUSPARSELT_MIN}.${CUSPARSELT_REV}"
+
+    # Set paths to CUDA binaries and libraries
+    export CUDA_HOME="/usr/local/cuda-${CUDA_MAJ}.${CUDA_MIN}"
+
+    export CUDNN_INCLUDE_DIR='/usr/include'
+    export CUDNN_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+
+    export NCCL_INCLUDE_DIR='/usr/include'
+    export NCCL_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+
+    export TENSORRT_INCLUDE_DIR='/usr/include'
+    export TENSORRT_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+
+    export CUTENSOR_INCLUDE_DIR='/usr/include'
+    export CUTENSOR_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+
+    export CUSPARSELT_INCLUDE_DIR='/usr/include'
+    export CUSPARSELT_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+
+    export PATH="${CUDA_HOME}/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="${CUDA_HOME}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+    export LD_LIBRARY_PATH="${CUDNN_LIB_DIR}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${NCCL_LIB_DIR}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${TENSORRT_LIB_DIR}:${LD_LIBRARY_PATH}"
+
+    # Set Mellanox OFED version, operating system, and platform architecture
+    export MOFED_VER='5.8-2.0.3.0'
+    export MOFED_DISTRO='ubuntu22.04'
+    export MOFED_ARCH='x86_64'
+
+    # Set paths to additional Mellanox OFED binaries and libraries
+    export PATH="/opt/mellanox/hcoll/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/mellanox/hcoll/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/mellanox/sharp/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/mellanox/sharp/lib:${LD_LIBRARY_PATH}"
+
+    # Set OpenMPI version and install path
+    export OPENMPI_MAJ='4'
+    export OPENMPI_MIN='1'
+    export OPENMPI_REV='6'
+    export OPENMPI_VER="${OPENMPI_MAJ}.${OPENMPI_MIN}.${OPENMPI_REV}"
+    export OPENMPI_ROOT_DIR='/opt/openmpi'
+    export OPENMPI_INSTALL_DIR="${OPENMPI_ROOT_DIR}/${OPENMPI_VER}"
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="${OPENMPI_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${OPENMPI_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    # DO NOT Upgrade all software packages to their latest versions
+    # apt-get -y update && apt-get -y upgrade
+
+    # Install Python and the TensorFlow package dependencies
+    # https://www.tensorflow.org/install/source#install_python_and_the_tensorflow_package_dependencies
+    apt-get -y install python3-dev
+    apt-get -y install python3-pip
+    apt-get -y install python-is-python3
+    python -m pip install numpy 
+    python -m pip install wheel 
+    python -m pip install packaging 
+    python -m pip install requests 
+    python -m pip install opt_einsum
+
+    # Install Bazel dependencies and prerequisites
+    # https://bazel.build/install/compile-source#bootstrap-bazel
+    apt-get -y install g++
+    apt-get -y install unzip
+    apt-get -y install zip
+    apt-get -y install git
+    apt-get -y install git-lfs
+    apt-get -y install openjdk-11-jdk
+
+    cd /tmp
+
+    # Set Bazel version number
+    export BAZEL_MAJ='6'
+    export BAZEL_MIN='1'
+    export BAZEL_REV='0'
+    export BAZEL_VER="${BAZEL_MAJ}.${BAZEL_MIN}.${BAZEL_REV}"
+
+    # Download, build, and install Bazel
+    mkdir -p "bazel/${BAZEL_VER}"
+    cd "bazel/${BAZEL_VER}"
+    wget "https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VER}/bazel-${BAZEL_VER}-dist.zip"
+    unzip -o "bazel-${BAZEL_VER}-dist.zip"
+    export EXTRA_BAZEL_ARGS="--tool_java_runtime_version=local_jdk"
+    ./compile.sh
+
+    # Set path to Bazel
+    export PATH="/tmp/bazel/${BAZEL_VER}/output:${PATH}"
+
+    # Download and install Clang
+    # https://www.tensorflow.org/install/source#install_clang_recommended_linux_only
+    #add-apt-repository -y deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-16 main
+    #wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+    #apt-get -y update
+    #apt-get -y install llvm-16 
+    #apt-get -y install clang-16
+
+    # Install common mathematical and scientific python3 packages
+    python -m pip install scipy
+    python -m pip install pandas
+    python -m pip install scikit-learn
+    python -m pip install scikit-image
+    python -m pip install scikit-optimize
+    python -m pip install statsmodels
+    python -m pip install matplotlib
+    python -m pip install plotly
+    python -m pip install seaborn
+    python -m pip install astropy
+    python -m pip install biopython
+    python -m pip install h5py
+    python -m pip install nltk
+    python -m pip install sympy
+    python -m pip install netcdf4
+
+    # Install JupyterLab
+    python -m pip install jupyter
+    python -m pip install jupyterlab
+
+    # Install mpi4py
+    python -m pip install mpi4py
+
+    # Install additional dependencies for TensorFlow
+    python -m pip install keras_preprocessing --no-deps
+    python -m pip install patchelf
+
+    # Set TensorFlow version number
+    export TF_MAJ='2'
+    export TF_MIN='15'
+    export TF_REV='0'
+    export TF_VER="${TF_MAJ}.${TF_MIN}.${TF_REV}"
+
+    cd /tmp
+
+    # Download, build, and install TensorFlow
+    # https://www.tensorflow.org/install/source#download_the_tensorflow_source_code
+    git clone https://github.com/tensorflow/tensorflow.git
+    cd tensorflow
+    git checkout "v${TF_VER}"
+    export PYTHON_BIN_PATH='/usr/bin/python3'
+    export PYTHON_LIB_PATH='/usr/lib/python3/dist-packages'
+    export TF_ENABLE_XLA=1
+    export TF_NEED_ROCM=0
+    export TF_NEED_OPENCL_SYCL=0
+    export TF_NEED_CUDA=1
+    export TF_NEED_TENSORRT=1
+    export TF_CUDA_CLANG=0
+    export TF_CUDA_COMPUTE_CAPABILITIES='7.0,8.0'
+    export CUDA_TOOLKIT_PATH="${CUDA_HOME}"
+    #export CLANG_CUDA_COMPILER_PATH='/usr/lib/llvm-16/bin/clang'
+    export CC_OPT_FLAGS='-mtune=generic'
+    export TF_SET_ANDROID_WORKSPACE=0
+    export TF_NEED_MPI=1
+    export MPI_HOME="${OMPI_INSTALL_DIR}"
+    #bazel build --local_ram_resources 8192 --local_cpu_resources 4 --compilation_mode='opt' --config='cuda_clang' --config='xla' --config='v2' --copt='-Xclang' --copt='-fcuda-allow-variadic-functions' --verbose_failures //tensorflow/tools/pip_package:build_pip_package
+    bazel build --local_ram_resources 8192 --local_cpu_resources 4 --compilation_mode='opt' --config='cuda' --config='xla' --config='v2' --verbose_failures //tensorflow/tools/pip_package:build_pip_package
+    bazel-bin/tensorflow/tools/pip_package/build_pip_package tensorflow_pkg
+    python -m pip install "tensorflow_pkg/tensorflow-${TF_VER}-cp310-cp310-linux_x86_64.whl"
+
+    # Install TensorFlow tools, extentions, and related packages.
+    python -m pip install tensorboard==2.15.2
+    python -m pip install tensorboard-plugin-profile==2.15.1
+    python -m pip install tensorflow-compression==2.15.0
+    python -m pip install tensorflow-datasets==4.9.4
+    python -m pip install tensorflow-decision-forests==1.8.1
+    python -m pip install tensorflow-hub==0.16.1
+    python -m pip install tensorflow-lattice==2.0.13
+    python -m pip install tensorflow-model-optimization==0.8.0
+    python -m pip install tensorflow-recommenders==0.7.3
+    python -m pip install tensorflow-text==2.15.0
+    python -m pip install tensorflow-addons==0.23.0
+    python -m pip install tensorflow-io==0.36.0
+    #python -m pip install tensorflow-data-validation==1.14.0
+    #python -m pip install tensorflow-gan==2.1.0
+    #python -m pip install tensorflow-gnn==1.0.2
+    #python -m pip install tensorflow-privacy==0.8.12
+    #python -m pip install tensorflow-probability==0.23.0
+    #python -m pip install tensorflow-transform==1.14.0
+    #python -m pip install tf-agents==0.19.0
+
+    # Intall Keras Tuner
+    python -m pip install keras-tuner==1.4.6
+
+    cd /tmp
+
+    # Set Horovod version number
+    export HOROVOD_MAJ='0'
+    export HOROVOD_MIN='28'
+    export HOROVOD_REV='1'
+    export HOROVOD_VER="${HOROVOD_MAJ}.${HOROVOD_MIN}.${HOROVOD_REV}"
+
+    # Set Horovod build configuration environment variables
+    export HOROVOD_WITHOUT_MXNET=1
+    export HOROVOD_WITHOUT_PYTORCH=1
+    export HOROVOD_WITH_TENSORFLOW=1
+    export HOROVOD_WITH_MPI=1
+    export HOROVOD_WITH_GLOO=1
+    export HOROVOD_GPU='CUDA'
+    export HOROVOD_CUDA_HOME="${CUDA_HOME}"
+    export HOROVOD_BUILD_CUDA_CC_LIST='70,80'
+    export HOROVOD_GPU_OPERATIONS='NCCL'
+    export HOROVOD_NCCL_INCLUDE_DIR="${NCCL_INCLUDE_DIR}"
+    export HOROVOD_NCCL_LIB_DIR="${NCCL_LIB_DIR}"
+
+    # Download, build, and install Horovod for PyTorch with NVIDIA GPU support
+    git clone --recursive https://github.com/horovod/horovod.git
+    cd horovod
+    git checkout "v${HOROVOD_VER}"
+    git submodule sync
+    git submodule update --init --recursive
+    pip install -v .
+
+    # Set tf2onnx version
+    export TF2ONNX_MAJOR='1'
+    export TF2ONNX_MINOR='16'
+    export TF2ONNX_REVISION='1'
+    export TF2ONNX_VERSION="${TF2ONNX_MAJOR}.${TF2ONNX_MINOR}.${TF2ONNX_REVISION}"
+  
+    cd /tmp
+
+    # Download, build, and install tf2onnx
+    git clone https://github.com/onnx/tensorflow-onnx.git
+    cd tensorflow-onnx
+    git checkout "v${TF2ONNX_VERSION}"
+    git submodule sync
+    git submodule update --init --recursive
+    python setup.py clean install
+
+    # Store information about the CPU architecture of the build system
+    lscpu > /.singularity.d/lscpu.txt
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
