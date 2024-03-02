@@ -3,7 +3,7 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-ubuntu-22.04-x86_64
 
 %labels
 
-    org.opencontainers.image.ref.name ghcr.io/mkandes/openmpi:4.1.6-mofed-5.8-ubuntu-22.04-x86_64
+    org.opencontainers.image.ref.name ghcr.io/mkandes/omb:7.3-openmpi-4.1-mofed-5.8-ubuntu-22.04-x86_64
 
     org.opencontainers.image.base.name ghcr.io/mkandes/openmpi:4.1-mofed-5.8-ubuntu-22.04-x86_64
     org.opencontainers.image.base.digest sha256:7fdd29c760c88e1359b02ac3e4c469b8be4261b05fe59762fc9cd6294a4d63a1
@@ -116,6 +116,12 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-ubuntu-22.04-x86_64
     mv libexec/osu-micro-benchmarks/mpi/pt2pt ./
     mv libexec/osu-micro-benchmarks/mpi/startup ./
     rm -rf libexec
+
+    cd /tmp
+
+    # Remove OMB build directory and source tarball
+    rm -rf "osu-micro-benchmarks-${OMB_VER}"
+    rm "osu-micro-benchmarks-${OMB_VER}.tar.gz"
 
     # Store information about the container image build system
     lscpu > /opt/lscpu.txt
