@@ -100,6 +100,7 @@ OSVersion: jammy
     # Cleanup
     apt-get -y autoremove --purge
     apt-get -y clean
+    rm -rf /var/lib/apt/lists/*
 
     # Update database for mlocate
     updatedb
