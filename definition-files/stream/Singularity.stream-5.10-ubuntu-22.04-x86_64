@@ -6,7 +6,7 @@ From: ghcr.io/mkandes/ubuntu:22.04-x86_64
     org.opencontainers.image.ref.name ghcr.io/mkandes/stream:5.10-ubuntu-22.04-x86_64
 
     org.opencontainers.image.base.name ghcr.io/mkandes/ubuntu:22.04-x86_64
-    org.opencontainers.image.base.digest sha256:c2337050c2d059c894318659bf5fcc9edb459b17f23bc2274bc6c1c4cc279d36
+    org.opencontainers.image.base.digest sha256:25cf511c278ec8002809eddb41042d0ca37dcc95a370b4d4d1fb24037f285d89
 
     org.opencontainers.image.title stream
     org.opencontainers.image.description STREAM is a benchmark that measures sustainable memory bandwidth (in MB/s) and the corresponding computation rate for simple vector kernels. 
@@ -25,12 +25,12 @@ From: ghcr.io/mkandes/ubuntu:22.04-x86_64
 %environment
 
     # Set STREAM version number, root and installation directories
-    export STREAM_ROOT_URL='http://www.cs.virginia.edu/stream/FTP/Code/'
-    export STREAM_MAJOR='5'
-    export STREAM_MINOR='10'
-    export STREAM_VERSION="${STREAM_MAJOR}.${STREAM_MINOR}"
+    export STREAM_MAJ='5'
+    export STREAM_MIN='10'
+    export STREAM_REV=''
+    export STREAM_VER="${STREAM_MAJ}.${STREAM_MIN}"
     export STREAM_ROOT_DIR='/opt/stream'
-    export STREAM_INSTALL_DIR="${STREAM_ROOT_DIR}/${STREAM_VERSION}"
+    export STREAM_INSTALL_DIR="${STREAM_ROOT_DIR}/${STREAM_VER}"
 
     # Set path to stream binary
     export PATH="${STREAM_INSTALL_DIR}/bin:${PATH}"
@@ -53,12 +53,12 @@ From: ghcr.io/mkandes/ubuntu:22.04-x86_64
     apt-get -y update && apt-get -y upgrade
 
     # Set STREAM version number, root and installation directories
-    export STREAM_ROOT_URL='http://www.cs.virginia.edu/stream/FTP/Code/'
-    export STREAM_MAJOR='5'
-    export STREAM_MINOR='10'
-    export STREAM_VERSION="${STREAM_MAJOR}.${STREAM_MINOR}"
+    export STREAM_MAJ='5'
+    export STREAM_MIN='10'
+    export STREAM_REV=''
+    export STREAM_VER="${STREAM_MAJ}.${STREAM_MIN}"
     export STREAM_ROOT_DIR='/opt/stream'
-    export STREAM_INSTALL_DIR="${STREAM_ROOT_DIR}/${STREAM_VERSION}"
+    export STREAM_INSTALL_DIR="${STREAM_ROOT_DIR}/${STREAM_VER}"
 
     cd /opt
 
@@ -67,6 +67,8 @@ From: ghcr.io/mkandes/ubuntu:22.04-x86_64
     cd "${STREAM_INSTALL_DIR}"
     wget -r -np -nH --cut-dirs=1 --reject "index.html*" \
       "http://www.cs.virginia.edu/stream/FTP/Code/"
+    mv FTP/Code/* ./
+    rm -rf FTP
 
     STREAM_ARRAY_SIZE_EXPONENT_BEGIN=13
     STREAM_ARRAY_SIZE_EXPONENT_END=36
@@ -84,17 +86,18 @@ From: ghcr.io/mkandes/ubuntu:22.04-x86_64
         -DSTREAM_ARRAY_SIZE="${STREAM_ARRAY_SIZE}" \
         -DNTIMES="${STREAM_NTIMES}" \
         -DOFFSET="${STREAM_OFFSET}" \
-        -o stream_omp."${STREAM_ARRAY_SIZE}.x" FTP/Code/stream.c
+        -o stream_omp."${STREAM_ARRAY_SIZE}.x" stream.c
     done
 
     mv *.x "${STREAM_INSTALL_DIR}/bin"
 
-    # Store information about the CPU arch of the build system
-    lscpu > /.singularity.d/lscpu.txt
+    # Store information about the container image build system
+    lscpu > /opt/lscpu.txt
 
     # Cleanup
     apt-get -y autoremove --purge
     apt-get -y clean
+    rm -rf /var/lib/apt/lists/*
 
     # Update database for mlocate
     updatedb
