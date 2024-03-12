@@ -1,0 +1,109 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/ubuntu:22.04-x86_64
+
+%labels
+
+    org.opencontainers.image.ref.name ghcr.io/mkandes/miniconda:py310-24.1-ubuntu-22.04-x86_64
+
+    org.opencontainers.image.base.name ghcr.io/mkandes/ubuntu:22.04-x86_64
+    org.opencontainers.image.base.digest sha256:25cf511c278ec8002809eddb41042d0ca37dcc95a370b4d4d1fb24037f285d89
+
+    org.opencontainers.image.title miniconda
+    org.opencontainers.image.description Miniconda is a free minimal installer for conda
+    org.opencontainers.image.url https://www.anaconda.com
+    org.opencontainers.image.documentation https://docs.anaconda.com/free/miniconda/index.html
+    org.opencontainers.image.source https://repo.anaconda.com/miniconda/Miniconda3-py310_24.1.2-0-Linux-x86_64.sh
+    org.opencontainers.image.vendor Anaconda Inc.
+    org.opencontainers.image.licenses BSD-3-Clause (https://docs.conda.io/en/latest/license.html)
+    org.opencontainers.image.version py310_24.1.2-0
+    org.opencontainers.image.revision 8eb5999c2f7ac6189690d95ae5ec911032fa6697ae4b34eb3235802086566d78
+
+    org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
+
+%setup
+
+%environment
+
+    # Set conda version(s), operating system, and system architecture
+    export CONDA_PYTHON_VER='py310'
+    export CONDA_MAJ='24'
+    export CONDA_MIN='1'
+    export CONDA_REV='2-0'
+    export CONDA_VER="${CONDA_MAJ}.${CONDA_MIN}.${CONDA_REV}"
+    export CONDA_OS='Linux'
+    export CONDA_ARCH='x86_64'
+    export CONDA_DISTRO="Miniconda3-${CONDA_PYTHON_VER}_${CONDA_VER}-${CONDA_OS}-${CONDA_ARCH}"
+    export CONDA_SHA256='8eb5999c2f7ac6189690d95ae5ec911032fa6697ae4b34eb3235802086566d78'
+
+    # Set paths to conda binaries and libraries
+    export PATH="/opt/${CONDA_DISTRO}/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/${CONDA_DISTRO}/lib:${LD_LIBRARY_PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='jammy'
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    cd /tmp
+
+    # Set conda version(s), operating system, and system architecture
+    export CONDA_PYTHON_VER='py310'
+    export CONDA_MAJ='24'
+    export CONDA_MIN='1'
+    export CONDA_REV='2-0'
+    export CONDA_VER="${CONDA_MAJ}.${CONDA_MIN}.${CONDA_REV}"
+    export CONDA_OS='Linux'
+    export CONDA_ARCH='x86_64'
+    export CONDA_DISTRO="Miniconda3-${CONDA_PYTHON_VER}_${CONDA_VER}-${CONDA_OS}-${CONDA_ARCH}"
+    export CONDA_SHA256='8eb5999c2f7ac6189690d95ae5ec911032fa6697ae4b34eb3235802086566d78'
+
+    # Download and install conda
+    wget "https://repo.anaconda.com/miniconda/${CONDA_DISTRO}.sh"
+    chmod +x "${CONDA_DISTRO}.sh"
+    "./${CONDA_DISTRO}.sh" -b -p "/opt/${CONDA_DISTRO}"
+
+    # Set paths to conda binaries and libraries
+    export PATH="/opt/${CONDA_DISTRO}/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/${CONDA_DISTRO}/lib:${LD_LIBRARY_PATH}"
+
+    # Install common python packages
+    conda install -y numpy
+    conda install -y pandas
+    conda install -y scipy
+    conda install -y scikit-learn
+    conda install -y matplotlib
+    conda install -y jupyterlab
+
+    cd ../
+
+    # Remove conda installer script
+    rm -rf "${CONDA_DISTRO}.sh"
+
+    # Store information about the container image build system
+    lscpu > /opt/lscpu.txt
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+    rm -rf /var/lib/apt/lists/*
+
+    # Update database for mlocate
+    updatedb
+
+%files
+
+%runscript
+
+%test
