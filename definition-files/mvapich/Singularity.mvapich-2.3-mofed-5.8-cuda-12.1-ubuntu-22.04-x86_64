@@ -3,10 +3,10 @@ From: ghcr.io/mkandes/mofed:5.8-cuda-12.1-ubuntu-22.04-x86_64
 
 %labels
 
-    org.opencontainers.image.ref.name ghcr.io/mkandes/mvapich:2.3.7-mofed-5.8-cuda-12.1-ubuntu-22.04-x86_64
+    org.opencontainers.image.ref.name ghcr.io/mkandes/mvapich:2.3-mofed-5.8-cuda-12.1-ubuntu-22.04-x86_64
 
     org.opencontainers.image.base.name ghcr.io/mkandes/mofed:5.8-cuda-12.1-ubuntu-22.04-x86_64
-    org.opencontainers.image.base.digest sha256:59c538c41917686ed1d2117d626342009cbc44b7ebaacde40b6085bb46c1b9c4
+    org.opencontainers.image.base.digest sha256:c841727922e1542a5b33a90addff812425715c0cfc61777431ec8cb213be72e4
 
     org.opencontainers.image.title mvapich
     org.opencontainers.image.description MVAPICH2 is an open source implementation of Message Passing Interface (MPI)
@@ -16,11 +16,13 @@ From: ghcr.io/mkandes/mofed:5.8-cuda-12.1-ubuntu-22.04-x86_64
     org.opencontainers.image.vendor Network-Based Computing Laboratory (NBCL), Ohio State Univeristy
     org.opencontainers.image.licenses https://mvapich.cse.ohio-state.edu/static/media/mvapich/LICENSE-MV2.TXT
     org.opencontainers.image.version 2.3.7-1
-    org.opencontainers.image.revision
+    org.opencontainers.image.revision fdd971cf36d6476d007b5d63d19414546ca8a2937b66886f24a1d9ca154634e4
 
     org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
 
 %setup
+
+%files
 
 %environment
 
@@ -133,46 +135,46 @@ From: ghcr.io/mkandes/mofed:5.8-cuda-12.1-ubuntu-22.04-x86_64
     export MV2_ROOT_DIR='/opt/mvapich'
     export MV2_INSTALL_DIR="${MV2_ROOT_DIR}/${MV2_VERSION}"
 
-    # Set paths to MVAPICH binaries and libraries
-    export PATH="${MV2_INSTALL_DIR}/bin:${PATH}"
-    export LD_LIBRARY_PATH="${MV2_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
-
-    cd /tmp
-
-    # Set MVAPICH version and install path
-    export MV2_MAJOR='2'
-    export MV2_MINOR='3'
-    export MV2_REVISION='7-1'
-    export MV2_VERSION="${MV2_MAJOR}.${MV2_MINOR}.${MV2_REVISION}"
-    export MV2_ROOT_DIR='/opt/mvapich'
-    export MV2_INSTALL_DIR="${MV2_ROOT_DIR}/${MV2_VERSION}"
-
     # Download, build, and install MVAPICH
     wget "http://mvapich.cse.ohio-state.edu/download/mvapich/mv2/mvapich2-${MV2_VERSION}.tar.gz"
     tar -xf "mvapich2-${MV2_VERSION}.tar.gz"
     cd "mvapich2-${MV2_VERSION}"
     export FFLAGS='-fallow-argument-mismatch'
     ./configure --prefix="${MV2_INSTALL_DIR}" --enable-cuda --with-cuda="${CUDA_HOME}" --with-cuda-include="${CUDA_HOME}/include" --with-cuda-libpath="${CUDA_HOME}/lib64" --enable-fast=all --with-hwloc=v2
-    make -j4
+    make -j 4
     make install
 
-    cd /tmp
+    cd ../
 
     # Remove MVAPICH build directory and source tarball
     rm -rf "mvapich2-${MV2_VERSION}"
     rm "mvapich2-${MV2_VERSION}.tar.gz"
 
     # Store information about the container image build system
-    lscpu > /opt/lscpu.txt
+    mkdir -p /opt/.nxis
+    cd /opt/.nxis
+    dmidecode > dmidecode.default
+    df -ahPT > df.default
+    fdisk --list > fdisk.default 
+    lsblk --output-all > lsblk.default
+    lsblk --output-all --json > lsblk.json
+    lscpu --output-all > lscpu.default
+    lscpu --output-all --json > lscpu.json
+    lshw > lshw.default
+    lshw -json > lshw.json
+    lshw -short > lshw.short
+    lspci > lspci.default
+    lspci -vvv > lspci.verbose
+    free -h > free.default
+    cat /proc/meminfo > meminfo.default
 
     # Cleanup
     apt-get -y autoremove --purge
     apt-get -y clean
+    rm -rf /var/lib/apt/lists/*
 
     # Update database for mlocate
     updatedb
-
-%files
 
 %runscript
 
