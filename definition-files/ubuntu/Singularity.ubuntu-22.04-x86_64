@@ -23,6 +23,8 @@ OSVersion: jammy
 
 %setup
 
+%files
+
 %environment
  
     # Set operating system mirror URL
@@ -94,9 +96,24 @@ OSVersion: jammy
     apt-get -y install wget
     apt-get -y install zip
 
-    # Store information about the container image build system
-    lscpu > /opt/lscpu.txt
+    cd /opt
 
+    # Store information about the container image build system
+    dmidecode > .dmidecode.default
+    df -ahPT > .df.default
+    fdisk --list > .fdisk.default 
+    lsblk --output-all > .lsblk.default
+    lsblk --output-all --json > .lsblk.json
+    lscpu --output-all > .lscpu.default
+    lscpu --output-all --json > .lscpu.json
+    lshw > .lshw.default
+    lshw -json > .lshw.json
+    lshw -short > .lshw.short
+    lspci > .lspci.default
+    lspci -vvv > .lspci.verbose
+    free -h > .free.default
+    cat /etc/meminfo > .meminfo.default
+    
     # Cleanup
     apt-get -y autoremove --purge
     apt-get -y clean
@@ -104,8 +121,6 @@ OSVersion: jammy
 
     # Update database for mlocate
     updatedb
-
-%files
 
 %runscript
 
