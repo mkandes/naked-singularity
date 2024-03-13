@@ -1,0 +1,133 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/openblas:0.3-ubuntu-22.04-x86_64
+
+%labels
+
+    org.opencontainers.image.ref.name ghcr.io/mkandes/mofed:5.8-openblas-0.3-ubuntu-22.04-x86_64
+
+    org.opencontainers.image.base.name ghcr.io/mkandes/openblas:0.3-ubuntu-22.04-x86_64
+    org.opencontainers.image.base.digest sha256:ea7aeecfc26e128dd4b14feff8bcfb2de248163dfe5f3901422f18bed4cfc476
+
+    org.opencontainers.image.title mofed 
+    org.opencontainers.image.description NVIDIA OpenFabrics Enterprise Distribution for Linux
+    org.opencontainers.image.url https://network.nvidia.com/products/infiniband-drivers/linux/mlnx_ofed/
+    org.opencontainers.image.documentation https://docs.nvidia.com/networking/display/mlnxofedv584150lts
+    org.opencontainers.image.source http://www.mellanox.com/downloads/ofed/MLNX_OFED-5.8-2.0.3.0/MLNX_OFED_LINUX-5.8-2.0.3.0-ubuntu22.04-x86_64.tgz
+    org.opencontainers.image.vendor NVIDIA Corporation (https://www.nvidia.com)
+    org.opencontainers.image.licenses https://docs.nvidia.com/networking/display/mlnxofedv584150lts/legal+notices+and+3rd+party+licenses
+    org.opencontainers.image.version 5.8-2.0.3.0
+    org.opencontainers.image.revision 6ec0e1b6a8de6fbcc6d6bceaedf853f801003b0ee854f3b660e53bd2f73ef79a
+
+    org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
+
+%setup
+
+%files
+
+%environment
+
+    # Set Mellanox OFED version, operating system, and platform architecture
+    export MOFED_MAJ='5'
+    export MOFED_MIN='8'
+    export MOFED_REV='2.0.3.0'
+    export MOFED_VER="${MOFED_MAJ}.${MOFED_MIN}-${MOFED_REV}"
+    export MOFED_OS='ubuntu22.04'
+    export MOFED_ARCH='x86_64'
+
+    # Set paths to additional Mellanox OFED binaries and libraries
+    export PATH="/opt/mellanox/hcoll/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/mellanox/hcoll/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/mellanox/sharp/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/mellanox/sharp/lib:${LD_LIBRARY_PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='jammy'
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set OpenBLAS version and install path
+    export OPENBLAS_MAJ='0'
+    export OPENBLAS_MIN='3'
+    export OPENBLAS_REV='26'
+    export OPENBLAS_VER="${OPENBLAS_MAJ}.${OPENBLAS_MIN}.${OPENBLAS_REV}"
+    export OPENBLAS_ROOT_DIR='/opt/openblas'
+    export OPENBLAS_INSTALL_DIR="${OPENBLAS_ROOT_DIR}/${OPENBLAS_VER}"
+
+    # Set OpenBLAS configuration, target architecture, maximum number of threads
+    export OPENBLAS_USE_OPENMP=1
+    export OPENBLAS_DYNAMIC_ARCH=1
+    export OPENBLAS_TARGET_ARCH='HASWELL'
+    export OPENBLAS_MAX_NUM_THREADS=256
+
+    # Set path to OpenBLAS libraries
+    export LD_LIBRARY_PATH="${OPENBLAS_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    cd /tmp
+
+    # Set Mellanox OFED version, operating system, and platform architecture
+    export MOFED_MAJ='5'
+    export MOFED_MIN='8'
+    export MOFED_REV='2.0.3.0'
+    export MOFED_VER="${MOFED_MAJ}.${MOFED_MIN}-${MOFED_REV}"
+    export MOFED_OS='ubuntu22.04'
+    export MOFED_ARCH='x86_64'
+
+    # Download and install Mellanox OFED drivers and supporting
+    # libraries for user space access to Ethernet, RDMA, and Infiniband.
+    # https://docs.mellanox.com/pages/releaseview.action?pageId=15049785
+    wget "http://www.mellanox.com/downloads/ofed/MLNX_OFED-${MOFED_VER}/MLNX_OFED_LINUX-${MOFED_VER}-${MOFED_OS}-${MOFED_ARCH}.tgz"
+    tar -xf "MLNX_OFED_LINUX-${MOFED_VER}-${MOFED_OS}-${MOFED_ARCH}.tgz"
+    cd "MLNX_OFED_LINUX-${MOFED_VER}-${MOFED_OS}-${MOFED_ARCH}"
+    ./mlnxofedinstall --user-space-only --without-fw-update --force
+
+    cd ../
+
+    # Remove Mellanox OFED archive directory and tarball
+    rm -rf "MLNX_OFED_LINUX-${MOFED_VER}-${MOFED_OS}-${MOFED_ARCH}"
+    rm "MLNX_OFED_LINUX-${MOFED_VER}-${MOFED_OS}-${MOFED_ARCH}.tgz"
+
+    # Install additional tools
+    apt-get -y install numactl
+    apt-get -y install libnuma-dev
+
+    # Store information about the container image build system
+    mkdir -p /opt/.nxis
+    cd /opt/.nxis
+    dmidecode > dmidecode.default
+    df -ahPT > df.default
+    fdisk --list > fdisk.default 
+    lsblk --output-all > lsblk.default
+    lsblk --output-all --json > lsblk.json
+    lscpu --output-all > lscpu.default
+    lscpu --output-all --json > lscpu.json
+    lshw > lshw.default
+    lshw -json > lshw.json
+    lshw -short > lshw.short
+    lspci > lspci.default
+    lspci -vvv > lspci.verbose
+    free -h > free.default
+    cat /proc/meminfo > meminfo.default
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+    rm -rf /var/lib/apt/lists/*
+
+    # Update database for mlocate
+    updatedb
+
+%runscript
+
+%test
