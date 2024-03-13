@@ -3,10 +3,10 @@ From: ghcr.io/mkandes/mofed:5.8-ubuntu-22.04-x86_64
 
 %labels
 
-    org.opencontainers.image.ref.name ghcr.io/mkandes/openmpi:4.1.6-mofed-5.8-ubuntu-22.04-x86_64
+    org.opencontainers.image.ref.name ghcr.io/mkandes/openmpi:4.1-mofed-5.8-ubuntu-22.04-x86_64
 
     org.opencontainers.image.base.name ghcr.io/mkandes/mofed:5.8-ubuntu-22.04-x86_64
-    org.opencontainers.image.base.digest sha256:5f3ccde49a9811edb1b55310ef6a443c901773a684259e413975126d01b79d74
+    org.opencontainers.image.base.digest sha256:e85181efc07433d290a9cf2b4f40208c8aa77cd9a4e1a32416847cdd6d88230a
 
     org.opencontainers.image.title openmpi
     org.opencontainers.image.description Open MPI is an open source Message Passing Interface (MPI) implementation
@@ -21,6 +21,8 @@ From: ghcr.io/mkandes/mofed:5.8-ubuntu-22.04-x86_64
     org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
 
 %setup
+
+%files
 
 %environment
 
@@ -93,7 +95,7 @@ From: ghcr.io/mkandes/mofed:5.8-ubuntu-22.04-x86_64
       --without-ucc \
       --with-ucx \
       --without-xpmem
-    make -j4
+    make -j 4
     make install
 
     cd ../
@@ -103,16 +105,30 @@ From: ghcr.io/mkandes/mofed:5.8-ubuntu-22.04-x86_64
     rm "openmpi-${OPENMPI_VER}.tar.gz"
 
     # Store information about the container image build system
-    lscpu > /opt/lscpu.txt
+    mkdir -p /opt/.nxis
+    cd /opt/.nxis
+    dmidecode > dmidecode.default
+    df -ahPT > df.default
+    fdisk --list > fdisk.default 
+    lsblk --output-all > lsblk.default
+    lsblk --output-all --json > lsblk.json
+    lscpu --output-all > lscpu.default
+    lscpu --output-all --json > lscpu.json
+    lshw > lshw.default
+    lshw -json > lshw.json
+    lshw -short > lshw.short
+    lspci > lspci.default
+    lspci -vvv > lspci.verbose
+    free -h > free.default
+    cat /proc/meminfo > meminfo.default
 
     # Cleanup
     apt-get -y autoremove --purge
     apt-get -y clean
+    rm -rf /var/lib/apt/lists/*
 
     # Update database for mlocate
     updatedb
-
-%files
 
 %runscript
 
