@@ -6,7 +6,7 @@ From: ghcr.io/mkandes/ubuntu:22.04-x86_64
     org.opencontainers.image.ref.name ghcr.io/mkandes/stream:5.10-ubuntu-22.04-x86_64
 
     org.opencontainers.image.base.name ghcr.io/mkandes/ubuntu:22.04-x86_64
-    org.opencontainers.image.base.digest sha256:25cf511c278ec8002809eddb41042d0ca37dcc95a370b4d4d1fb24037f285d89
+    org.opencontainers.image.base.digest sha256:30d10d1ca82886d1656382397b6af5e52ae7cf12c699dd3af40ad678781da220
 
     org.opencontainers.image.title stream
     org.opencontainers.image.description STREAM is a benchmark that measures sustainable memory bandwidth (in MB/s) and the corresponding computation rate for simple vector kernels. 
@@ -21,6 +21,8 @@ From: ghcr.io/mkandes/ubuntu:22.04-x86_64
     org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
 
 %setup
+
+%files
 
 %environment
 
@@ -92,7 +94,22 @@ From: ghcr.io/mkandes/ubuntu:22.04-x86_64
     mv *.x "${STREAM_INSTALL_DIR}/bin"
 
     # Store information about the container image build system
-    lscpu > /opt/lscpu.txt
+    mkdir -p /opt/.nxis
+    cd /opt/.nxis
+    dmidecode > dmidecode.default
+    df -ahPT > df.default
+    fdisk --list > fdisk.default 
+    lsblk --output-all > lsblk.default
+    lsblk --output-all --json > lsblk.json
+    lscpu --output-all > lscpu.default
+    lscpu --output-all --json > lscpu.json
+    lshw > lshw.default
+    lshw -json > lshw.json
+    lshw -short > lshw.short
+    lspci > lspci.default
+    lspci -vvv > lspci.verbose
+    free -h > free.default
+    cat /proc/meminfo > meminfo.default
 
     # Cleanup
     apt-get -y autoremove --purge
@@ -101,8 +118,6 @@ From: ghcr.io/mkandes/ubuntu:22.04-x86_64
 
     # Update database for mlocate
     updatedb
-
-%files
 
 %runscript
 
