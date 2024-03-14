@@ -6,7 +6,7 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-ubuntu-22.04-x86_64
     org.opencontainers.image.ref.name ghcr.io/mkandes/omb:7.3-openmpi-4.1-mofed-5.8-cuda-12.1-ubuntu-22.04-x86_64
 
     org.opencontainers.image.base.name ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-ubuntu-22.04-x86_64
-    org.opencontainers.image.base.digest sha256:1dda6bba9903a2ef9ec21354d3041bbc74b640f38d60db4454ae3dacfce51245
+    org.opencontainers.image.base.digest sha256:1b1758d3850b23d2408f7b9447b63e50acfe88686cc309d20cd1ab50be733b62
 
     org.opencontainers.image.title omb
     org.opencontainers.image.description OSU Micro-Benchmarks (OMB) measure the performance of different MPI operations
@@ -16,11 +16,13 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-ubuntu-22.04-x86_64
     org.opencontainers.image.vendor Network-Based Computing Laboratory (NBCL), Ohio State Univeristy
     org.opencontainers.image.licenses https://mvapich.cse.ohio-state.edu/static/media/mvapich/LICENSE-OMB.txt
     org.opencontainers.image.version 7.3
-    org.opencontainers.image.revision
+    org.opencontainers.image.revision 8fa25b8aaa34e4b07ab3a4f30b7690ab46b038b08d204a853a9b6aa7bdb02f2f
 
     org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
 
 %setup
+
+%files
 
 %environment
 
@@ -134,8 +136,10 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-ubuntu-22.04-x86_64
     export PATH="${OPENMPI_INSTALL_DIR}/bin:${PATH}"
     export LD_LIBRARY_PATH="${OPENMPI_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
 
-    # DO NOT Upgrade all software packages to their latest versions
-    #apt-get -y update && apt-get -y upgrade
+    # Update software package index, but DO NOT upgrade all installed 
+    # packages to their latest versions. This is done primarily to 
+    # prevent the upgrade of NVIDIA CUDA to a newer version.
+    apt-get -y update #&& apt-get -y upgrade
 
     cd /tmp
 
@@ -147,51 +151,79 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-ubuntu-22.04-x86_64
     export OMB_ROOT_DIR='/opt/omb'
     export OMB_INSTALL_DIR="${OMB_ROOT_DIR}/${OMB_VER}"
 
-    # Install additional dependencies for OMBs Python-based benchmarks
+    # Install gnuplot and imagemagick for OMB data visualization
     apt-get -y install gnuplot
     apt-get -y install imagemagick
+
+    # Install base environment for OMB Python benchmarks
     apt-get -y install python3-dev
     apt-get -y install python3-pip
     apt-get -y install python-is-python3
-    apt-get -y install python3-numpy
-    apt-get -y install python3-numba
+
+    # Install additional dependencies for OMB Python benchmarks
+    python -m pip install numpy
+    python -m pip install cupy-cuda12x
+    python -m pip install pycuda
+    python -m pip install numba
     python -m pip install mpi4py
 
-    # Download, build, and install OSU Microbenchmarks
+    # Download, build, and install OSU Micro-Benchmarks
     wget "http://mvapich.cse.ohio-state.edu/download/mvapich/osu-micro-benchmarks-${OMB_VER}.tar.gz"
     tar -xf "osu-micro-benchmarks-${OMB_VER}.tar.gz"
     cd "osu-micro-benchmarks-${OMB_VER}"
-    ./configure --prefix="${OMB_INSTALL_DIR}" CC='mpicc' CXX='mpicxx' --enable-openacc --enable-cuda --with-cuda="${CUDA_HOME}" --with-cuda-include="${CUDA_HOME}/include" --with-cuda-libpath="${CUDA_HOME}/lib64" --enable-ncclomb --with-nccl="${NCCL_LIB}" --with-gnuplot='/usr/bin' --with-convert='/usr/bin'
+    ./configure --prefix="${OMB_INSTALL_DIR}" CC='mpicc' CXX='mpicxx' \
+      --disable-openacc \
+      --enable-cuda \
+      --with-cuda="${CUDA_HOME}" \
+      --with-cuda-include="${CUDA_HOME}/include" \
+      --with-cuda-libpath="${CUDA_HOME}/lib64" \
+      --disable-ncclomb \
+      --with-nccl="${NCCL_LIB_DIR}" \
+      --with-gnuplot='/usr/bin' \
+      --with-convert='/usr/bin'
     make -j 4
     make install
     cp -r python/ "${OMB_INSTALL_DIR}"
 
-    cd "${OMB_INSTALL_DIR}"
+    cd ../
+
+    # Remove OMB build directory and source tarball
+    rm -rf "osu-micro-benchmarks-${OMB_VER}"
+    rm "osu-micro-benchmarks-${OMB_VER}.tar.gz"
 
     # Reorganize OSU Microbenchmarks directory structure
+    cd "${OMB_INSTALL_DIR}"
     mv libexec/osu-micro-benchmarks/mpi/collective ./
     mv libexec/osu-micro-benchmarks/mpi/one-sided ./
     mv libexec/osu-micro-benchmarks/mpi/pt2pt ./
     mv libexec/osu-micro-benchmarks/mpi/startup ./
     rm -rf libexec
 
-    cd /tmp
-
-    # Remove OMB build directory and source tarball
-    rm -rf "osu-micro-benchmarks-${OMB_VER}"
-    rm "osu-micro-benchmarks-${OMB_VER}.tar.gz"
-
     # Store information about the container image build system
-    lscpu > /opt/lscpu.txt
+    mkdir -p /opt/.nxis
+    cd /opt/.nxis
+    dmidecode > dmidecode.default
+    df -ahPT > df.default
+    fdisk --list > fdisk.default
+    lsblk --output-all > lsblk.default
+    lsblk --output-all --json > lsblk.json
+    lscpu --output-all > lscpu.default
+    lscpu --output-all --json > lscpu.json
+    lshw > lshw.default
+    lshw -json > lshw.json
+    lshw -short > lshw.short
+    lspci > lspci.default
+    lspci -vvv > lspci.verbose
+    free -h > free.default
+    cat /proc/meminfo > meminfo.default
 
     # Cleanup
     apt-get -y autoremove --purge
     apt-get -y clean
+    rm -rf /var/lib/apt/lists/*
 
     # Update database for mlocate
     updatedb
-
-%files
 
 %runscript
 

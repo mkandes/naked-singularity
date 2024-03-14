@@ -111,7 +111,9 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-ubuntu-22.04-x86_64
     wget "http://mvapich.cse.ohio-state.edu/download/mvapich/osu-micro-benchmarks-${OMB_VER}.tar.gz"
     tar -xf "osu-micro-benchmarks-${OMB_VER}.tar.gz"
     cd "osu-micro-benchmarks-${OMB_VER}"
-    ./configure --prefix="${OMB_INSTALL_DIR}" CC='mpicc' CXX='mpicxx' --with-gnuplot='/usr/bin' --with-convert='/usr/bin'
+    ./configure --prefix="${OMB_INSTALL_DIR}" CC='mpicc' CXX='mpicxx' \
+      --with-gnuplot='/usr/bin' \
+      --with-convert='/usr/bin'
     make -j 4
     make install
     cp -r python/ "${OMB_INSTALL_DIR}"
@@ -135,7 +137,7 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-ubuntu-22.04-x86_64
     cd /opt/.nxis
     dmidecode > dmidecode.default
     df -ahPT > df.default
-    fdisk --list > fdisk.default 
+    fdisk --list > fdisk.default
     lsblk --output-all > lsblk.default
     lsblk --output-all --json > lsblk.json
     lscpu --output-all > lscpu.default
