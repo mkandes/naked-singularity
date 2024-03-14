@@ -1,5 +1,5 @@
 Bootstrap: oras
-From: ghcr.io/mkandes/ubuntu:22.04-mlnx-ofed-5.8-2.0.3.0-openmpi-4.1.5a1-x86_64-2024-01-27
+From: 
 
 %labels
 
@@ -24,8 +24,7 @@ From: ghcr.io/mkandes/ubuntu:22.04-mlnx-ofed-5.8-2.0.3.0-openmpi-4.1.5a1-x86_64-
 
 %environment
 
-    # Set OMB major and minor version numbers, root and
-    # installation directories
+    # Set OMB version number and install path
     export OMB_MAJOR='7'
     export OMB_MINOR='3'
     export OMB_REVISION=''
@@ -52,6 +51,24 @@ From: ghcr.io/mkandes/ubuntu:22.04-mlnx-ofed-5.8-2.0.3.0-openmpi-4.1.5a1-x86_64-
 
     # Set debian frontend interface
     export DEBIAN_FRONTEND='noninteractive'
+
+    # Set Mellanox OFED version, operating system and platform architecture
+    export MLNX_ROOT_URL='http://www.mellanox.com/downloads/ofed'
+    export MLNX_OFED_VERSION='5.8-2.0.3.0'
+    export MLNX_OS_VERSION='ubuntu22.04'
+    export MLNX_PLATFORM='x86_64'
+
+    # Set OpenMPI version number and install path
+    export OMPI_MAJOR='4'
+    export OMPI_MINOR='1'
+    export OMPI_REVISION='5a1'
+    export OMPI_VERSION="${OMPI_MAJOR}.${OMPI_MINOR}.${OMPI_REVISION}"
+    export OMPI_ROOT_DIR='/usr/mpi/gcc'
+    export OMPI_INSTALL_DIR="${OMPI_ROOT_DIR}/openmpi-${OMPI_VERSION}"
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="${OMPI_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${OMPI_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
 
     # Upgrade all software packages to their latest versions
     apt-get -y update && apt-get -y upgrade

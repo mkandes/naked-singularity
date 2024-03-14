@@ -38,6 +38,83 @@ From: ghcr.io/mkandes/ubuntu:22.04-cuda-12.1-mlnx-ofed-5.8-2.0.3.0-openmpi-4.1.5
     # Set debian frontend interface
     export DEBIAN_FRONTEND='noninteractive'
 
+    # Set NVIDIA driver and CUDA version numbers
+    export NVIDIA_DRIVER_MAJOR='525'
+    export NVIDIA_DRIVER_MINOR='85'
+    export NVIDIA_DRIVER_REVISION='12'
+    export NVIDIA_DRIVER_VERSION="${NVIDIA_DRIVER_MAJOR}.${NVIDIA_DRIVER_MINOR}.${NVIDIA_DRIVER_REVISION}"
+
+    export CUDA_MAJOR='12'
+    export CUDA_MINOR='1'
+    export CUDA_REVISION='1'
+    export CUDA_VERSION="${CUDA_MAJOR}.${CUDA_MINOR}.${CUDA_REVISION}"
+
+    export CUDNN_MAJOR='8'
+    export CUDNN_MINOR='9'
+    export CUDNN_REVISION='0.131'
+    export CUDNN_VERSION="${CUDNN_MAJOR}.${CUDNN_MINOR}.${CUDNN_REVISION}"
+
+    export NCCL_MAJOR='2'
+    export NCCL_MINOR='18'
+    export NCCL_REVISION='3'
+    export NCCL_VERSION="${NCCL_MAJOR}.${NCCL_MINOR}.${NCCL_REVISION}"
+
+    export TENSORRT_MAJOR='8'
+    export TENSORRT_MINOR='6'
+    export TENSORRT_REVISION='1.6'
+    export TENSORRT_VERSION="${TENSORRT_MAJOR}.${TENSORRT_MINOR}.${TENSORRT_REVISION}"
+
+    export CUTENSOR_MAJOR='2'
+    export CUTENSOR_MINOR='0'
+    export CUTENSOR_REVISION='0.7'
+    export CUTENSOR_VERSION="${CUTENSOR_MAJOR}.${CUTENSOR_MINOR}.${CUTENSOR_REVISION}"
+
+    export CUSPARSELT_MAJOR='0'
+    export CUSPARSELT_MINOR='5'
+    export CUSPARSELT_REVISION='2.1'
+    export CUSPARSELT_VERSION="${CUSPARSELT_MAJOR}.${CUSPARSELT_MINOR}.${CUSPARSELT_REVISION}"
+
+    # Set paths to CUDA binaries and libraries
+    export CUDA_HOME="/usr/local/cuda-${CUDA_MAJOR}.${CUDA_MINOR}"
+
+    export CUDNN_INCLUDE_DIR='/usr/include'
+    export CUDNN_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+
+    export NCCL_INCLUDE_DIR='/usr/include'
+    export NCCL_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+
+    export TENSORRT_INCLUDE='/usr/include'
+    export TENSORRT_LIB='/usr/lib/x86_64-linux-gnu'
+
+    export CUTENSOR_INCLUDE_DIR='/usr/include'
+    export CUTENSOR_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+
+    export CUSPARSELT_INCLUDE_DIR='/usr/include'
+    export CUSPARSELT_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+
+    export PATH="${CUDA_HOME}/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="${CUDA_HOME}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+    export LD_LIBRARY_PATH="${CUDNN_LIB_DIR}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${NCCL_LIB_DIR}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${TENSORRT_LIB}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${CUTENSOR_LIB_DIR}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${CUSPARSELT_LIB_DIR}:${LD_LIBRARY_PATH}"
+
+    # Set Mellanox OFED version, operating system, and hardware platform
+    export MLNX_ROOT_URL='http://www.mellanox.com/downloads/ofed'
+    export MLNX_OFED_VERSION='5.8-2.0.3.0'
+    export MLNX_OS_VERSION='ubuntu22.04'
+    export MLNX_PLATFORM='x86_64'
+
+    # Set OpenMPI major, minor, and revision numbers, root and
+    # installation directories
+    export OMPI_MAJOR='4'
+    export OMPI_MINOR='1'
+    export OMPI_REVISION='5a1'
+    export OMPI_VERSION="${OMPI_MAJOR}.${OMPI_MINOR}.${OMPI_REVISION}"
+    export OMPI_ROOT_DIR='/usr/mpi/gcc'
+    export OMPI_INSTALL_DIR="${OMPI_ROOT_DIR}/openmpi-${OMPI_VERSION}"
+
     # DO NOT Upgrade all software packages to their latest versions
     # apt-get -y update && apt-get -y upgrade
 
@@ -146,20 +223,17 @@ From: ghcr.io/mkandes/ubuntu:22.04-cuda-12.1-mlnx-ofed-5.8-2.0.3.0-openmpi-4.1.5
     bazel-bin/tensorflow/tools/pip_package/build_pip_package tensorflow_pkg
     pip3 install "tensorflow_pkg/tensorflow-${TF_VERSION}-cp310-cp310-linux_x86_64.whl"
 
+    cd /tmp
+
     # Set Horovod version number
     export HOROVOD_MAJOR='0'
     export HOROVOD_MINOR='28'
     export HOROVOD_REVISION='1'
     export HOROVOD_VERSION="${HOROVOD_MAJOR}.${HOROVOD_MINOR}.${HOROVOD_REVISION}"
 
-    cd /tmp
-
-    # Download, build, and install Horovod with TensorFlow + NVIDIA GPU support 
-    git clone --recursive https://github.com/horovod/horovod.git
-    cd horovod
-    git checkout "v${HOROVOD_VERSION}"
-    export HOROVOD_WITHOUT_PYTORCH=1
+    # Set Horovod build configuration environment variables
     export HOROVOD_WITHOUT_MXNET=1
+    export HOROVOD_WITHOUT_PYTORCH=1
     export HOROVOD_WITH_TENSORFLOW=1
     export HOROVOD_WITH_MPI=1
     export HOROVOD_WITH_GLOO=1
@@ -167,9 +241,16 @@ From: ghcr.io/mkandes/ubuntu:22.04-cuda-12.1-mlnx-ofed-5.8-2.0.3.0-openmpi-4.1.5
     export HOROVOD_CUDA_HOME="${CUDA_HOME}"
     export HOROVOD_BUILD_CUDA_CC_LIST='70,80'
     export HOROVOD_GPU_OPERATIONS='NCCL'
-    export HOROVOD_NCCL_INCLUDE="${NCCL_INCLUDE}"
-    export HOROVOD_NCCL_LIB="${NCCL_LIB}"
-    pip3 install -v -e .
+    export HOROVOD_NCCL_INCLUDE="${NCCL_INCLUDE_DIR}"
+    export HOROVOD_NCCL_LIB="${NCCL_LIB_DIR}"
+
+    # Download, build, and install Horovod for TensorFlow with NVIDIA GPU support 
+    git clone --recursive https://github.com/horovod/horovod.git
+    cd horovod
+    git checkout "v${HOROVOD_VERSION}"
+    git submodule sync
+    git submodule update --init --recursive
+    pip3 install -v .
 
     # Install TensorFlow tools, extentions, and related packages.
     pip3 install tensorboard==2.15.2
@@ -208,7 +289,9 @@ From: ghcr.io/mkandes/ubuntu:22.04-cuda-12.1-mlnx-ofed-5.8-2.0.3.0-openmpi-4.1.5
     git clone https://github.com/onnx/tensorflow-onnx.git
     cd tensorflow-onnx
     git checkout "v${TF2ONNX_VERSION}"
-    python3 setup.py install
+    git submodule sync
+    git submodule update --init --recursive
+    python3 setup.py clean install
 
     # Store information about the CPU arch of the build system
     lscpu > /.singularity.d/lscpu.txt
