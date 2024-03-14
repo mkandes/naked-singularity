@@ -104,7 +104,7 @@ From: ghcr.io/mkandes/mofed:5.8-openblas-0.3-ubuntu-22.04-x86_64
       --enable-shared \
       --enable-static \
       --with-cma \
-      --with-cuda="${CUDA_HOME}" \
+      --without-cuda \
       --with-hcoll='/opt/mellanox/hcoll' \
       --without-knem \
       --without-pmi \
