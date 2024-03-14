@@ -6,7 +6,7 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-ubuntu-22.04-x86_64
     org.opencontainers.image.ref.name ghcr.io/mkandes/omb:7.3-openmpi-4.1-mofed-5.8-ubuntu-22.04-x86_64
 
     org.opencontainers.image.base.name ghcr.io/mkandes/openmpi:4.1-mofed-5.8-ubuntu-22.04-x86_64
-    org.opencontainers.image.base.digest sha256:7fdd29c760c88e1359b02ac3e4c469b8be4261b05fe59762fc9cd6294a4d63a1
+    org.opencontainers.image.base.digest sha256:4ad950af40610adbae76c29740ee99a68e5560ac2420dcf66bf38f51268d6225
 
     org.opencontainers.image.title omb
     org.opencontainers.image.description OSU Micro-Benchmarks (OMB) measure the performance of different MPI operations
@@ -16,11 +16,13 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-ubuntu-22.04-x86_64
     org.opencontainers.image.vendor Network-Based Computing Laboratory (NBCL), Ohio State Univeristy
     org.opencontainers.image.licenses https://mvapich.cse.ohio-state.edu/static/media/mvapich/LICENSE-OMB.txt
     org.opencontainers.image.version 7.3
-    org.opencontainers.image.revision
+    org.opencontainers.image.revision 8fa25b8aaa34e4b07ab3a4f30b7690ab46b038b08d204a853a9b6aa7bdb02f2f
 
     org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
 
 %setup
+
+%files
 
 %environment
 
@@ -108,32 +110,45 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-ubuntu-22.04-x86_64
     make install
     cp -r python/ "${OMB_INSTALL_DIR}"
 
-    cd "${OMB_INSTALL_DIR}"
+    cd ../
+
+    # Remove OMB build directory and source tarball
+    rm -rf "osu-micro-benchmarks-${OMB_VER}"
+    rm "osu-micro-benchmarks-${OMB_VER}.tar.gz"
 
     # Reorganize OSU Microbenchmarks directory structure
+    cd "${OMB_INSTALL_DIR}"
     mv libexec/osu-micro-benchmarks/mpi/collective ./
     mv libexec/osu-micro-benchmarks/mpi/one-sided ./
     mv libexec/osu-micro-benchmarks/mpi/pt2pt ./
     mv libexec/osu-micro-benchmarks/mpi/startup ./
     rm -rf libexec
 
-    cd /tmp
-
-    # Remove OMB build directory and source tarball
-    rm -rf "osu-micro-benchmarks-${OMB_VER}"
-    rm "osu-micro-benchmarks-${OMB_VER}.tar.gz"
-
     # Store information about the container image build system
-    lscpu > /opt/lscpu.txt
+    mkdir -p /opt/.nxis
+    cd /opt/.nxis
+    dmidecode > dmidecode.default
+    df -ahPT > df.default
+    fdisk --list > fdisk.default 
+    lsblk --output-all > lsblk.default
+    lsblk --output-all --json > lsblk.json
+    lscpu --output-all > lscpu.default
+    lscpu --output-all --json > lscpu.json
+    lshw > lshw.default
+    lshw -json > lshw.json
+    lshw -short > lshw.short
+    lspci > lspci.default
+    lspci -vvv > lspci.verbose
+    free -h > free.default
+    cat /proc/meminfo > meminfo.default
 
     # Cleanup
     apt-get -y autoremove --purge
     apt-get -y clean
+    rm -rf /var/lib/apt/lists/*
 
     # Update database for mlocate
     updatedb
-
-%files
 
 %runscript
 
