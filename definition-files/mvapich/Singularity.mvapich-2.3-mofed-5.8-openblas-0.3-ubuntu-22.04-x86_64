@@ -1,0 +1,142 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/mofed:5.8-openblas-0.3-ubuntu-22.04-x86_64
+
+%labels
+
+    org.opencontainers.image.ref.name ghcr.io/mkandes/mvapich:2.3-mofed-5.8-openblas-0.3-ubuntu-22.04-x86_64
+
+    org.opencontainers.image.base.name ghcr.io/mkandes/mofed:5.8-openblas-0.3-ubuntu-22.04-x86_64
+    org.opencontainers.image.base.digest sha256:734adc35dbbcef3593d963d059ad9e4da9e0b01b886afa18729bb755dbf34c4c
+
+    org.opencontainers.image.title mvapich
+    org.opencontainers.image.description MVAPICH2 is an open source implementation of Message Passing Interface (MPI)
+    org.opencontainers.image.url https://mvapich.cse.ohio-state.edu
+    org.opencontainers.image.documentation https://mvapich.cse.ohio-state.edu/static/media/mvapich/mvapich2-userguide.html
+    org.opencontainers.image.source https://mvapich.cse.ohio-state.edu/download/mvapich/mv2/mvapich2-2.3.7-1.tar.gz
+    org.opencontainers.image.vendor Network-Based Computing Laboratory (NBCL), Ohio State Univeristy
+    org.opencontainers.image.licenses https://mvapich.cse.ohio-state.edu/static/media/mvapich/LICENSE-MV2.TXT
+    org.opencontainers.image.version 2.3.7-1
+    org.opencontainers.image.revision fdd971cf36d6476d007b5d63d19414546ca8a2937b66886f24a1d9ca154634e4
+
+    org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
+
+%setup
+
+%files
+
+%environment
+
+    # Set MVAPICH version and install path
+    export MV2_MAJOR='2'
+    export MV2_MINOR='3'
+    export MV2_REVISION='7-1'
+    export MV2_VERSION="${MV2_MAJOR}.${MV2_MINOR}.${MV2_REVISION}"
+    export MV2_ROOT_DIR='/opt/mvapich'
+    export MV2_INSTALL_DIR="${MV2_ROOT_DIR}/${MV2_VERSION}"
+
+    # Set paths to MVAPICH binaries and libraries
+    export PATH="${MV2_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${MV2_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='jammy'
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set OpenBLAS version and install path
+    export OPENBLAS_MAJ='0'
+    export OPENBLAS_MIN='3'
+    export OPENBLAS_REV='26'
+    export OPENBLAS_VER="${OPENBLAS_MAJ}.${OPENBLAS_MIN}.${OPENBLAS_REV}"
+    export OPENBLAS_ROOT_DIR='/opt/openblas'
+    export OPENBLAS_INSTALL_DIR="${OPENBLAS_ROOT_DIR}/${OPENBLAS_VER}"
+
+    # Set OpenBLAS configuration, target architecture, maximum number of threads
+    export OPENBLAS_USE_OPENMP=1
+    export OPENBLAS_DYNAMIC_ARCH=1
+    export OPENBLAS_TARGET_ARCH='HASWELL'
+    export OPENBLAS_MAX_NUM_THREADS=256
+
+    # Set path to OpenBLAS libraries
+    export LD_LIBRARY_PATH="${OPENBLAS_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    # Set Mellanox OFED version, operating system, and platform architecture
+    export MOFED_MAJ='5'
+    export MOFED_MIN='8'
+    export MOFED_REV='2.0.3.0'
+    export MOFED_VER="${MOFED_MAJ}.${MOFED_MIN}-${MOFED_REV}"
+    export MOFED_OS='ubuntu22.04'
+    export MOFED_ARCH='x86_64'
+
+    # Set paths to additional Mellanox OFED binaries and libraries
+    export PATH="/opt/mellanox/hcoll/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/mellanox/hcoll/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/mellanox/sharp/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/mellanox/sharp/lib:${LD_LIBRARY_PATH}"
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    cd /tmp
+
+    # Set MVAPICH version and install path
+    export MV2_MAJOR='2'
+    export MV2_MINOR='3'
+    export MV2_REVISION='7-1'
+    export MV2_VERSION="${MV2_MAJOR}.${MV2_MINOR}.${MV2_REVISION}"
+    export MV2_ROOT_DIR='/opt/mvapich'
+    export MV2_INSTALL_DIR="${MV2_ROOT_DIR}/${MV2_VERSION}"
+
+    # Download, build, and install MVAPICH
+    wget "http://mvapich.cse.ohio-state.edu/download/mvapich/mv2/mvapich2-${MV2_VERSION}.tar.gz"
+    tar -xf "mvapich2-${MV2_VERSION}.tar.gz"
+    cd "mvapich2-${MV2_VERSION}"
+    export FFLAGS='-fallow-argument-mismatch'
+    ./configure --prefix="${MV2_INSTALL_DIR}" --enable-fast
+    make -j 4
+    make install
+
+    cd ../
+
+    # Remove MVAPICH build directory and source tarball
+    rm -rf "mvapich2-${MV2_VERSION}"
+    rm "mvapich2-${MV2_VERSION}.tar.gz"
+
+    # Store information about the container image build system
+    mkdir -p /opt/.nxis
+    cd /opt/.nxis
+    dmidecode > dmidecode.default
+    df -ahPT > df.default
+    fdisk --list > fdisk.default 
+    lsblk --output-all > lsblk.default
+    lsblk --output-all --json > lsblk.json
+    lscpu --output-all > lscpu.default
+    lscpu --output-all --json > lscpu.json
+    lshw > lshw.default
+    lshw -json > lshw.json
+    lshw -short > lshw.short
+    lspci > lspci.default
+    lspci -vvv > lspci.verbose
+    free -h > free.default
+    cat /proc/meminfo > meminfo.default
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+    rm -rf /var/lib/apt/lists/*
+
+    # Update database for mlocate
+    updatedb
+
+%runscript
+
+%test
