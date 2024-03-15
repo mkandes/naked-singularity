@@ -1,0 +1,191 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/ucx:1.14-cuda-12.1-ubuntu-22.04-x86_64
+
+%labels
+
+    org.opencontainers.image.ref.name ghcr.io/mkandes/openmpi:4.1-ucx-1.14-cuda-12.1-ubuntu-22.04-x86_64
+
+    org.opencontainers.image.base.name ghcr.io/mkandes/ucx:1.14-cuda-12.1-ubuntu-22.04-x86_64
+    org.opencontainers.image.base.digest sha256:9447022483a38ad12a34d70fe407f9a06cd1e73bd9bf580a0da0a0c46268cb14
+
+    org.opencontainers.image.title openmpi
+    org.opencontainers.image.description Open MPI is an open source Message Passing Interface (MPI) implementation
+    org.opencontainers.image.url https://www.open-mpi.org
+    org.opencontainers.image.documentation https://www-lb.open-mpi.org/doc/v4.1
+    org.opencontainers.image.source https://github.com/open-mpi/ompi.git
+    org.opencontainers.image.vendor The Open MPI Project
+    org.opencontainers.image.licenses BSD-3-Clause-Open-MPI
+    org.opencontainers.image.version 4.1.6
+    org.opencontainers.image.revision 439b23db6288f0370f6fcc80c8c0a06ad86d6873
+
+    org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
+
+%setup
+
+%files
+
+%environment
+
+    # Set OpenMPI version and install path
+    export OPENMPI_MAJ='4'
+    export OPENMPI_MIN='1'
+    export OPENMPI_REV='6'
+    export OPENMPI_VER="${OPENMPI_MAJ}.${OPENMPI_MIN}.${OPENMPI_REV}"
+    export OPENMPI_ROOT_DIR='/opt/openmpi'
+    export OPENMPI_INSTALL_DIR="${OPENMPI_ROOT_DIR}/${OPENMPI_VER}"
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="${OPENMPI_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${OPENMPI_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='jammy'
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set NVIDIA driver and CUDA versions
+    export NV_DRIVER_MAJ='525'
+    export NV_DRIVER_MIN='85'
+    export NV_DRIVER_REV='12'
+    export NV_DRIVER_VER="${NV_DRIVER_MAJ}.${NV_DRIVER_MIN}.${NV_DRIVER_REV}"
+
+    export CUDA_MAJ='12'
+    export CUDA_MIN='1'
+    export CUDA_REV='1'
+    export CUDA_VER="${CUDA_MAJ}.${CUDA_MIN}.${CUDA_REV}"
+
+    export CUDNN_MAJ='8'
+    export CUDNN_MIN='9'
+    export CUDNN_REV='0.131'
+    export CUDNN_VER="${CUDNN_MAJ}.${CUDNN_MIN}.${CUDNN_REV}"
+
+    export NCCL_MAJ='2'
+    export NCCL_MIN='18'
+    export NCCL_REV='3'
+    export NCCL_VER="${NCCL_MAJ}.${NCCL_MIN}.${NCCL_REV}"
+
+    export TENSORRT_MAJ='8'
+    export TENSORRT_MIN='6'
+    export TENSORRT_REV='1.6'
+    export TENSORRT_VER="${TENSORRT_MAJ}.${TENSORRT_MIN}.${TENSORRT_REV}"
+
+    export CUTENSOR_MAJ='2'
+    export CUTENSOR_MIN='0'
+    export CUTENSOR_REV='0.7'
+    export CUTENSOR_VER="${CUTENSOR_MAJ}.${CUTENSOR_MIN}.${CUTENSOR_REV}"
+
+    export CUSPARSELT_MAJ='0'
+    export CUSPARSELT_MIN='5'
+    export CUSPARSELT_REV='2.1'
+    export CUSPARSELT_VER="${CUSPARSELT_MAJ}.${CUSPARSELT_MIN}.${CUSPARSELT_REV}"
+
+    # Set paths to CUDA binaries and libraries
+    export CUDA_HOME="/usr/local/cuda-${CUDA_MAJ}.${CUDA_MIN}"
+    export CUDNN_INCLUDE_DIR='/usr/include'
+    export CUDNN_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+    export NCCL_INCLUDE_DIR='/usr/include'
+    export NCCL_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+    export TENSORRT_INCLUDE_DIR='/usr/include'
+    export TENSORRT_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+    export CUTENSOR_INCLUDE_DIR='/usr/include'
+    export CUTENSOR_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+    export CUSPARSELT_INCLUDE_DIR='/usr/include'
+    export CUSPARSELT_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+    export PATH="${CUDA_HOME}/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="${CUDA_HOME}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+    export LD_LIBRARY_PATH="${CUDNN_LIB_DIR}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${NCCL_LIB_DIR}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${TENSORRT_LIB_DIR}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${CUTENSOR_LIB_DIR}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${CUSPARSELT_LIB_DIR}:${LD_LIBRARY_PATH}"
+
+    # Set UCX version and install path
+    export UCX_MAJ='1'
+    export UCX_MIN='14'
+    export UCX_REV='1'
+    export UCX_VER="${UCX_MAJ}.${UCX_MIN}.${UCX_REV}"
+    export UCX_ROOT_DIR='/opt/ucx'
+    export UCX_INSTALL_DIR="${UCX_ROOT_DIR}/${UCX_VER}"
+
+    # Set paths to UCX binaries and libraries
+    export PATH="${UCX_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${UCX_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    # Update software package index, but DO NOT upgrade all installed
+    # packages to their latest versions. This is done primarily to
+    # prevent the upgrade of NVIDIA CUDA to a newer version.
+    apt-get -y update #&& apt-get -y upgrade
+
+    cd /tmp
+
+    # Set OpenMPI version and install path
+    export OPENMPI_MAJ='4'
+    export OPENMPI_MIN='1'
+    export OPENMPI_REV='6'
+    export OPENMPI_VER="${OPENMPI_MAJ}.${OPENMPI_MIN}.${OPENMPI_REV}"
+    export OPENMPI_ROOT_DIR='/opt/openmpi'
+    export OPENMPI_INSTALL_DIR="${OPENMPI_ROOT_DIR}/${OPENMPI_VER}"
+
+    # Download, build, and install OpenMPI with UCX support
+    wget "https://download.open-mpi.org/release/open-mpi/v${OPENMPI_MAJ}.${OPENMPI_MIN}/openmpi-${OPENMPI_VER}.tar.gz"
+    tar -xf "openmpi-${OPENMPI_VER}.tar.gz"
+    cd "openmpi-${OPENMPI_VER}"
+    ./configure --prefix="${OPENMPI_INSTALL_DIR}" \
+      --enable-shared \
+      --enable-static \
+      --with-cma \
+      --with-cuda="${CUDA_HOME}" \
+      --without-hcoll \
+      --without-knem \
+      --without-pmi \
+      --with-pmix \
+      --without-ucc \
+      --with-ucx="${UCX_INSTALL_DIR}" \
+      --without-xpmem
+    make -j 4
+    make install
+
+    cd ../
+
+    # Remove OpenMPI build directory and source tarball
+    rm -rf "openmpi-${OPENMPI_VER}"
+    rm "openmpi-${OPENMPI_VER}.tar.gz"
+
+    # Store information about the container image build system
+    mkdir -p /opt/.nxis
+    cd /opt/.nxis
+    dmidecode > dmidecode.default
+    df -ahPT > df.default
+    fdisk --list > fdisk.default
+    lsblk --output-all > lsblk.default
+    lsblk --output-all --json > lsblk.json
+    lscpu --output-all > lscpu.default
+    lscpu --output-all --json > lscpu.json
+    lshw > lshw.default
+    lshw -json > lshw.json
+    lshw -short > lshw.short
+    lspci > lspci.default
+    lspci -vvv > lspci.verbose
+    free -h > free.default
+    cat /proc/meminfo > meminfo.default
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+    rm -rf /var/lib/apt/lists/*
+
+    # Update database for mlocate
+    updatedb
+
+%runscript
+
+%test
