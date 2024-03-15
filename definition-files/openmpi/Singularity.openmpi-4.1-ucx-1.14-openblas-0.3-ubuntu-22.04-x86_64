@@ -1,0 +1,150 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/ucx:1.14-openblas-0.3-ubuntu-22.04-x86_64
+
+%labels
+
+    org.opencontainers.image.ref.name ghcr.io/mkandes/openmpi:4.1-ucx-1.14-openblas-0.3-ubuntu-22.04-x86_64
+
+    org.opencontainers.image.base.name ghcr.io/mkandes/ucx:1.14-openblas-0.3-ubuntu-22.04-x86_64
+    org.opencontainers.image.base.digest sha256:9109856bb4ccfc046cfcfb517933bc67d17aa28832359149886adfa84e0e3d98
+
+    org.opencontainers.image.title openmpi
+    org.opencontainers.image.description Open MPI is an open source Message Passing Interface (MPI) implementation
+    org.opencontainers.image.url https://www.open-mpi.org
+    org.opencontainers.image.documentation https://www-lb.open-mpi.org/doc/v4.1
+    org.opencontainers.image.source https://github.com/open-mpi/ompi.git
+    org.opencontainers.image.vendor The Open MPI Project
+    org.opencontainers.image.licenses BSD-3-Clause-Open-MPI
+    org.opencontainers.image.version 4.1.6
+    org.opencontainers.image.revision 439b23db6288f0370f6fcc80c8c0a06ad86d6873
+
+    org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
+
+%setup
+
+%files
+
+%environment
+
+    # Set OpenMPI version and install path
+    export OPENMPI_MAJ='4'
+    export OPENMPI_MIN='1'
+    export OPENMPI_REV='6'
+    export OPENMPI_VER="${OPENMPI_MAJ}.${OPENMPI_MIN}.${OPENMPI_REV}"
+    export OPENMPI_ROOT_DIR='/opt/openmpi'
+    export OPENMPI_INSTALL_DIR="${OPENMPI_ROOT_DIR}/${OPENMPI_VER}"
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="${OPENMPI_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${OPENMPI_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='jammy'
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set OpenBLAS version and install path
+    export OPENBLAS_MAJ='0'
+    export OPENBLAS_MIN='3'
+    export OPENBLAS_REV='26'
+    export OPENBLAS_VER="${OPENBLAS_MAJ}.${OPENBLAS_MIN}.${OPENBLAS_REV}"
+    export OPENBLAS_ROOT_DIR='/opt/openblas'
+    export OPENBLAS_INSTALL_DIR="${OPENBLAS_ROOT_DIR}/${OPENBLAS_VER}"
+
+    # Set OpenBLAS configuration, target architecture, maximum number of threads
+    export OPENBLAS_USE_OPENMP=1
+    export OPENBLAS_DYNAMIC_ARCH=1
+    export OPENBLAS_TARGET_ARCH='HASWELL'
+    export OPENBLAS_MAX_NUM_THREADS=256
+
+    # Set path to OpenBLAS libraries
+    export LD_LIBRARY_PATH="${OPENBLAS_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    # Set UCX version and install path
+    export UCX_MAJ='1'
+    export UCX_MIN='14'
+    export UCX_REV='1'
+    export UCX_VER="${UCX_MAJ}.${UCX_MIN}.${UCX_REV}"
+    export UCX_ROOT_DIR='/opt/ucx'
+    export UCX_INSTALL_DIR="${UCX_ROOT_DIR}/${UCX_VER}"
+
+    # Set paths to UCX binaries and libraries
+    export PATH="${UCX_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${UCX_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    cd /tmp
+
+    # Set OpenMPI version and install path
+    export OPENMPI_MAJ='4'
+    export OPENMPI_MIN='1'
+    export OPENMPI_REV='6'
+    export OPENMPI_VER="${OPENMPI_MAJ}.${OPENMPI_MIN}.${OPENMPI_REV}"
+    export OPENMPI_ROOT_DIR='/opt/openmpi'
+    export OPENMPI_INSTALL_DIR="${OPENMPI_ROOT_DIR}/${OPENMPI_VER}"
+
+    # Download, build, and install OpenMPI with UCX support
+    wget "https://download.open-mpi.org/release/open-mpi/v${OPENMPI_MAJ}.${OPENMPI_MIN}/openmpi-${OPENMPI_VER}.tar.gz"
+    tar -xf "openmpi-${OPENMPI_VER}.tar.gz"
+    cd "openmpi-${OPENMPI_VER}"
+    ./configure --prefix="${OPENMPI_INSTALL_DIR}" \
+      --enable-shared \
+      --enable-static \
+      --with-cma \
+      --without-cuda \
+      --without-hcoll \
+      --without-knem \
+      --without-pmi \
+      --with-pmix \
+      --without-ucc \
+      --with-ucx="${UCX_INSTALL_DIR}" \
+      --without-xpmem
+    make -j 4
+    make install
+
+    cd ../
+
+    # Remove OpenMPI build directory and source tarball
+    rm -rf "openmpi-${OPENMPI_VER}"
+    rm "openmpi-${OPENMPI_VER}.tar.gz"
+
+    # Store information about the container image build system
+    mkdir -p /opt/.nxis
+    cd /opt/.nxis
+    dmidecode > dmidecode.default
+    df -ahPT > df.default
+    fdisk --list > fdisk.default
+    lsblk --output-all > lsblk.default
+    lsblk --output-all --json > lsblk.json
+    lscpu --output-all > lscpu.default
+    lscpu --output-all --json > lscpu.json
+    lshw > lshw.default
+    lshw -json > lshw.json
+    lshw -short > lshw.short
+    lspci > lspci.default
+    lspci -vvv > lspci.verbose
+    free -h > free.default
+    cat /proc/meminfo > meminfo.default
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+    rm -rf /var/lib/apt/lists/*
+
+    # Update database for mlocate
+    updatedb
+
+%runscript
+
+%test
