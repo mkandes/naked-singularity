@@ -87,8 +87,6 @@ OSVersion: jammy
     apt-get -y install automake
     apt-get -y install build-essential
     apt-get -y install cmake
-    apt-get -y install evince
-    apt-get -y install expect
     apt-get -y install gfortran
     apt-get -y install libtool
     apt-get -y install mlocate
@@ -101,7 +99,7 @@ OSVersion: jammy
     cd /opt/.nxis
     dmidecode > dmidecode.default
     df -ahPT > df.default
-    fdisk --list > fdisk.default 
+    fdisk --list > fdisk.default
     lsblk --output-all > lsblk.default
     lsblk --output-all --json > lsblk.json
     lscpu --output-all > lscpu.default

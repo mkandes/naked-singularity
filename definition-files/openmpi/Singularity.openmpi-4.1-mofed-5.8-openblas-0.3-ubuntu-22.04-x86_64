@@ -6,7 +6,7 @@ From: ghcr.io/mkandes/mofed:5.8-openblas-0.3-ubuntu-22.04-x86_64
     org.opencontainers.image.ref.name ghcr.io/mkandes/openmpi:4.1-mofed-5.8-openblas-0.3-ubuntu-22.04-x86_64
 
     org.opencontainers.image.base.name ghcr.io/mkandes/mofed:5.8-openblas-0.3-ubuntu-22.04-x86_64
-    org.opencontainers.image.base.digest sha256:734adc35dbbcef3593d963d059ad9e4da9e0b01b886afa18729bb755dbf34c4c
+    org.opencontainers.image.base.digest sha256:49a31c73cc7b03b8d378e46e23d90def693e08d236d16830413bd2c4beaf1670
 
     org.opencontainers.image.title openmpi
     org.opencontainers.image.description Open MPI is an open source Message Passing Interface (MPI) implementation
@@ -126,7 +126,7 @@ From: ghcr.io/mkandes/mofed:5.8-openblas-0.3-ubuntu-22.04-x86_64
     cd /opt/.nxis
     dmidecode > dmidecode.default
     df -ahPT > df.default
-    fdisk --list > fdisk.default 
+    fdisk --list > fdisk.default
     lsblk --output-all > lsblk.default
     lsblk --output-all --json > lsblk.json
     lscpu --output-all > lscpu.default

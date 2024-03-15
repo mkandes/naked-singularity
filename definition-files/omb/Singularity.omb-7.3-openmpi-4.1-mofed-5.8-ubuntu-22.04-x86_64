@@ -6,7 +6,7 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-ubuntu-22.04-x86_64
     org.opencontainers.image.ref.name ghcr.io/mkandes/omb:7.3-openmpi-4.1-mofed-5.8-ubuntu-22.04-x86_64
 
     org.opencontainers.image.base.name ghcr.io/mkandes/openmpi:4.1-mofed-5.8-ubuntu-22.04-x86_64
-    org.opencontainers.image.base.digest sha256:4ad950af40610adbae76c29740ee99a68e5560ac2420dcf66bf38f51268d6225
+    org.opencontainers.image.base.digest sha256:b9e0e73fc6d6c10b1fb2117b4572f35f69fdc42b9038842a11e8bdbc9fb37b94
 
     org.opencontainers.image.title omb
     org.opencontainers.image.description OSU Micro-Benchmarks (OMB) measure the performance of different MPI operations

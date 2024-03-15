@@ -6,7 +6,7 @@ From: ghcr.io/mkandes/cuda:12.1-ubuntu-22.04-x86_64
     org.opencontainers.image.ref.name ghcr.io/mkandes/mofed:5.8-cuda-12.1-ubuntu-22.04-x86_64
 
     org.opencontainers.image.base.name ghcr.io/mkandes/cuda:12.1-ubuntu-22.04-x86_64
-    org.opencontainers.image.base.digest sha256:b1279f334e492fd77571ea4202800b7fd2f94f91e54e273444d6d5bd4e6c14c0
+    org.opencontainers.image.base.digest sha256:72f74043c3e6f9e981eefe21bfcdd5d5798e86f6402890d41a7a1792c6cc455e
 
     org.opencontainers.image.title mofed 
     org.opencontainers.image.description NVIDIA OpenFabrics Enterprise Distribution for Linux
@@ -124,8 +124,10 @@ From: ghcr.io/mkandes/cuda:12.1-ubuntu-22.04-x86_64
     export LD_LIBRARY_PATH="${CUTENSOR_LIB_DIR}:${LD_LIBRARY_PATH}"
     export LD_LIBRARY_PATH="${CUSPARSELT_LIB_DIR}:${LD_LIBRARY_PATH}"
 
-    # DO NOT Upgrade all software packages to their latest versions
-    #apt-get -y update && apt-get -y upgrade
+    # Update software package index, but DO NOT upgrade all installed
+    # packages to their latest versions. This is done primarily to
+    # prevent the upgrade of NVIDIA CUDA to a newer version.
+    apt-get -y update #&& apt-get -y upgrade
 
     cd /tmp
 
@@ -160,7 +162,7 @@ From: ghcr.io/mkandes/cuda:12.1-ubuntu-22.04-x86_64
     cd /opt/.nxis
     dmidecode > dmidecode.default
     df -ahPT > df.default
-    fdisk --list > fdisk.default 
+    fdisk --list > fdisk.default
     lsblk --output-all > lsblk.default
     lsblk --output-all --json > lsblk.json
     lscpu --output-all > lscpu.default

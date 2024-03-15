@@ -1,12 +1,12 @@
 Bootstrap: oras
-From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-ubuntu-22.04-x86_64
+From: ghcr.io/mkandes/mvapich:2.3-mofed-5.8-ubuntu-22.04-x86_64
 
 %labels
 
-    org.opencontainers.image.ref.name ghcr.io/mkandes/omb:7.3-openmpi-4.1-mofed-5.8-cuda-12.1-ubuntu-22.04-x86_64
+    org.opencontainers.image.ref.name ghcr.io/mkandes/omb:7.3-mvapich-2.3-mofed-5.8-ubuntu-22.04-x86_64
 
-    org.opencontainers.image.base.name ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-ubuntu-22.04-x86_64
-    org.opencontainers.image.base.digest sha256:59403be9a4886a6571866bd3a83be6407f33a55e14d87aba473816e7c183099a
+    org.opencontainers.image.base.name ghcr.io/mkandes/mvapich:2.3-mofed-5.8-ubuntu-22.04-x86_64
+    org.opencontainers.image.base.digest sha256:f0c42ddff7d99ce1254ea562fa543754908aca7ab17602cd5587ba010536dfd1
 
     org.opencontainers.image.title omb
     org.opencontainers.image.description OSU Micro-Benchmarks (OMB) measure the performance of different MPI operations
@@ -54,62 +54,6 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-ubuntu-22.04-x86_64
     # Set debian frontend interface
     export DEBIAN_FRONTEND='noninteractive'
 
-    # Set NVIDIA driver and CUDA versions
-    export NV_DRIVER_MAJ='525'
-    export NV_DRIVER_MIN='85'
-    export NV_DRIVER_REV='12'
-    export NV_DRIVER_VER="${NV_DRIVER_MAJ}.${NV_DRIVER_MIN}.${NV_DRIVER_REV}"
-
-    export CUDA_MAJ='12'
-    export CUDA_MIN='1'
-    export CUDA_REV='1'
-    export CUDA_VER="${CUDA_MAJ}.${CUDA_MIN}.${CUDA_REV}"
-
-    export CUDNN_MAJ='8'
-    export CUDNN_MIN='9'
-    export CUDNN_REV='0.131'
-    export CUDNN_VER="${CUDNN_MAJ}.${CUDNN_MIN}.${CUDNN_REV}"
-
-    export NCCL_MAJ='2'
-    export NCCL_MIN='18'
-    export NCCL_REV='3'
-    export NCCL_VER="${NCCL_MAJ}.${NCCL_MIN}.${NCCL_REV}"
-
-    export TENSORRT_MAJ='8'
-    export TENSORRT_MIN='6'
-    export TENSORRT_REV='1.6'
-    export TENSORRT_VER="${TENSORRT_MAJ}.${TENSORRT_MIN}.${TENSORRT_REV}"
-
-    export CUTENSOR_MAJ='2'
-    export CUTENSOR_MIN='0'
-    export CUTENSOR_REV='0.7'
-    export CUTENSOR_VER="${CUTENSOR_MAJ}.${CUTENSOR_MIN}.${CUTENSOR_REV}"
-
-    export CUSPARSELT_MAJ='0'
-    export CUSPARSELT_MIN='5'
-    export CUSPARSELT_REV='2.1'
-    export CUSPARSELT_VER="${CUSPARSELT_MAJ}.${CUSPARSELT_MIN}.${CUSPARSELT_REV}"
-
-    # Set paths to CUDA binaries and libraries
-    export CUDA_HOME="/usr/local/cuda-${CUDA_MAJ}.${CUDA_MIN}"
-    export CUDNN_INCLUDE_DIR='/usr/include'
-    export CUDNN_LIB_DIR='/usr/lib/x86_64-linux-gnu'
-    export NCCL_INCLUDE_DIR='/usr/include'
-    export NCCL_LIB_DIR='/usr/lib/x86_64-linux-gnu'
-    export TENSORRT_INCLUDE_DIR='/usr/include'
-    export TENSORRT_LIB_DIR='/usr/lib/x86_64-linux-gnu'
-    export CUTENSOR_INCLUDE_DIR='/usr/include'
-    export CUTENSOR_LIB_DIR='/usr/lib/x86_64-linux-gnu'
-    export CUSPARSELT_INCLUDE_DIR='/usr/include'
-    export CUSPARSELT_LIB_DIR='/usr/lib/x86_64-linux-gnu'
-    export PATH="${CUDA_HOME}/bin${PATH:+:${PATH}}"
-    export LD_LIBRARY_PATH="${CUDA_HOME}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
-    export LD_LIBRARY_PATH="${CUDNN_LIB_DIR}:${LD_LIBRARY_PATH}"
-    export LD_LIBRARY_PATH="${NCCL_LIB_DIR}:${LD_LIBRARY_PATH}"
-    export LD_LIBRARY_PATH="${TENSORRT_LIB_DIR}:${LD_LIBRARY_PATH}"
-    export LD_LIBRARY_PATH="${CUTENSOR_LIB_DIR}:${LD_LIBRARY_PATH}"
-    export LD_LIBRARY_PATH="${CUSPARSELT_LIB_DIR}:${LD_LIBRARY_PATH}"
-
     # Set Mellanox OFED version, operating system, and platform architecture
     export MOFED_MAJ='5'
     export MOFED_MIN='8'
@@ -124,22 +68,20 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-ubuntu-22.04-x86_64
     export PATH="/opt/mellanox/sharp/bin:${PATH}"
     export LD_LIBRARY_PATH="/opt/mellanox/sharp/lib:${LD_LIBRARY_PATH}"
 
-    # Set OpenMPI version and install path
-    export OPENMPI_MAJ='4'
-    export OPENMPI_MIN='1'
-    export OPENMPI_REV='6'
-    export OPENMPI_VER="${OPENMPI_MAJ}.${OPENMPI_MIN}.${OPENMPI_REV}"
-    export OPENMPI_ROOT_DIR='/opt/openmpi'
-    export OPENMPI_INSTALL_DIR="${OPENMPI_ROOT_DIR}/${OPENMPI_VER}"
+    # Set MVAPICH version and install path
+    export MV2_MAJOR='2'
+    export MV2_MINOR='3'
+    export MV2_REVISION='7-1'
+    export MV2_VERSION="${MV2_MAJOR}.${MV2_MINOR}.${MV2_REVISION}"
+    export MV2_ROOT_DIR='/opt/mvapich'
+    export MV2_INSTALL_DIR="${MV2_ROOT_DIR}/${MV2_VERSION}"
 
-    # Set paths to OpenMPI binaries and libraries
-    export PATH="${OPENMPI_INSTALL_DIR}/bin:${PATH}"
-    export LD_LIBRARY_PATH="${OPENMPI_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+    # Set paths to MVAPICH binaries and libraries
+    export PATH="${MV2_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${MV2_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
 
-    # Update software package index, but DO NOT upgrade all installed
-    # packages to their latest versions. This is done primarily to
-    # prevent the upgrade of NVIDIA CUDA to a newer version.
-    apt-get -y update #&& apt-get -y upgrade
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
 
     cd /tmp
 
@@ -162,8 +104,6 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-ubuntu-22.04-x86_64
 
     # Install additional dependencies for OMB Python benchmarks
     python -m pip install numpy
-    python -m pip install cupy-cuda12x
-    python -m pip install pycuda
     python -m pip install numba
     python -m pip install mpi4py
 
@@ -172,13 +112,6 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-ubuntu-22.04-x86_64
     tar -xf "osu-micro-benchmarks-${OMB_VER}.tar.gz"
     cd "osu-micro-benchmarks-${OMB_VER}"
     ./configure --prefix="${OMB_INSTALL_DIR}" CC='mpicc' CXX='mpicxx' \
-      --disable-openacc \
-      --enable-cuda \
-      --with-cuda="${CUDA_HOME}" \
-      --with-cuda-include="${CUDA_HOME}/include" \
-      --with-cuda-libpath="${CUDA_HOME}/lib64" \
-      --disable-ncclomb \
-      --with-nccl="${NCCL_LIB_DIR}" \
       --with-gnuplot='/usr/bin' \
       --with-convert='/usr/bin'
     make -j 4

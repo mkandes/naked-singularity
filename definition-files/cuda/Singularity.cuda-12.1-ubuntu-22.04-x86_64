@@ -6,7 +6,7 @@ From: ghcr.io/mkandes/ubuntu:22.04-x86_64
     org.opencontainers.image.ref.name ghcr.io/mkandes/cuda:12.1-ubuntu-22.04-x86_64
 
     org.opencontainers.image.base.name ghcr.io/mkandes/ubuntu:22.04-x86_64
-    org.opencontainers.image.base.digest sha256:30d10d1ca82886d1656382397b6af5e52ae7cf12c699dd3af40ad678781da220
+    org.opencontainers.image.base.digest sha256:0629fd1cec548f1a44f84a1a88000a73e3ade4fde79de436ff7a0c28833ef16b
 
     org.opencontainers.image.title cuda
     org.opencontainers.image.description NVIDIA CUDA is a parallel computing platform and programming model for creating high performance GPU-accelerated applications
@@ -110,11 +110,6 @@ From: ghcr.io/mkandes/ubuntu:22.04-x86_64
     # Set debian frontend interface
     export DEBIAN_FRONTEND='noninteractive'
 
-    # Upgrade all software packages to their latest versions
-    apt-get -y update && apt-get -y upgrade
-
-    cd /tmp
-
     # Set NVIDIA driver version
     export NV_DRIVER_MAJ='525'
     export NV_DRIVER_MIN='85'
@@ -169,14 +164,16 @@ From: ghcr.io/mkandes/ubuntu:22.04-x86_64
     export CUDA_REPO_URL="http://developer.download.nvidia.com/compute/cuda/repos/${CUDA_OS}/${CUDA_ARCH}"
     export CUDA_KEYRING_PKG='cuda-keyring_1.1-1_all.deb'
 
+    cd /tmp
+
     # Install the new cuda-keyring package
     # https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#network-repo-installation-for-ubuntu
     wget "${CUDA_REPO_URL}/${CUDA_KEYRING_PKG}"
     dpkg -i "${CUDA_KEYRING_PKG}"
     rm "${CUDA_KEYRING_PKG}"
 
-    # Update the apt repository cache
-    apt-get update
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
 
     # Install NVIDIA libcompute package
     # This package provides a set of libraries which enable the NVIDIA
@@ -214,7 +211,7 @@ From: ghcr.io/mkandes/ubuntu:22.04-x86_64
     cd /opt/.nxis
     dmidecode > dmidecode.default
     df -ahPT > df.default
-    fdisk --list > fdisk.default 
+    fdisk --list > fdisk.default
     lsblk --output-all > lsblk.default
     lsblk --output-all --json > lsblk.json
     lscpu --output-all > lscpu.default

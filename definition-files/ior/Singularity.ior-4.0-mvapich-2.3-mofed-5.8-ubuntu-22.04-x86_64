@@ -1,0 +1,136 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/mvapich:2.3-mofed-5.8-ubuntu-22.04-x86_64
+
+%labels
+
+    org.opencontainers.image.ref.name ghcr.io/mkandes/ior:4.0-mvapich-2.3-mofed-5.8-ubuntu-22.04-x86_64
+
+    org.opencontainers.image.base.name ghcr.io/mkandes/mvapich:2.3-mofed-5.8-ubuntu-22.04-x86_64
+    org.opencontainers.image.base.digest sha256:f0c42ddff7d99ce1254ea562fa543754908aca7ab17602cd5587ba010536dfd1
+
+    org.opencontainers.image.title ior
+    org.opencontainers.image.description IOR is benchmark to test the performance of storage systems
+    org.opencontainers.image.url https://ior.readthedocs.io/en/latest/index.html
+    org.opencontainers.image.documentation https://ior.readthedocs.io/en/latest/index.html
+    org.opencontainers.image.source https://github.com/hpc/ior.git
+    org.opencontainers.image.vendor https://github.com/hpc
+    org.opencontainers.image.licenses https://github.com/hpc/ior/blob/main/COPYRIGHT
+    org.opencontainers.image.version 4.0.0
+    org.opencontainers.image.revision 967a9f65109760db8a3ac14a7fdd007f337d2960
+
+    org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
+
+%setup
+
+%files
+
+%environment
+
+    # Set IOR version and install path
+    export IOR_MAJ='4'
+    export IOR_MIN='0'
+    export IOR_REV='0'
+    export IOR_VER="${IOR_MAJ}.${IOR_MIN}.${IOR_REV}"
+    export IOR_ROOT_DIR='/opt/ior'
+    export IOR_INSTALL_DIR="${IOR_ROOT_DIR}/${IOR_VER}"
+
+    # Set paths to IOR binaries and libraries
+    export PATH="${IOR_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${IOR_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='jammy'
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set Mellanox OFED version, operating system, and platform architecture
+    export MOFED_MAJ='5'
+    export MOFED_MIN='8'
+    export MOFED_REV='2.0.3.0'
+    export MOFED_VER="${MOFED_MAJ}.${MOFED_MIN}-${MOFED_REV}"
+    export MOFED_OS='ubuntu22.04'
+    export MOFED_ARCH='x86_64'
+
+    # Set paths to additional Mellanox OFED binaries and libraries
+    export PATH="/opt/mellanox/hcoll/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/mellanox/hcoll/lib:${LD_LIBRARY_PATH}"
+    export PATH="/opt/mellanox/sharp/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/mellanox/sharp/lib:${LD_LIBRARY_PATH}"
+
+    # Set MVAPICH version and install path
+    export MV2_MAJOR='2'
+    export MV2_MINOR='3'
+    export MV2_REVISION='7-1'
+    export MV2_VERSION="${MV2_MAJOR}.${MV2_MINOR}.${MV2_REVISION}"
+    export MV2_ROOT_DIR='/opt/mvapich'
+    export MV2_INSTALL_DIR="${MV2_ROOT_DIR}/${MV2_VERSION}"
+
+    # Set paths to MVAPICH binaries and libraries
+    export PATH="${MV2_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${MV2_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    cd /tmp
+
+    # Set IOR version and install path
+    export IOR_MAJ='4'
+    export IOR_MIN='0'
+    export IOR_REV='0'
+    export IOR_VER="${IOR_MAJ}.${IOR_MIN}.${IOR_REV}"
+    export IOR_ROOT_DIR='/opt/ior'
+    export IOR_INSTALL_DIR="${IOR_ROOT_DIR}/${IOR_VER}"
+
+    # Download, build, and install IOR
+    git clone https://github.com/hpc/ior.git
+    cd ior
+    git checkout "${IOR_VERSION}"
+    ./bootstrap
+    ./configure --prefix="${IOR_INSTALL_DIR}"
+    make
+    make install
+
+    cd ../
+
+    # Remove IOR build directory and source repository
+    rm -rf ior
+
+    # Store information about the container image build system
+    mkdir -p /opt/.nxis
+    cd /opt/.nxis
+    dmidecode > dmidecode.default
+    df -ahPT > df.default
+    fdisk --list > fdisk.default
+    lsblk --output-all > lsblk.default
+    lsblk --output-all --json > lsblk.json
+    lscpu --output-all > lscpu.default
+    lscpu --output-all --json > lscpu.json
+    lshw > lshw.default
+    lshw -json > lshw.json
+    lshw -short > lshw.short
+    lspci > lspci.default
+    lspci -vvv > lspci.verbose
+    free -h > free.default
+    cat /proc/meminfo > meminfo.default
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+    rm -rf /var/lib/apt/lists/*
+
+    # Update database for mlocate
+    updatedb
+
+%runscript
+
+%test

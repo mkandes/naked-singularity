@@ -1,22 +1,22 @@
 Bootstrap: oras
-From: ghcr.io/mkandes/mofed:5.8-cuda-12.1-ubuntu-22.04-x86_64
+From: ghcr.io/mkandes/mvapich:2.3-mofed-5.8-cuda-12.1-ubuntu-22.04-x86_64
 
 %labels
 
-    org.opencontainers.image.ref.name ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-ubuntu-22.04-x86_64
+    org.opencontainers.image.ref.name ghcr.io/mkandes/omb:7.3-mvapich-2.3-mofed-5.8-cuda-12.1-ubuntu-22.04-x86_64
 
-    org.opencontainers.image.base.name ghcr.io/mkandes/mofed:5.8-cuda-12.1-ubuntu-22.04-x86_64
-    org.opencontainers.image.base.digest sha256:c3b40e033545d0d81cea31227aca59d28cd343a492e50a14f4c27122373695bd
+    org.opencontainers.image.base.name ghcr.io/mkandes/mvapich:2.3-mofed-5.8-cuda-12.1-ubuntu-22.04-x86_64
+    org.opencontainers.image.base.digest sha256:b9e0b505de3c1377f7e4684807b60b2af8e17e4116c6fe8dedc5e37ce9bbafa3
 
-    org.opencontainers.image.title openmpi
-    org.opencontainers.image.description Open MPI is an open source Message Passing Interface (MPI) implementation
-    org.opencontainers.image.url https://www.open-mpi.org
-    org.opencontainers.image.documentation https://www-lb.open-mpi.org/doc/v4.1
-    org.opencontainers.image.source https://github.com/open-mpi/ompi.git
-    org.opencontainers.image.vendor The Open MPI Project
-    org.opencontainers.image.licenses BSD-3-Clause-Open-MPI
-    org.opencontainers.image.version 4.1.6
-    org.opencontainers.image.revision 439b23db6288f0370f6fcc80c8c0a06ad86d6873
+    org.opencontainers.image.title omb
+    org.opencontainers.image.description OSU Micro-Benchmarks (OMB) measure the performance of different MPI operations
+    org.opencontainers.image.url https://mvapich.cse.ohio-state.edu/benchmarks
+    org.opencontainers.image.documentation https://mvapich.cse.ohio-state.edu/static/media/mvapich/mvapich2-userguide.html#x1-1060007
+    org.opencontainers.image.source https://mvapich.cse.ohio-state.edu/download/mvapich/osu-micro-benchmarks-7.3.tar.gz
+    org.opencontainers.image.vendor Network-Based Computing Laboratory (NBCL), Ohio State Univeristy
+    org.opencontainers.image.licenses https://mvapich.cse.ohio-state.edu/static/media/mvapich/LICENSE-OMB.txt
+    org.opencontainers.image.version 7.3
+    org.opencontainers.image.revision 8fa25b8aaa34e4b07ab3a4f30b7690ab46b038b08d204a853a9b6aa7bdb02f2f
 
     org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
 
@@ -26,17 +26,19 @@ From: ghcr.io/mkandes/mofed:5.8-cuda-12.1-ubuntu-22.04-x86_64
 
 %environment
 
-    # Set OpenMPI version and install path
-    export OPENMPI_MAJ='4'
-    export OPENMPI_MIN='1'
-    export OPENMPI_REV='6'
-    export OPENMPI_VER="${OPENMPI_MAJ}.${OPENMPI_MIN}.${OPENMPI_REV}"
-    export OPENMPI_ROOT_DIR='/opt/openmpi'
-    export OPENMPI_INSTALL_DIR="${OPENMPI_ROOT_DIR}/${OPENMPI_VER}"
+    # Set OSU Micro-Benchmarks version and install path
+    export OMB_MAJ='7'
+    export OMB_MIN='3'
+    export OMB_REV=''
+    export OMB_VER="${OMB_MAJ}.${OMB_MIN}"
+    export OMB_ROOT_DIR='/opt/omb'
+    export OMB_INSTALL_DIR="${OMB_ROOT_DIR}/${OMB_VER}"
 
-    # Set paths to OpenMPI binaries and libraries
-    export PATH="${OPENMPI_INSTALL_DIR}/bin:${PATH}"
-    export LD_LIBRARY_PATH="${OPENMPI_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+    # Set paths to OSU Micro-Benchmarks binaries
+    export PATH="${OMB_INSTALL_DIR}/collective:${PATH}"
+    export PATH="${OMB_INSTALL_DIR}/one-sided:${PATH}"
+    export PATH="${OMB_INSTALL_DIR}/pt2pt:${PATH}"
+    export PATH="${OMB_INSTALL_DIR}/startup:${PATH}"
 
 %post -c /bin/bash
 
@@ -122,6 +124,18 @@ From: ghcr.io/mkandes/mofed:5.8-cuda-12.1-ubuntu-22.04-x86_64
     export PATH="/opt/mellanox/sharp/bin:${PATH}"
     export LD_LIBRARY_PATH="/opt/mellanox/sharp/lib:${LD_LIBRARY_PATH}"
 
+    # Set MVAPICH version and install path
+    export MV2_MAJOR='2'
+    export MV2_MINOR='3'
+    export MV2_REVISION='7-1'
+    export MV2_VERSION="${MV2_MAJOR}.${MV2_MINOR}.${MV2_REVISION}"
+    export MV2_ROOT_DIR='/opt/mvapich'
+    export MV2_INSTALL_DIR="${MV2_ROOT_DIR}/${MV2_VERSION}"
+
+    # Set paths to MVAPICH binaries and libraries
+    export PATH="${MV2_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${MV2_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
     # Update software package index, but DO NOT upgrade all installed
     # packages to their latest versions. This is done primarily to
     # prevent the upgrade of NVIDIA CUDA to a newer version.
@@ -129,38 +143,61 @@ From: ghcr.io/mkandes/mofed:5.8-cuda-12.1-ubuntu-22.04-x86_64
 
     cd /tmp
 
-    # Set OpenMPI version and install path
-    export OPENMPI_MAJ='4'
-    export OPENMPI_MIN='1'
-    export OPENMPI_REV='6'
-    export OPENMPI_VER="${OPENMPI_MAJ}.${OPENMPI_MIN}.${OPENMPI_REV}"
-    export OPENMPI_ROOT_DIR='/opt/openmpi'
-    export OPENMPI_INSTALL_DIR="${OPENMPI_ROOT_DIR}/${OPENMPI_VER}"
+    # Set OSU Micro-Benchmarks version and install path
+    export OMB_MAJ='7'
+    export OMB_MIN='3'
+    export OMB_REV=''
+    export OMB_VER="${OMB_MAJ}.${OMB_MIN}"
+    export OMB_ROOT_DIR='/opt/omb'
+    export OMB_INSTALL_DIR="${OMB_ROOT_DIR}/${OMB_VER}"
 
-    # Download, build, and install OpenMPI with UCX support
-    wget "https://download.open-mpi.org/release/open-mpi/v${OPENMPI_MAJ}.${OPENMPI_MIN}/openmpi-${OPENMPI_VER}.tar.gz"
-    tar -xf "openmpi-${OPENMPI_VER}.tar.gz"
-    cd "openmpi-${OPENMPI_VER}"
-    ./configure --prefix="${OPENMPI_INSTALL_DIR}" \
-      --enable-shared \
-      --enable-static \
-      --with-cma \
+    # Install gnuplot and imagemagick for OMB data visualization
+    apt-get -y install gnuplot
+    apt-get -y install imagemagick
+
+    # Install base environment for OMB Python benchmarks
+    apt-get -y install python3-dev
+    apt-get -y install python3-pip
+    apt-get -y install python-is-python3
+
+    # Install additional dependencies for OMB Python benchmarks
+    python -m pip install numpy
+    python -m pip install cupy-cuda12x
+    python -m pip install pycuda
+    python -m pip install numba
+    python -m pip install mpi4py
+
+    # Download, build, and install OSU Micro-Benchmarks
+    wget "http://mvapich.cse.ohio-state.edu/download/mvapich/osu-micro-benchmarks-${OMB_VER}.tar.gz"
+    tar -xf "osu-micro-benchmarks-${OMB_VER}.tar.gz"
+    cd "osu-micro-benchmarks-${OMB_VER}"
+    ./configure --prefix="${OMB_INSTALL_DIR}" CC='mpicc' CXX='mpicxx' \
+      --disable-openacc \
+      --enable-cuda \
       --with-cuda="${CUDA_HOME}" \
-      --with-hcoll='/opt/mellanox/hcoll' \
-      --without-knem \
-      --without-pmi \
-      --with-pmix \
-      --without-ucc \
-      --with-ucx \
-      --without-xpmem
+      --with-cuda-include="${CUDA_HOME}/include" \
+      --with-cuda-libpath="${CUDA_HOME}/lib64" \
+      --enable-ncclomb \
+      --with-nccl="${NCCL_LIB_DIR}" \
+      --with-gnuplot='/usr/bin' \
+      --with-convert='/usr/bin'
     make -j 4
     make install
+    cp -r python/ "${OMB_INSTALL_DIR}"
 
     cd ../
 
-    # Remove OpenMPI build directory and source tarball
-    rm -rf "openmpi-${OPENMPI_VER}"
-    rm "openmpi-${OPENMPI_VER}.tar.gz"
+    # Remove OMB build directory and source tarball
+    rm -rf "osu-micro-benchmarks-${OMB_VER}"
+    rm "osu-micro-benchmarks-${OMB_VER}.tar.gz"
+
+    # Reorganize OSU Microbenchmarks directory structure
+    cd "${OMB_INSTALL_DIR}"
+    mv libexec/osu-micro-benchmarks/mpi/collective ./
+    mv libexec/osu-micro-benchmarks/mpi/one-sided ./
+    mv libexec/osu-micro-benchmarks/mpi/pt2pt ./
+    mv libexec/osu-micro-benchmarks/mpi/startup ./
+    rm -rf libexec
 
     # Store information about the container image build system
     mkdir -p /opt/.nxis

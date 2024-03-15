@@ -6,7 +6,7 @@ From: ghcr.io/mkandes/mofed:5.8-ubuntu-22.04-x86_64
     org.opencontainers.image.ref.name ghcr.io/mkandes/mvapich:2.3-mofed-5.8-ubuntu-22.04-x86_64
 
     org.opencontainers.image.base.name ghcr.io/mkandes/mofed:5.8-ubuntu-22.04-x86_64
-    org.opencontainers.image.base.digest sha256:e85181efc07433d290a9cf2b4f40208c8aa77cd9a4e1a32416847cdd6d88230a
+    org.opencontainers.image.base.digest sha256:f510ab1567daade0916db0a61a316c8a7f517a46de2f8562def9c8c427aa7631
 
     org.opencontainers.image.title mvapich
     org.opencontainers.image.description MVAPICH2 is an open source implementation of Message Passing Interface (MPI)
@@ -99,7 +99,7 @@ From: ghcr.io/mkandes/mofed:5.8-ubuntu-22.04-x86_64
     cd /opt/.nxis
     dmidecode > dmidecode.default
     df -ahPT > df.default
-    fdisk --list > fdisk.default 
+    fdisk --list > fdisk.default
     lsblk --output-all > lsblk.default
     lsblk --output-all --json > lsblk.json
     lscpu --output-all > lscpu.default
