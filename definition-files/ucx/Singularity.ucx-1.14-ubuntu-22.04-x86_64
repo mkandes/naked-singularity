@@ -1,0 +1,110 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/ubuntu:22.04-x86_64
+
+%labels
+
+    org.opencontainers.image.ref.name ghcr.io/mkandes/ucx:1.14-ubuntu-22.04-x86_64
+
+    org.opencontainers.image.base.name ghcr.io/mkandes/ubuntu:22.04-x86_64
+    org.opencontainers.image.base.digest sha256:0629fd1cec548f1a44f84a1a88000a73e3ade4fde79de436ff7a0c28833ef16b
+
+    org.opencontainers.image.title ucx
+    org.opencontainers.image.description OpenBLAS is an optimized BLAS library
+    org.opencontainers.image.url https://openucx.org
+    org.opencontainers.image.documentation https://openucx.org/documentation
+    org.opencontainers.image.source https://github.com/openucx/ucx.git
+    org.opencontainers.image.vendor Unified Communication X
+    org.opencontainers.image.licenses BSD 3-Clause License (https://openucx.org/license)
+    org.opencontainers.image.version 1.14.1
+    org.opencontainers.image.revision 04897a079ac88713842f7209c5e82430d095444e
+
+    org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
+
+%setup
+
+%files
+
+%environment
+
+    # Set UCX version and install path
+    export UCX_MAJ='1'
+    export UCX_MIN='14'
+    export UCX_REV='1'
+    export UCX_VER="${UCX_MAJ}.${UCX_MIN}.${UCX_REV}"
+    export UCX_ROOT_DIR='/opt/ucx'
+    export UCX_INSTALL_DIR="${UCX_ROOT_DIR}/${UCX_VER}"
+
+    # Set paths to UCX binaries and libraries
+    export PATH="${UCX_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${UCX_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='jammy'
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    cd /tmp
+
+    # Set UCX version and install path
+    export UCX_MAJ='1'
+    export UCX_MIN='14'
+    export UCX_REV='1'
+    export UCX_VER="${UCX_MAJ}.${UCX_MIN}.${UCX_REV}"
+    export UCX_ROOT_DIR='/opt/ucx'
+    export UCX_INSTALL_DIR="${UCX_ROOT_DIR}/${UCX_VER}"
+
+    # Download, build, and install UCX
+    git clone https://github.com/openucx/ucx.git
+    cd ucx
+    git checkout "v${UCX_VERSION}"
+    ./autogen.sh
+    ./contrib/configure-release --prefix="${UCX_INSTALL_DIR}"
+    make -j 4
+    make install
+
+    cd ../
+
+    # Remove UCX build directory and source repository
+    rm -rf ucx
+
+    # Store information about the container image build system
+    mkdir -p /opt/.nxis
+    cd /opt/.nxis
+    dmidecode > dmidecode.default
+    df -ahPT > df.default
+    fdisk --list > fdisk.default
+    lsblk --output-all > lsblk.default
+    lsblk --output-all --json > lsblk.json
+    lscpu --output-all > lscpu.default
+    lscpu --output-all --json > lscpu.json
+    lshw > lshw.default
+    lshw -json > lshw.json
+    lshw -short > lshw.short
+    lspci > lspci.default
+    lspci -vvv > lspci.verbose
+    free -h > free.default
+    cat /proc/meminfo > meminfo.default
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+    rm -rf /var/lib/apt/lists/*
+
+    # Update database for mlocate
+    updatedb
+
+%runscript
+
+%test
