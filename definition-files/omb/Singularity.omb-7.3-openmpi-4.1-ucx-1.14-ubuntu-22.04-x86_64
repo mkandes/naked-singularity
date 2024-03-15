@@ -1,0 +1,161 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/openmpi:4.1-ucx-1.14-ubuntu-22.04-x86_64
+
+%labels
+
+    org.opencontainers.image.ref.name ghcr.io/mkandes/omb:7.3-openmpi-4.1-ucx-1.14-ubuntu-22.04-x86_64
+
+    org.opencontainers.image.base.name ghcr.io/mkandes/openmpi:4.1-ucx-1.14-ubuntu-22.04-x86_64
+    org.opencontainers.image.base.digest sha256:708abcc07c84d84a43ec815475921f273d34e05d639eadb5b23cbc1fb08954cb
+
+    org.opencontainers.image.title omb
+    org.opencontainers.image.description OSU Micro-Benchmarks (OMB) measure the performance of different MPI operations
+    org.opencontainers.image.url https://mvapich.cse.ohio-state.edu/benchmarks
+    org.opencontainers.image.documentation https://mvapich.cse.ohio-state.edu/static/media/mvapich/mvapich2-userguide.html#x1-1060007
+    org.opencontainers.image.source https://mvapich.cse.ohio-state.edu/download/mvapich/osu-micro-benchmarks-7.3.tar.gz
+    org.opencontainers.image.vendor Network-Based Computing Laboratory (NBCL), Ohio State Univeristy
+    org.opencontainers.image.licenses https://mvapich.cse.ohio-state.edu/static/media/mvapich/LICENSE-OMB.txt
+    org.opencontainers.image.version 7.3
+    org.opencontainers.image.revision 8fa25b8aaa34e4b07ab3a4f30b7690ab46b038b08d204a853a9b6aa7bdb02f2f
+
+    org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
+
+%setup
+
+%files
+
+%environment
+
+    # Set OSU Micro-Benchmarks version and install path
+    export OMB_MAJ='7'
+    export OMB_MIN='3'
+    export OMB_REV=''
+    export OMB_VER="${OMB_MAJ}.${OMB_MIN}"
+    export OMB_ROOT_DIR='/opt/omb'
+    export OMB_INSTALL_DIR="${OMB_ROOT_DIR}/${OMB_VER}"
+
+    # Set paths to OSU Micro-Benchmarks binaries
+    export PATH="${OMB_INSTALL_DIR}/collective:${PATH}"
+    export PATH="${OMB_INSTALL_DIR}/one-sided:${PATH}"
+    export PATH="${OMB_INSTALL_DIR}/pt2pt:${PATH}"
+    export PATH="${OMB_INSTALL_DIR}/startup:${PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='jammy'
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set UCX version and install path
+    export UCX_MAJ='1'
+    export UCX_MIN='14'
+    export UCX_REV='1'
+    export UCX_VER="${UCX_MAJ}.${UCX_MIN}.${UCX_REV}"
+    export UCX_ROOT_DIR='/opt/ucx'
+    export UCX_INSTALL_DIR="${UCX_ROOT_DIR}/${UCX_VER}"
+
+    # Set paths to UCX binaries and libraries
+    export PATH="${UCX_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${UCX_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    # Set OpenMPI version and install path
+    export OPENMPI_MAJ='4'
+    export OPENMPI_MIN='1'
+    export OPENMPI_REV='6'
+    export OPENMPI_VER="${OPENMPI_MAJ}.${OPENMPI_MIN}.${OPENMPI_REV}"
+    export OPENMPI_ROOT_DIR='/opt/openmpi'
+    export OPENMPI_INSTALL_DIR="${OPENMPI_ROOT_DIR}/${OPENMPI_VER}"
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="${OPENMPI_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${OPENMPI_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    cd /tmp
+
+    # Set OSU Micro-Benchmarks version and install path
+    export OMB_MAJ='7'
+    export OMB_MIN='3'
+    export OMB_REV=''
+    export OMB_VER="${OMB_MAJ}.${OMB_MIN}"
+    export OMB_ROOT_DIR='/opt/omb'
+    export OMB_INSTALL_DIR="${OMB_ROOT_DIR}/${OMB_VER}"
+
+    # Install gnuplot and imagemagick for OMB data visualization
+    apt-get -y install gnuplot
+    apt-get -y install imagemagick
+
+    # Install base environment for OMB Python benchmarks
+    apt-get -y install python3-dev
+    apt-get -y install python3-pip
+    apt-get -y install python-is-python3
+
+    # Install additional dependencies for OMB Python benchmarks
+    python -m pip install numpy
+    python -m pip install numba
+    python -m pip install mpi4py
+
+    # Download, build, and install OSU Micro-Benchmarks
+    wget "http://mvapich.cse.ohio-state.edu/download/mvapich/osu-micro-benchmarks-${OMB_VER}.tar.gz"
+    tar -xf "osu-micro-benchmarks-${OMB_VER}.tar.gz"
+    cd "osu-micro-benchmarks-${OMB_VER}"
+    ./configure --prefix="${OMB_INSTALL_DIR}" CC='mpicc' CXX='mpicxx' \
+      --with-gnuplot='/usr/bin' \
+      --with-convert='/usr/bin'
+    make -j 4
+    make install
+    cp -r python/ "${OMB_INSTALL_DIR}"
+
+    cd ../
+
+    # Remove OMB build directory and source tarball
+    rm -rf "osu-micro-benchmarks-${OMB_VER}"
+    rm "osu-micro-benchmarks-${OMB_VER}.tar.gz"
+
+    # Reorganize OSU Microbenchmarks directory structure
+    cd "${OMB_INSTALL_DIR}"
+    mv libexec/osu-micro-benchmarks/mpi/collective ./
+    mv libexec/osu-micro-benchmarks/mpi/one-sided ./
+    mv libexec/osu-micro-benchmarks/mpi/pt2pt ./
+    mv libexec/osu-micro-benchmarks/mpi/startup ./
+    rm -rf libexec
+
+    # Store information about the container image build system
+    mkdir -p /opt/.nxis
+    cd /opt/.nxis
+    dmidecode > dmidecode.default
+    df -ahPT > df.default
+    fdisk --list > fdisk.default
+    lsblk --output-all > lsblk.default
+    lsblk --output-all --json > lsblk.json
+    lscpu --output-all > lscpu.default
+    lscpu --output-all --json > lscpu.json
+    lshw > lshw.default
+    lshw -json > lshw.json
+    lshw -short > lshw.short
+    lspci > lspci.default
+    lspci -vvv > lspci.verbose
+    free -h > free.default
+    cat /proc/meminfo > meminfo.default
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+    rm -rf /var/lib/apt/lists/*
+
+    # Update database for mlocate
+    updatedb
+
+%runscript
+
+%test
