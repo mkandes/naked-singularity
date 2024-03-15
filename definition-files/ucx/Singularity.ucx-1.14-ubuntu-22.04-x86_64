@@ -9,7 +9,7 @@ From: ghcr.io/mkandes/ubuntu:22.04-x86_64
     org.opencontainers.image.base.digest sha256:0629fd1cec548f1a44f84a1a88000a73e3ade4fde79de436ff7a0c28833ef16b
 
     org.opencontainers.image.title ucx
-    org.opencontainers.image.description OpenBLAS is an optimized BLAS library
+    org.opencontainers.image.description Unified Communication X (UCX) is a communication framework for high-bandwidth and low-latency networks
     org.opencontainers.image.url https://openucx.org
     org.opencontainers.image.documentation https://openucx.org/documentation
     org.opencontainers.image.source https://github.com/openucx/ucx.git
@@ -70,7 +70,8 @@ From: ghcr.io/mkandes/ubuntu:22.04-x86_64
     cd ucx
     git checkout "v${UCX_VERSION}"
     ./autogen.sh
-    ./contrib/configure-release --prefix="${UCX_INSTALL_DIR}"
+    ./contrib/configure-release \
+      --prefix="${UCX_INSTALL_DIR}"
     make -j 4
     make install
 
