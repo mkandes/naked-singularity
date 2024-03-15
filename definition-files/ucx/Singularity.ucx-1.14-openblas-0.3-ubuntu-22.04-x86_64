@@ -1,0 +1,128 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/openblas:0.3-ubuntu-22.04-x86_64
+
+%labels
+
+    org.opencontainers.image.ref.name ghcr.io/mkandes/ucx:1.14-openblas-0.3-ubuntu-22.04-x86_64
+
+    org.opencontainers.image.base.name ghcr.io/mkandes/openblas:0.3-ubuntu-22.04-x86_64
+    org.opencontainers.image.base.digest sha256:da9bc8341f09bbd1f74d95e61d74596e5664f45a9ac814a1739fd07aa11a8ca3
+
+    org.opencontainers.image.title ucx
+    org.opencontainers.image.description Unified Communication X (UCX) is a communication framework for high-bandwidth and low-latency networks
+    org.opencontainers.image.url https://openucx.org
+    org.opencontainers.image.documentation https://openucx.org/documentation
+    org.opencontainers.image.source https://github.com/openucx/ucx.git
+    org.opencontainers.image.vendor Unified Communication X
+    org.opencontainers.image.licenses BSD 3-Clause License (https://openucx.org/license)
+    org.opencontainers.image.version 1.14.1
+    org.opencontainers.image.revision 04897a079ac88713842f7209c5e82430d095444e
+
+    org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
+
+%setup
+
+%files
+
+%environment
+
+    # Set UCX version and install path
+    export UCX_MAJ='1'
+    export UCX_MIN='14'
+    export UCX_REV='1'
+    export UCX_VER="${UCX_MAJ}.${UCX_MIN}.${UCX_REV}"
+    export UCX_ROOT_DIR='/opt/ucx'
+    export UCX_INSTALL_DIR="${UCX_ROOT_DIR}/${UCX_VER}"
+
+    # Set paths to UCX binaries and libraries
+    export PATH="${UCX_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${UCX_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='jammy'
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set OpenBLAS version and install path
+    export OPENBLAS_MAJ='0'
+    export OPENBLAS_MIN='3'
+    export OPENBLAS_REV='26'
+    export OPENBLAS_VER="${OPENBLAS_MAJ}.${OPENBLAS_MIN}.${OPENBLAS_REV}"
+    export OPENBLAS_ROOT_DIR='/opt/openblas'
+    export OPENBLAS_INSTALL_DIR="${OPENBLAS_ROOT_DIR}/${OPENBLAS_VER}"
+
+    # Set OpenBLAS configuration, target architecture, maximum number of threads
+    export OPENBLAS_USE_OPENMP=1
+    export OPENBLAS_DYNAMIC_ARCH=1
+    export OPENBLAS_TARGET_ARCH='HASWELL'
+    export OPENBLAS_MAX_NUM_THREADS=256
+
+    # Set path to OpenBLAS libraries
+    export LD_LIBRARY_PATH="${OPENBLAS_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    cd /tmp
+
+    # Set UCX version and install path
+    export UCX_MAJ='1'
+    export UCX_MIN='14'
+    export UCX_REV='1'
+    export UCX_VER="${UCX_MAJ}.${UCX_MIN}.${UCX_REV}"
+    export UCX_ROOT_DIR='/opt/ucx'
+    export UCX_INSTALL_DIR="${UCX_ROOT_DIR}/${UCX_VER}"
+
+    # Download, build, and install UCX
+    git clone https://github.com/openucx/ucx.git
+    cd ucx
+    git checkout "v${UCX_VERSION}"
+    ./autogen.sh
+    ./contrib/configure-release \
+      --prefix="${UCX_INSTALL_DIR}"
+    make -j 4
+    make install
+
+    cd ../
+
+    # Remove UCX build directory and source repository
+    rm -rf ucx
+
+    # Store information about the container image build system
+    mkdir -p /opt/.nxis
+    cd /opt/.nxis
+    dmidecode > dmidecode.default
+    df -ahPT > df.default
+    fdisk --list > fdisk.default
+    lsblk --output-all > lsblk.default
+    lsblk --output-all --json > lsblk.json
+    lscpu --output-all > lscpu.default
+    lscpu --output-all --json > lscpu.json
+    lshw > lshw.default
+    lshw -json > lshw.json
+    lshw -short > lshw.short
+    lspci > lspci.default
+    lspci -vvv > lspci.verbose
+    free -h > free.default
+    cat /proc/meminfo > meminfo.default
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+    rm -rf /var/lib/apt/lists/*
+
+    # Update database for mlocate
+    updatedb
+
+%runscript
+
+%test
