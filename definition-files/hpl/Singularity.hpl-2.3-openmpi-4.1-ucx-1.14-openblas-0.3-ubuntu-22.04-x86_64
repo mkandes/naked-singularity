@@ -1,0 +1,168 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/openmpi:4.1-ucx-1.14-openblas-0.3-ubuntu-22.04-x86_64
+
+%labels
+
+    org.opencontainers.image.ref.name ghcr.io/mkandes/hpl:2.3-openmpi-4.1-ucx-1.14-openblas-0.3-ubuntu-22.04-x86_64
+
+    org.opencontainers.image.base.name ghcr.io/mkandes/openmpi:4.1-ucx-1.14-openblas-0.3-ubuntu-22.04-x86_64
+    org.opencontainers.image.base.digest sha256:b23d16af02bf86aa544427ffd81c6635efb1e34fc1381eda3172b1684d6dcfc4
+
+    org.opencontainers.image.title hpl
+    org.opencontainers.image.description High-Performance Linpack (HPL) Benchmark for Distributed-Memory Computers
+    org.opencontainers.image.url https://www.netlib.org/benchmark/hpl
+    org.opencontainers.image.documentation https://www.netlib.org/benchmark/hpl/documentation.html
+    org.opencontainers.image.source https://www.netlib.org/benchmark/hpl/hpl-2.3.tar.gz
+    org.opencontainers.image.vendor Innovative Computing Laboratory, University of Tennessee (https://icl.utk.edu)
+    org.opencontainers.image.licenses https://www.netlib.org/benchmark/hpl/copyright.html
+    org.opencontainers.image.version 2.3
+    org.opencontainers.image.revision 32c5c17d22330e6f2337b681aded51637fb6008d3f0eb7c277b163fadd612830
+
+    org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
+
+%setup
+
+%files
+
+%environment
+
+    # Set HPL version and install path
+    export HPL_MAJ='2'
+    export HPL_MIN='3'
+    export HPL_REV=''
+    export HPL_VER="${HPL_MAJ}.${HPL_MIN}"
+    export HPL_ARCH='linux64'
+    export HPL_ROOT_DIR='/opt/hpl'
+    export HPL_INSTALL_DIR="${HPL_ROOT_DIR}/${HPL_VER}"
+
+    # Set path to HPL binary and library
+    export PATH="${HPL_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${HPL_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='jammy'
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set OpenBLAS version and install path
+    export OPENBLAS_MAJ='0'
+    export OPENBLAS_MIN='3'
+    export OPENBLAS_REV='26'
+    export OPENBLAS_VER="${OPENBLAS_MAJ}.${OPENBLAS_MIN}.${OPENBLAS_REV}"
+    export OPENBLAS_ROOT_DIR='/opt/openblas'
+    export OPENBLAS_INSTALL_DIR="${OPENBLAS_ROOT_DIR}/${OPENBLAS_VER}"
+
+    # Set OpenBLAS configuration, target architecture, maximum number of threads
+    export OPENBLAS_USE_OPENMP=1
+    export OPENBLAS_DYNAMIC_ARCH=1
+    export OPENBLAS_TARGET_ARCH='HASWELL'
+    export OPENBLAS_MAX_NUM_THREADS=256
+
+    # Set path to OpenBLAS libraries
+    export LD_LIBRARY_PATH="${OPENBLAS_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    # Set UCX version and install path
+    export UCX_MAJ='1'
+    export UCX_MIN='14'
+    export UCX_REV='1'
+    export UCX_VER="${UCX_MAJ}.${UCX_MIN}.${UCX_REV}"
+    export UCX_ROOT_DIR='/opt/ucx'
+    export UCX_INSTALL_DIR="${UCX_ROOT_DIR}/${UCX_VER}"
+
+    # Set paths to UCX binaries and libraries
+    export PATH="${UCX_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${UCX_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    # Set OpenMPI version and install path
+    export OPENMPI_MAJ='4'
+    export OPENMPI_MIN='1'
+    export OPENMPI_REV='6'
+    export OPENMPI_VER="${OPENMPI_MAJ}.${OPENMPI_MIN}.${OPENMPI_REV}"
+    export OPENMPI_ROOT_DIR='/opt/openmpi'
+    export OPENMPI_INSTALL_DIR="${OPENMPI_ROOT_DIR}/${OPENMPI_VER}"
+
+    # Set paths to OpenMPI binaries and libraries
+    export PATH="${OPENMPI_INSTALL_DIR}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${OPENMPI_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    cd /tmp
+
+    # Set HPL version and install path
+    export HPL_MAJ='2'
+    export HPL_MIN='3'
+    export HPL_REV=''
+    export HPL_VER="${HPL_MAJ}.${HPL_MIN}"
+    export HPL_ARCH='linux64'
+    export HPL_ROOT_DIR='/opt/hpl'
+    export HPL_INSTALL_DIR="${HPL_ROOT_DIR}/${HPL_VER}"
+
+    # Download, build, and install HPL
+    wget "http://www.netlib.org/benchmark/hpl/hpl-${HPL_VER}.tar.gz"
+    tar -xf "hpl-${HPL_VER}.tar.gz"
+    cd "hpl-${HPL_VER}/setup"
+    source make_generic
+    mv Make.UNKNOWN Make.linux64
+    sed -i 's/ARCH         = UNKNOWN/ARCH         = linux64/' Make.linux64
+    sed -i 's/TOPdir       = $(HOME)\/hpl/TOPdir       =/' Make.linux64
+    sed -i "s/TOPdir       =/TOPdir       = \/opt\/hpl\/${HPL_VER}/" Make.linux64
+    sed -i 's/MPdir        = /MPdir        = \/opt\/openmpi\/4.1.6/' Make.linux64
+    sed -i 's/MPinc        = /MPinc        = -I$(MPdir)\/include/' Make.linux64
+    sed -i 's/MPlib        = /MPlib        = $(MPdir)\/lib\/libmpi.so/' Make.linux64
+    sed -i "s/LAdir        = /LAdir        = \/opt\/openblas\/${OPENBLAS_VERSION}/" Make.linux64
+    sed -i 's/LAinc        = /LAinc        = -I$(LAdir)\/include/' Make.linux64
+    sed -i 's/LAlib        = -lblas/LAlib        = $(LAdir)\/lib\/libopenblas.a/' Make.linux64
+    sed -i 's/LINKER       = mpif77/LINKER       = mpicc/' Make.linux64
+    cp Make.linux64 ../
+    cd ../
+    export LDFLAGS="-L${OPENBLAS_INSTALL_DIR}/lib"
+    ./configure --prefix="${HPL_INSTALL_DIR}"
+    make arch='linux64'
+    make install
+
+    cd ../
+
+    # Remove HPL build directory and source tarball
+    rm -rf "hpl-${HPL_VER}"
+    rm "hpl-${HPL_VER}.tar.gz"
+
+    # Store information about the container image build system
+    mkdir -p /opt/.nxis
+    cd /opt/.nxis
+    dmidecode > dmidecode.default
+    df -ahPT > df.default
+    fdisk --list > fdisk.default
+    lsblk --output-all > lsblk.default
+    lsblk --output-all --json > lsblk.json
+    lscpu --output-all > lscpu.default
+    lscpu --output-all --json > lscpu.json
+    lshw > lshw.default
+    lshw -json > lshw.json
+    lshw -short > lshw.short
+    lspci > lspci.default
+    lspci -vvv > lspci.verbose
+    free -h > free.default
+    cat /proc/meminfo > meminfo.default
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+    rm -rf /var/lib/apt/lists/*
+
+    # Update database for mlocate
+    updatedb
+
+%runscript
+
+%test
