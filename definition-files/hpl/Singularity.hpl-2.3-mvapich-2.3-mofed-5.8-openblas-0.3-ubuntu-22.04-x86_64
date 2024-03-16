@@ -119,7 +119,7 @@ From: ghcr.io/mkandes/mvapich:2.3-mofed-5.8-openblas-0.3-ubuntu-22.04-x86_64
     sed -i 's/ARCH         = UNKNOWN/ARCH         = linux64/' Make.linux64
     sed -i 's/TOPdir       = $(HOME)\/hpl/TOPdir       =/' Make.linux64
     sed -i "s/TOPdir       =/TOPdir       = \/opt\/hpl\/${HPL_VER}/" Make.linux64
-    sed -i 's/MPdir        = /MPdir        = \/usr\/mpi\/gcc\/openmpi-4.1.5a1/' Make.linux64
+    sed -i 's/MPdir        = /MPdir        = \/opt\/mvapich\/2.3.7/' Make.linux64
     sed -i 's/MPinc        = /MPinc        = -I$(MPdir)\/include/' Make.linux64
     sed -i 's/MPlib        = /MPlib        = $(MPdir)\/lib\/libmpi.so/' Make.linux64
     sed -i "s/LAdir        = /LAdir        = \/opt\/openblas\/${OPENBLAS_VERSION}/" Make.linux64
