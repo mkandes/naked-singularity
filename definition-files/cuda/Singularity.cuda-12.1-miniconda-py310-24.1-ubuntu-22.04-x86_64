@@ -1,0 +1,252 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/miniconda:py310-24.1-ubuntu-22.04-x86_64
+
+%labels
+
+    org.opencontainers.image.ref.name ghcr.io/mkandes/cuda:12.1-ubuntu-22.04-x86_64
+
+    org.opencontainers.image.base.name ghcr.io/mkandes/miniconda:py310-24.1-ubuntu-22.04-x86_64
+    org.opencontainers.image.base.digest sha256:2556bd8eef7df93bee2d5c9f534ac262461f0888235f7025f46472a415d4de0f
+
+    org.opencontainers.image.title cuda
+    org.opencontainers.image.description NVIDIA CUDA is a parallel computing platform and programming model for creating high performance GPU-accelerated applications
+    org.opencontainers.image.url https://developer.nvidia.com/cuda-toolkit
+    org.opencontainers.image.documentation https://docs.nvidia.com/cuda/archive/12.1.1
+    org.opencontainers.image.source https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-12-1_12.1.1-1_amd64.deb
+    org.opencontainers.image.vendor NVIDIA Corporation (https://www.nvidia.com)
+    org.opencontainers.image.licenses https://docs.nvidia.com/cuda/archive/12.1.1/eula/index.html
+    org.opencontainers.image.version 12.1.1
+    org.opencontainers.image.revision
+
+    org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
+
+%setup
+
+%files
+
+%environment
+
+    # Set NVIDIA driver version
+    export NV_DRIVER_MAJ='525'
+    export NV_DRIVER_MIN='85'
+    export NV_DRIVER_REV='12'
+    export NV_DRIVER_VER="${NV_DRIVER_MAJ}.${NV_DRIVER_MIN}.${NV_DRIVER_REV}"
+
+    # Set CUDA version, operating system, and platform architecture
+    # https://docs.nvidia.com/cuda/archive/12.1.1
+    export CUDA_MAJ='12'
+    export CUDA_MIN='1'
+    export CUDA_REV='1'
+    export CUDA_VER="${CUDA_MAJ}.${CUDA_MIN}.${CUDA_REV}"
+    export CUDA_OS='ubuntu2204'
+    export CUDA_ARCH='x86_64'
+
+    # Set cuDNN version
+    # https://docs.nvidia.com/deeplearning/cudnn/archives/cudnn-890
+    export CUDNN_MAJ='8'
+    export CUDNN_MIN='9'
+    export CUDNN_REV='0.131'
+    export CUDNN_VER="${CUDNN_MAJ}.${CUDNN_MIN}.${CUDNN_REV}"
+
+    # Set NCCL version
+    # https://docs.nvidia.com/deeplearning/nccl/archives/nccl_2183/user-guide/docs/index.html
+    export NCCL_MAJ='2'
+    export NCCL_MIN='18'
+    export NCCL_REV='3'
+    export NCCL_VER="${NCCL_MAJ}.${NCCL_MIN}.${NCCL_REV}"
+
+    # Set TensorRT version
+    # https://docs.nvidia.com/deeplearning/tensorrt/archives/tensorrt-861
+    export TENSORRT_MAJ='8'
+    export TENSORRT_MIN='6'
+    export TENSORRT_REV='1.6'
+    export TENSORRT_VER="${TENSORRT_MAJ}.${TENSORRT_MIN}.${TENSORRT_REV}"
+
+    # Set cuTENSOR version
+    # https://docs.nvidia.com/cuda/cutensor/2.0.0
+    export CUTENSOR_MAJ='2'
+    export CUTENSOR_MIN='0'
+    export CUTENSOR_REV='0.7'
+    export CUTENSOR_VER="${CUTENSOR_MAJ}.${CUTENSOR_MIN}.${CUTENSOR_REV}"
+
+    # Set cuSPARSELt version
+    # https://docs.nvidia.com/cuda/cusparselt/index.html
+    export CUSPARSELT_MAJ='0'
+    export CUSPARSELT_MIN='5'
+    export CUSPARSELT_REV='2.1'
+    export CUSPARSELT_VER="${CUSPARSELT_MAJ}.${CUSPARSELT_MIN}.${CUSPARSELT_REV}"
+
+    # Set paths to CUDA binaries and libraries
+    export CUDA_HOME="/usr/local/cuda-${CUDA_MAJ}.${CUDA_MIN}"
+    export CUDNN_INCLUDE_DIR='/usr/include'
+    export CUDNN_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+    export NCCL_INCLUDE_DIR='/usr/include'
+    export NCCL_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+    export TENSORRT_INCLUDE_DIR='/usr/include'
+    export TENSORRT_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+    export CUTENSOR_INCLUDE_DIR='/usr/include'
+    export CUTENSOR_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+    export CUSPARSELT_INCLUDE_DIR='/usr/include'
+    export CUSPARSELT_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+    export PATH="${CUDA_HOME}/bin${PATH:+:${PATH}}"
+    export LD_LIBRARY_PATH="${CUDA_HOME}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+    export LD_LIBRARY_PATH="${CUDNN_LIB_DIR}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${NCCL_LIB_DIR}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${TENSORRT_LIB_DIR}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${CUTENSOR_LIB_DIR}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${CUSPARSELT_LIB_DIR}:${LD_LIBRARY_PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='jammy'
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set conda version(s), operating system, and system architecture
+    export CONDA_PYTHON_VER='py310'
+    export CONDA_MAJ='24'
+    export CONDA_MIN='1'
+    export CONDA_REV='2-0'
+    export CONDA_VER="${CONDA_MAJ}.${CONDA_MIN}.${CONDA_REV}"
+    export CONDA_OS='Linux'
+    export CONDA_ARCH='x86_64'
+    export CONDA_DISTRO="Miniconda3-${CONDA_PYTHON_VER}_${CONDA_VER}-${CONDA_OS}-${CONDA_ARCH}"
+    export CONDA_SHA256='8eb5999c2f7ac6189690d95ae5ec911032fa6697ae4b34eb3235802086566d78'
+
+    # Set paths to conda binaries and libraries
+    export PATH="/opt/${CONDA_DISTRO}/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/${CONDA_DISTRO}/lib:${LD_LIBRARY_PATH}"
+
+    # Set NVIDIA driver version
+    export NV_DRIVER_MAJ='525'
+    export NV_DRIVER_MIN='85'
+    export NV_DRIVER_REV='12'
+    export NV_DRIVER_VER="${NV_DRIVER_MAJ}.${NV_DRIVER_MIN}.${NV_DRIVER_REV}"
+
+    # Set CUDA version, operating system, and platform architecture
+    # https://docs.nvidia.com/cuda/archive/12.2.1
+    export CUDA_MAJ='12'
+    export CUDA_MIN='1'
+    export CUDA_REV='1'
+    export CUDA_VER="${CUDA_MAJ}.${CUDA_MIN}.${CUDA_REV}"
+    export CUDA_OS='ubuntu2204'
+    export CUDA_ARCH='x86_64'
+
+    # Set cuDNN version
+    # https://docs.nvidia.com/deeplearning/cudnn/archives/cudnn-890
+    export CUDNN_MAJ='8'
+    export CUDNN_MIN='9'
+    export CUDNN_REV='0.131'
+    export CUDNN_VER="${CUDNN_MAJ}.${CUDNN_MIN}.${CUDNN_REV}"
+
+    # Set NCCL version
+    # https://docs.nvidia.com/deeplearning/nccl/archives/nccl_2183/user-guide/docs/index.html
+    export NCCL_MAJ='2'
+    export NCCL_MIN='18'
+    export NCCL_REV='3'
+    export NCCL_VER="${NCCL_MAJ}.${NCCL_MIN}.${NCCL_REV}"
+
+    # Set TensorRT version
+    # https://docs.nvidia.com/deeplearning/tensorrt/archives/tensorrt-861
+    export TENSORRT_MAJ='8'
+    export TENSORRT_MIN='6'
+    export TENSORRT_REV='1.6'
+    export TENSORRT_VER="${TENSORRT_MAJ}.${TENSORRT_MIN}.${TENSORRT_REV}"
+
+    # Set cuTENSOR version
+    # https://docs.nvidia.com/cuda/cutensor/2.0.0
+    export CUTENSOR_MAJ='2'
+    export CUTENSOR_MIN='0'
+    export CUTENSOR_REV='0.7'
+    export CUTENSOR_VER="${CUTENSOR_MAJ}.${CUTENSOR_MIN}.${CUTENSOR_REV}"
+
+    # Set cuSPARSELt version
+    # https://docs.nvidia.com/cuda/cusparselt/index.html
+    export CUSPARSELT_MAJ='0'
+    export CUSPARSELT_MIN='5'
+    export CUSPARSELT_REV='2.1'
+    export CUSPARSELT_VER="${CUSPARSELT_MAJ}.${CUSPARSELT_MIN}.${CUSPARSELT_REV}"
+
+    # Set CUDA repository information
+    export CUDA_REPO_URL="http://developer.download.nvidia.com/compute/cuda/repos/${CUDA_OS}/${CUDA_ARCH}"
+    export CUDA_KEYRING_PKG='cuda-keyring_1.1-1_all.deb'
+
+    cd /tmp
+
+    # Install the new cuda-keyring package
+    # https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#network-repo-installation-for-ubuntu
+    wget "${CUDA_REPO_URL}/${CUDA_KEYRING_PKG}"
+    dpkg -i "${CUDA_KEYRING_PKG}"
+    rm "${CUDA_KEYRING_PKG}"
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    # Install NVIDIA libcompute package
+    # This package provides a set of libraries which enable the NVIDIA
+    # driver to use GPUs for parallel general purpose computation through CUDA and
+    # OpenCL. Also REQUIRED by MLNX_OFED ucx-cuda package.
+    apt-get -y install "libnvidia-compute-${NV_DRIVER_MAJ}=${NV_DRIVER_VER}-0ubuntu1"
+
+    # Install CUDA toolkit meta-package - https://developer.nvidia.com/cuda-toolkit
+    apt-get -y install "cuda-toolkit-${CUDA_MAJ}-${CUDA_MIN}=${CUDA_VER}-1"
+
+    # Install the cuDNN library - https://developer.nvidia.com/cudnn
+    apt-get -y install "libcudnn${CUDNN_MAJ}=${CUDNN_VER}-1+cuda${CUDA_MAJ}.${CUDA_MIN}"
+    apt-get -y install "libcudnn${CUDNN_MAJ}-dev=${CUDNN_VER}-1+cuda${CUDA_MAJ}.${CUDA_MIN}"
+
+    # Install NCCL - https://developer.nvidia.com/nccl
+    apt-get -y install "libnccl${NCCL_MAJ}=${NCCL_VER}-1+cuda${CUDA_MAJ}.${CUDA_MIN}"
+    apt-get -y install "libnccl-dev=${NCCL_VER}-1+cuda${CUDA_MAJ}.${CUDA_MIN}"
+
+    # Install TensorRT - https://docs.nvidia.com/deeplearning/tensorrt/index.html
+    export CUDA_MIN='0'
+    apt-get -y install "tensorrt=${TENSORRT_VER}-1+cuda${CUDA_MAJ}.${CUDA_MIN}"
+    apt-get -y install "tensorrt-dev=${TENSORRT_VER}-1+cuda${CUDA_MAJ}.${CUDA_MIN}"
+    apt-get -y install "tensorrt-libs=${TENSORRT_VER}-1+cuda${CUDA_MAJ}.${CUDA_MIN}"
+
+    # Install cuTensor - https://developer.nvidia.com/cutensor
+    apt-get -y install "libcutensor${CUTENSOR_MAJ}=${CUTENSOR_VER}-1"
+    apt-get -y install "libcutensor-dev=${CUTENSOR_VER}-1"
+
+    # Install cuSPARSELt - https://docs.nvidia.com/cuda/cusparselt
+    apt-get -y install "libcusparselt${CUSPARSELT_MAJ}=${CUSPARSELT_VER}-1"
+    apt-get -y install "libcusparselt-dev=${CUSPARSELT_VER}-1"
+
+    # Store information about the container image build system
+    mkdir -p /opt/.nxis
+    cd /opt/.nxis
+    dmidecode > dmidecode.default
+    df -ahPT > df.default
+    fdisk --list > fdisk.default
+    lsblk --output-all > lsblk.default
+    lsblk --output-all --json > lsblk.json
+    lscpu --output-all > lscpu.default
+    lscpu --output-all --json > lscpu.json
+    lshw > lshw.default
+    lshw -json > lshw.json
+    lshw -short > lshw.short
+    lspci > lspci.default
+    lspci -vvv > lspci.verbose
+    free -h > free.default
+    cat /proc/meminfo > meminfo.default
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+    rm -rf /var/lib/apt/lists/*
+
+    # Update database for mlocate
+    updatedb
+
+%runscript
+
+%test
