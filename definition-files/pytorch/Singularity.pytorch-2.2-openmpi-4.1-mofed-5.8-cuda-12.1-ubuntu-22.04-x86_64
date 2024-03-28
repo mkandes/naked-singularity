@@ -1,12 +1,12 @@
 Bootstrap: oras
-From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-miniconda-py310-24.1-ubuntu-22.04-x86_64
+From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-ubuntu-22.04-x86_64
 
 %labels
 
-    org.opencontainers.image.ref.name ghcr.io/mkandes/pytorch:2.2-openmpi-4.1-mofed-5.8-cuda-12.1-miniconda-py310-24.1-ubuntu-22.04-x86_64
+    org.opencontainers.image.ref.name ghcr.io/mkandes/pytorch:2.2-openmpi-4.1-mofed-5.8-cuda-12.1-ubuntu-22.04-x86_64
 
-    org.opencontainers.image.base.name ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-miniconda-py310-24.1-ubuntu-22.04-x86_64
-    org.opencontainers.image.base.digest sha256:31b623980868ca8fe3b93b0269c15bc0074510a1f592c81bcd6ab445b330aac0
+    org.opencontainers.image.base.name ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-ubuntu-22.04-x86_64
+    org.opencontainers.image.base.digest sha256:59403be9a4886a6571866bd3a83be6407f33a55e14d87aba473816e7c183099a
 
     org.opencontainers.image.title pytorch
     org.opencontainers.image.description PyTorch is an optimized tensor library for deep learning
@@ -22,9 +22,18 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-miniconda-py310-24.1-ubunt
 
 %setup
 
-%files
-
 %environment
+
+    # Set MAGMA version number
+    export MAGMA_MAJ='2'
+    export MAGMA_MIN='7'
+    export MAGMA_REV='2'
+    export MAGMA_VER="${MAGMA_MAJ}.${MAGMA_MIN}.${MAGMA_REV}"
+    export MAGMA_ROOT_DIR='/opt/magma'
+    export MAGMA_INSTALL_DIR="${MAGMA_ROOT_DIR}/${MAGMA_VER}"
+
+    # Set path to MAGMA ibraries
+    export LD_LIBRARY_PATH="${MAGMA_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
 
 %post -c /bin/bash
 
@@ -40,22 +49,7 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-miniconda-py310-24.1-ubunt
     # Set debian frontend interface
     export DEBIAN_FRONTEND='noninteractive'
 
-    # Set conda version(s), operating system, and system architecture
-    export CONDA_PYTHON_VER='py310'
-    export CONDA_MAJ='24'
-    export CONDA_MIN='1'
-    export CONDA_REV='2-0'
-    export CONDA_VER="${CONDA_MAJ}.${CONDA_MIN}.${CONDA_REV}"
-    export CONDA_OS='Linux'
-    export CONDA_ARCH='x86_64'
-    export CONDA_DISTRO="Miniconda3-${CONDA_PYTHON_VER}_${CONDA_VER}-${CONDA_OS}-${CONDA_ARCH}"
-    export CONDA_SHA256='8eb5999c2f7ac6189690d95ae5ec911032fa6697ae4b34eb3235802086566d78'
-
-    # Set paths to conda binaries and libraries
-    export PATH="/opt/${CONDA_DISTRO}/bin:${PATH}"
-    export LD_LIBRARY_PATH="/opt/${CONDA_DISTRO}/lib:${LD_LIBRARY_PATH}"
-
-    # Set NVIDIA driver and CUDA version numbers
+    # Set NVIDIA driver and CUDA versions
     export NV_DRIVER_MAJ='525'
     export NV_DRIVER_MIN='85'
     export NV_DRIVER_REV='12'
@@ -108,8 +102,6 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-miniconda-py310-24.1-ubunt
     export LD_LIBRARY_PATH="${CUDNN_LIB_DIR}:${LD_LIBRARY_PATH}"
     export LD_LIBRARY_PATH="${NCCL_LIB_DIR}:${LD_LIBRARY_PATH}"
     export LD_LIBRARY_PATH="${TENSORRT_LIB_DIR}:${LD_LIBRARY_PATH}"
-    export LD_LIBRARY_PATH="${CUTENSOR_LIB_DIR}:${LD_LIBRARY_PATH}"
-    export LD_LIBRARY_PATH="${CUSPARSELT_LIB_DIR}:${LD_LIBRARY_PATH}"
 
     # Set Mellanox OFED version, operating system, and platform architecture
     export MOFED_MAJ='5'
@@ -142,41 +134,92 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-miniconda-py310-24.1-ubunt
     # prevent the upgrade of NVIDIA CUDA to a newer version.
     apt-get -y update #&& apt-get -y upgrade
 
+    # Install base python environment
+    apt-get -y install python3-dev
+    apt-get -y install python3-pip
+    apt-get -y install python3-setuptools
+    apt-get -y install python3-wheel
+    apt-get -y install python-is-python3
+
+    # Install common python packags
+    apt-get -y install python3-numpy
+    apt-get -y install python3-scipy
+    apt-get -y install python3-pandas
+    apt-get -y install python3-sklearn
+    apt-get -y install python3-matplotlib
+
     # Install additional python packages
-    conda install -y h5py
-    conda install -y netcdf4
-    conda install -y nltk
-    conda install -y scikit-image
-    conda install -y sympy
-    conda install -y spacy
+    apt-get -y install python3-h5py
+    apt-get -y install python3-netcdf4
+    apt-get -y install python3-nltk
+    apt-get -y install python3-skimage
+
+    # Install PyTorch dependencies
+    apt-get -y install ninja-build
+    apt-get -y install python3-astunparse
+    apt-get -y install python3-hypothesis
+    apt-get -y install python3-typing-extensions
+    apt-get -y install python3-filelock
+    apt-get -y install python3-fsspec
+    python -m pip install expecttest
+    python -m pip install types-dataclasses
+    python -m pip install optree
+
+    # Install optional PyTorch dependencies
+    apt-get -y install ffmpeg
+    apt-get -y install libffmpeg-nvenc-dev
+    apt-get -y install libavcodec-dev
+    apt-get -y install libavdevice-dev
+    apt-get -y install libavutil-dev 
+    apt-get -y install libjpeg-dev
+    apt-get -y install libpng-dev
+    apt-get -y install python3-opencv
+
+    # Install JupyterLab
+    python -m pip install jupyterlab
 
     # Install mpi4py
-    # 
-    # Note, however, there currently appears to be an issue that occurs
-    # when attempting to compile mpi4py within a conda environment and 
-    # link it against a non-conda installed MPI distribution.
-    # 
-    # See https://github.com/mpi4py/mpi4py/issues/335
-    #
-    #   ...
-    #
-    #   collect2: error: ld returned 1 exit status
-    #   failure.
-    #   removing: _configtest.c _configtest.o
-    #   error: Cannot link MPI programs. Check your configuration!!!
-    #   [end of output]
-    #
-    # note: This error originates from a subprocess, and is likely not a problem with pip.
-    # ERROR: Failed building wheel for mpi4py
-    # Failed to build mpi4py
-    # ERROR: Could not build wheels for mpi4py, which is required to install pyproject.toml-based projects
-    #
-    # The following 'quick fix' removing ld from the conda environment 
-    # works, but it is unclear what the implications of this might be 
-    # down the road. i.e., it's likely not ideal
-    #
-    rm -rf /opt/Miniconda3-py310_23.11.0-2-Linux-x86_64/compiler_compat/ld
     python -m pip install mpi4py
+
+    cd /tmp 
+
+    # Set MAGMA version number
+    export MAGMA_MAJ='2'
+    export MAGMA_MIN='7'
+    export MAGMA_REV='2'
+    export MAGMA_VER="${MAGMA_MAJ}.${MAGMA_MIN}.${MAGMA_REV}"
+    export MAGMA_ROOT_DIR='/opt/magma'
+    export MAGMA_INSTALL_DIR="${MAGMA_ROOT_DIR}/${MAGMA_VER}"
+
+    # Set MAGMA build configuration environment variables 
+
+    # Download, build, and install MAGMA for PyTorch with NVIDIA GPU support
+    wget "https://icl.utk.edu/projectsfiles/magma/downloads/magma-${MAGMA_VER}.tar.gz"
+    tar -xf "magma-${MAGMA_VER}.tar.gz"
+    cd "magma-${MAGMA_VER}/"
+    rm -rf CMakeCache.txt CMakeFiles/
+    mkdir build
+    cd build
+    cmake .. \
+      -DCMAKE_INSTALL_PREFIX="${MAGMA_INSTALL_DIR}" \
+      -DBUILD_SHARED_LIBS='ON' \
+      -DUSE_FORTRAN='ON' \
+      -DBLA_VENDOR='Generic' \
+      -DLAPACK_LIBRARIES='-llapack -lblas' \
+      -DMAGMA_ENABLE_CUDA='ON' \
+      -DGPU_TARGET='sm_60,sm_70,sm_80'
+    make -j 4
+    make install
+
+    cd ../../
+
+    # Remove MAGMA build directory and source tarball
+    rm -rf "magma-${MAGMA_VER}/"
+    rm "magma-${MAGMA_VER}.tar.gz"
+
+    # Set path to MAGMA libraries
+    export MAGMA_HOME="${MAGMA_INSTALL_DIR}"
+    export LD_LIBRARY_PATH="${MAGMA_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
 
     cd /tmp
 
@@ -186,30 +229,9 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-miniconda-py310-24.1-ubunt
     export TORCH_REV='1'
     export TORCH_VER="${TORCH_MAJ}.${TORCH_MIN}.${TORCH_REV}"
 
-    # Install PyTorch dependencies
-    # https://github.com/pytorch/pytorch/tree/v2.2.0?tab=readme-ov-file#install-dependencies
-    conda install -y cmake
-    conda install -y ninja
-    conda install -y astunparse
-    conda install -y expecttest
-    conda install -y hypothesis
-    conda install -y typing-extensions
-    conda install -y filelock
-    conda install -y fsspec
-    conda install -y mkl-include
-    conda install -y types-dataclasses -c conda-forge
-    conda install -y optree -c conda-forge
-
-    # Install (optional) PyTorch dependencies
-    #conda install -y ffmpeg -c conda-forge
-    #conda install -y opencv -c intel
-
-    # Add LAPACK support for the GPU
-    conda install -y magma-cuda121 -c pytorch
-
     # Download PyTorch source code
     git clone --recursive https://github.com/pytorch/pytorch.git
-    cd pytorch
+    cd pytorch/
     git checkout "v${TORCH_VER}"
     git submodule sync
     git submodule update --init --recursive --jobs 0
@@ -232,9 +254,9 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-miniconda-py310-24.1-ubunt
     export FFLAGS='-O3 -mtune=generic'
     export BUILD_CAFFE2=0
     export BUILD_CAFFE2_OPS=0
-    export BLAS='MKL'
-    export USE_MKL=1
-    export USE_MKLDNN=1
+    export BLAS='OpenBLAS'
+    export USE_MKL=0
+    export USE_MKLDNN=0
     export USE_MKLDNN_ACL=0
     export USE_MKLDNN_CBLAS=0
     export USE_OPENMP=1
@@ -256,12 +278,16 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-miniconda-py310-24.1-ubunt
     export USE_MPI=1
     export USE_GLOO=1
     export USE_TENSORPIPE=1
-    export USE_FFMPEG=0
-    export USE_OPENCV=0
-    export CMAKE_PREFIX_PATH="${CONDA_PREFIX:-"$(dirname $(which conda))/../"}"
+    export USE_FFMPEG=1
+    export USE_OPENCV=1
 
     # Run PyTorch build and installation
     python setup.py install
+
+    cd ../
+
+    # Remove PyTorch build directory and source repository
+    rm -rf pytorch/
 
     cd /tmp
 
@@ -272,33 +298,21 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-miniconda-py310-24.1-ubunt
     export TORCHDATA_VER="${TORCHDATA_MAJ}.${TORCHDATA_MIN}.${TORCHDATA_REV}"
 
     # Set TorchData build configuration environment variables
-    export BUILD_S3=1
+    export BUILD_S3=0
 
     # Download, build and install TorchText
     # https://github.com/pytorch/data/tree/v0.7.1?tab=readme-ov-file#from-source
     git clone https://github.com/pytorch/data.git
-    cd data
+    cd data/
     git checkout "v${TORCHDATA_VER}"
     git submodule sync
     git submodule update --init --recursive
-    pip install -v .
-
-    cd /tmp
-
-    # Set TorchText version number
-    export TORCHTEXT_MAJ='0'
-    export TORCHTEXT_MIN='17'
-    export TORCHTEXT_REV='1'
-    export TORCHTEXT_VER="${TORCHTEXT_MAJ}.${TORCHTEXT_MIN}.${TORCHTEXT_REV}"
-
-    # Download, build and install TorchText
-    # https://github.com/pytorch/text/tree/v0.17.0?tab=readme-ov-file#installation
-    git clone https://github.com/pytorch/text.git
-    cd text
-    git checkout "v${TORCHTEXT_VER}"
-    git submodule sync
-    git submodule update --init --recursive
     python setup.py clean install
+
+    cd ../
+
+    # Remove TorchData build directory and source repository
+    rm -rf data/
 
     cd /tmp
 
@@ -308,21 +322,21 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-miniconda-py310-24.1-ubunt
     export TORCHVISION_REV='1'
     export TORCHVISION_VER="${TORCHVISION_MAJ}.${TORCHVISION_MIN}.${TORCHVISION_REV}"
 
-    # Install (optional) TorchVision dependencies
-    # https://github.com/pytorch/vision/blob/v0.17.0/CONTRIBUTING.md#development-installation
-    conda install -y libpng -c pytorch
-    conda install -y libjpeg-turbo -c pytorch
-
     # Set TorchVision build configuration environment variables
     export FORCE_CUDA=1
 
     # Download, build and install TorchVision
     git clone https://github.com/pytorch/vision.git
-    cd vision
+    cd vision/
     git checkout "v${TORCHVISION_VER}"
     git submodule sync
     git submodule update --init --recursive
     python setup.py clean install
+
+    cd ../
+
+    # Remove TorchVision build directory and source repository
+    rm -rf vision/
 
     cd /tmp
 
@@ -340,11 +354,16 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-miniconda-py310-24.1-ubunt
     # Download, build and install TorchAudio
     # https://pytorch.org/audio/main/build.html
     git clone https://github.com/pytorch/audio.git
-    cd audio
+    cd audio/
     git checkout "v${TORCHAUDIO_VER}"
     git submodule sync
     git submodule update --init --recursive
     python setup.py clean install
+
+    cd ../
+
+    # Remove TorchAudio build directory and source repository
+    rm -rf audio/
 
     cd /tmp
 
@@ -367,9 +386,9 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-miniconda-py310-24.1-ubunt
     export HOROVOD_NCCL_INCLUDE_DIR="${NCCL_INCLUDE_DIR}"
     export HOROVOD_NCCL_LIB_DIR="${NCCL_LIB_DIR}"
 
-    # Download, build, and install Horovod for PyTorch with NVIDIA GPU support  
+    # Download, build, and install Horovod for PyTorch with NVIDIA GPU support
     #git clone --recursive https://github.com/horovod/horovod.git
-    #cd horovod
+    #cd horovod/
     #git checkout "v${HOROVOD_VER}"
     #git submodule sync
     #git submodule update --init --recursive
@@ -388,11 +407,17 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-miniconda-py310-24.1-ubunt
 
     # Download, build and install PyTorch Lightning
     git clone https://github.com/Lightning-AI/pytorch-lightning.git
-    cd pytorch-lightning
+    cd pytorch-lightning/
     git checkout "${TORCH_LIGHTNING_VER}"
     git submodule sync
     git submodule update --init --recursive
+    #python setup.py clean install
     pip install -v .
+
+    cd ../
+
+    # Remove TorchAudio build directory and source repository
+    rm -rf pytorch-lightning/
 
     # Store information about the container image build system
     mkdir -p /opt/.nxis
@@ -419,6 +444,8 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-miniconda-py310-24.1-ubunt
 
     # Update database for mlocate
     updatedb
+
+%files
 
 %runscript
 
