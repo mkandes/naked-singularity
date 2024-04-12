@@ -300,7 +300,7 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-ubuntu-22.04-x86_64
     # Set TorchData build configuration environment variables
     export BUILD_S3=0
 
-    # Download, build and install TorchText
+    # Download, build and install TorchData
     # https://github.com/pytorch/data/tree/v0.7.1?tab=readme-ov-file#from-source
     git clone https://github.com/pytorch/data.git
     cd data/
@@ -313,6 +313,28 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-cuda-12.1-ubuntu-22.04-x86_64
 
     # Remove TorchData build directory and source repository
     rm -rf data/
+
+    cd /tmp
+
+    # Set TorchText version number
+    export TORCHTEXT_MAJ='0'
+    export TORCHTEXT_MIN='17'
+    export TORCHTEXT_REV='1'
+    export TORCHTEXT_VER="${TORCHTEXT_MAJ}.${TORCHTEXT_MIN}.${TORCHTEXT_REV}"
+
+    # Download, build and install TorchText
+    # https://github.com/pytorch/text/tree/v0.17.0?tab=readme-ov-file#installation
+    git clone https://github.com/pytorch/text.git
+    cd text
+    git checkout "v${TORCHTEXT_VER}"
+    git submodule sync
+    git submodule update --init --recursive
+    python setup.py clean install
+
+    cd ../
+
+    # Remove TorchText build directory and source repository
+    rm -rf text/
 
     cd /tmp
 
