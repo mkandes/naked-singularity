@@ -81,17 +81,24 @@ OSVersion: jammy
     # Upgrade all software packages to their latest versions
     apt-get -y update && apt-get -y upgrade
 
-    # Install common packages from 'main'
+    # Install common packages
     apt-get -y install apt-utils
+    apt-get -y install aria2
     apt-get -y install autoconf
     apt-get -y install automake
     apt-get -y install build-essential
     apt-get -y install cmake
     apt-get -y install gfortran
+    apt-get -y install lbzip2
+    apt-get -y install lftp
     apt-get -y install libtool
     apt-get -y install mlocate
+    apt-get -y install pigz
+    apt-get -y install pipx
     apt-get -y install pkg-config
+    apt-get -y install rclone
     apt-get -y install wget
+    apt-get -y install wget2
     apt-get -y install zip
 
     # Store information about the container image build system
