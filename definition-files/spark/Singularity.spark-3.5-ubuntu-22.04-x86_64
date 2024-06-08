@@ -1,0 +1,152 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/ubuntu:22.04-x86_64
+
+%labels
+
+    org.opencontainers.image.ref.name ghcr.io/mkandes/spark:3.5-ubuntu-22.04-x86_64
+
+    org.opencontainers.image.base.name ghcr.io/mkandes/ubuntu:22.04-x86_64
+    org.opencontainers.image.base.digest sha256:0629fd1cec548f1a44f84a1a88000a73e3ade4fde79de436ff7a0c28833ef16b
+
+    org.opencontainers.image.title spark
+    org.opencontainers.image.description Apache Spark is a unified engine for large-scale data analytics
+    org.opencontainers.image.url https://spark.apache.org
+    org.opencontainers.image.documentation https://spark.apache.org/docs/latest
+    org.opencontainers.image.source https://github.com/apache/spark.git
+    org.opencontainers.image.vendor Apache Software Foundation (https://www.apache.org)
+    org.opencontainers.image.licenses Apache-2.0 (https://www.apache.org/licenses)
+    org.opencontainers.image.version 3.5.1
+    org.opencontainers.image.revision fd86f85e181fc2dc0f50a096855acf83a6cc5d9c
+
+    org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
+
+%setup
+
+%files
+
+%environment
+
+    # Set Spark version and install path
+    export SPARK_MAJ='3'
+    export SPARK_MIN='5'
+    export SPARK_REV='1'
+    export SPARK_VER="${SPARK_MAJ}.${SPARK_MIN}.${SPARK_REV}"
+    export SPARK_HADDOP_MAJ='3'
+    export SPARK_HADOOP_MIN=''
+    export SPARK_HADOOP_REV=''
+    export SPARK_HADOOP_VER="${SPARK_MAJ}"
+    export SPARK_SHA512='3d8e3f082c602027d540771e9eba9987f8ea955e978afc29e1349eb6e3f9fe32543e3d3de52dff048ebbd789730454c96447c86ff5b60a98d72620a0f082b355'
+    export SPARK_ROOT_DIR='/opt/spark'
+    export SPARK_INSTALL_DIR="${SPARK_ROOT_DIR}/${SPARK_VER}"
+
+    # Set PATH to Spark commands and scripts
+    export PATH="${SPARK_INSTALL_DIR}/bin:${PATH}"
+    export PATH="${SPARK_INSTALL_DIR}/sbin:${PATH}"
+
+    # Set other environment variables utilized by Spark
+    export JAVA_HOME='/usr'
+    export SPARK_HOME="${SPARK_INSTALL_DIR}"
+    export PYTHONPATH="${SPARK_HOME}/python/lib/pyspark.zip:${PYTHONPATH}"
+    export PYTHONPATH="${SPARK_HOME}/python/lib/py4j-0.10.9.7-src.zip:${PYTHONPATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='jammy'
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    # Install Spark dependencies
+    apt-get -y install python3
+    apt-get -y install python3-dev
+    apt-get -y install python-is-python3
+    apt-get -y install openjdk-17-jdk
+
+    cd /tmp
+
+    # Install pip
+    wget https://bootstrap.pypa.io/get-pip.py
+    python get-pip.py
+    rm get-pip.py
+
+    # Install additional (optional) Spark dependencies
+    python -m pip install numpy
+    python -m pip install pandas
+    python -m pip install pyarrow
+
+    # Install other common python packages
+    python -m pip install scipy
+    python -m pip install scikit-learn
+    python -m pip install matplotlib
+    python -m pip install jupyter
+    python -m pip install jupyterlab
+
+    cd /tmp
+
+    # Set Spark version and install path
+    export SPARK_MAJ='3'
+    export SPARK_MIN='5'
+    export SPARK_REV='1'
+    export SPARK_VER="${SPARK_MAJ}.${SPARK_MIN}.${SPARK_REV}"
+    export SPARK_HADDOP_MAJ='3'
+    export SPARK_HADOOP_MIN=''
+    export SPARK_HADOOP_REV=''
+    export SPARK_HADOOP_VER="${SPARK_MAJ}"
+    export SPARK_SHA512='3d8e3f082c602027d540771e9eba9987f8ea955e978afc29e1349eb6e3f9fe32543e3d3de52dff048ebbd789730454c96447c86ff5b60a98d72620a0f082b355'
+    export SPARK_ROOT_DIR='/opt/spark'
+    export SPARK_INSTALL_DIR="${SPARK_ROOT_DIR}/${SPARK_VER}"
+
+    # Download and install a pre-built Spark distribution
+    wget "https://archive.apache.org/dist/spark/spark-${SPARK_VER}/spark-${SPARK_VER}-bin-hadoop${SPARK_HADOOP_VER}.tgz"
+    wget "https://archive.apache.org/dist/spark/spark-${SPARK_VER}/spark-${SPARK_VER}-bin-hadoop${SPARK_HADOOP_VER}.tgz.sha512"
+    sha512sum -c "spark-${SPARK_VER}-bin-hadoop${SPARK_HADOOP_VER}.tgz.sha512"
+    tar -xf "spark-${SPARK_VER}-bin-hadoop${SPARK_HADOOP_VER}.tgz"
+    cd "spark-${SPARK_VER}-bin-hadoop${SPARK_HADOOP_VER}"
+    mkdir -p "${SPARK_INSTALL_DIR}"
+    mv * "${SPARK_INSTALL_DIR}"
+
+    cd /tmp
+
+    # Remove pre-built Spark installation tarball
+    rmdir "spark-${SPARK_VER}-bin-hadoop${SPARK_HADOOP_VER}"
+    rm "spark-${SPARK_VER}-bin-hadoop${SPARK_HADOOP_VER}.tgz"
+
+    # Store information about the container image build system
+    mkdir -p /opt/.nxis
+    cd /opt/.nxis
+    dmidecode > dmidecode.default
+    df -ahPT > df.default
+    fdisk --list > fdisk.default
+    lsblk --output-all > lsblk.default
+    lsblk --output-all --json > lsblk.json
+    lscpu --output-all > lscpu.default
+    lscpu --output-all --json > lscpu.json
+    lshw > lshw.default
+    lshw -json > lshw.json
+    lshw -short > lshw.short
+    lspci > lspci.default
+    lspci -vvv > lspci.verbose
+    free -h > free.default
+    cat /proc/meminfo > meminfo.default
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+    rm -rf /var/lib/apt/lists/*
+
+    # Update database for mlocate
+    updatedb
+
+%runscript
+
+%test

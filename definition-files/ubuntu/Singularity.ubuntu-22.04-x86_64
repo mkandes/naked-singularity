@@ -98,8 +98,18 @@ OSVersion: jammy
     apt-get -y install pkg-config
     apt-get -y install rclone
     apt-get -y install wget
-    apt-get -y install wget2
     apt-get -y install zip
+
+    cd /tmp
+
+    # Download, build, and install wget2
+    #wget https://gnuwget.gitlab.io/wget2/wget2-latest.tar.gz
+    #tar -xf wget2-latest.tar.gz
+    #cd wget2-2.1.0
+    #./configure --prefix='/opt/wget2'
+    #make
+    #make check
+    #make install
 
     # Store information about the container image build system
     mkdir -p /opt/.nxis
