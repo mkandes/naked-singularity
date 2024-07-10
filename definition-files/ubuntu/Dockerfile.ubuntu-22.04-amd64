@@ -18,6 +18,9 @@ LABEL org.opencontainers.image.version='22.04'
 LABEL org.opencontainers.image.revision='4'
 LABEL org.opencontainers.image.authors='Marty Kandes (mkandes@sdsc.edu)'
 
+# Set the default shell for the image
+SHELL ["/bin/bash", "-c"]
+
 # Set operating system mirror URL
 ENV MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
 

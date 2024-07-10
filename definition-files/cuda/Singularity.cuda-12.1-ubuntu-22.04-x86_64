@@ -192,6 +192,39 @@ From: ghcr.io/mkandes/ubuntu:22.04-x86_64
     apt-get -y install "libnccl${NCCL_MAJ}=${NCCL_VER}-1+cuda${CUDA_MAJ}.${CUDA_MIN}"
     apt-get -y install "libnccl-dev=${NCCL_VER}-1+cuda${CUDA_MAJ}.${CUDA_MIN}"
 
+    #Some packages could not be installed. This may mean that you have
+    #requested an impossible situation or if you are using the unstable
+    #distribution that some required packages have not yet been created
+    #or been moved out of Incoming.
+    #The following information may help to resolve the situation:
+    #The following packages have unmet dependencies:
+    #tensorrt : Depends: libnvinfer-bin (= 8.6.1.6-1+cuda12.0) but 10.2.0.19-1+cuda12.5 is to be installed
+    #        Depends: libnvinfer-dev (= 8.6.1.6-1+cuda12.0) but 10.2.0.19-1+cuda12.5 is to be installed
+    #        Depends: libnvinfer-lean-dev (= 8.6.1.6-1+cuda12.0) but 10.2.0.19-1+cuda12.5 is to be installed
+    #        Depends: libnvinfer-plugin-dev (= 8.6.1.6-1+cuda12.0) but 10.2.0.19-1+cuda12.5 is to be installed
+    #        Depends: libnvinfer-vc-plugin-dev (= 8.6.1.6-1+cuda12.0) but 10.2.0.19-1+cuda12.5 is to be installed
+    #        Depends: libnvinfer-dispatch-dev (= 8.6.1.6-1+cuda12.0) but 10.2.0.19-1+cuda12.5 is to be installed
+    #        Depends: libnvparsers-dev (= 8.6.1.6-1+cuda12.0) but it is not going to be installed
+    #        Depends: libnvonnxparsers-dev (= 8.6.1.6-1+cuda12.0) but 10.2.0.19-1+cuda12.5 is to be installed
+    #        Depends: libnvinfer-samples (= 8.6.1.6-1+cuda12.0) but 10.2.0.19-1+cuda12.5 is to be installed
+    #E: Unable to correct problems, you have held broken packages.
+    #Reading package lists... Done
+    #Building dependency tree... Done
+    #Reading state information... Done
+    #Some packages could not be installed. This may mean that you have
+    #requested an impossible situation or if you are using the unstable
+    #distribution that some required packages have not yet been created
+    #or been moved out of Incoming.
+    #The following information may help to resolve the situation:
+    #The following packages have unmet dependencies:
+    #tensorrt-dev : Depends: libnvinfer-dev (= 8.6.1.6-1+cuda12.0) but 10.2.0.19-1+cuda12.5 is to be installed
+    #            Depends: libnvinfer-lean-dev (= 8.6.1.6-1+cuda12.0) but 10.2.0.19-1+cuda12.5 is to be installed
+    #            Depends: libnvinfer-dispatch-dev (= 8.6.1.6-1+cuda12.0) but 10.2.0.19-1+cuda12.5 is to be installed
+    #            Depends: libnvinfer-plugin-dev (= 8.6.1.6-1+cuda12.0) but 10.2.0.19-1+cuda12.5 is to be installed
+    #            Depends: libnvinfer-vc-plugin-dev (= 8.6.1.6-1+cuda12.0) but 10.2.0.19-1+cuda12.5 is to be installed
+    #            Depends: libnvparsers-dev (= 8.6.1.6-1+cuda12.0) but it is not going to be installed
+    #            Depends: libnvonnxparsers-dev (= 8.6.1.6-1+cuda12.0) but 10.2.0.19-1+cuda12.5 is to be installed
+    #E: Unable to correct problems, you have held broken packages.
     # Install TensorRT - https://docs.nvidia.com/deeplearning/tensorrt/index.html
     export CUDA_MIN='0'
     apt-get -y install "tensorrt=${TENSORRT_VER}-1+cuda${CUDA_MAJ}.${CUDA_MIN}"

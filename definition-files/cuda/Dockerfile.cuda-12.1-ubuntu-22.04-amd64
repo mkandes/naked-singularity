@@ -1,0 +1,204 @@
+FROM docker.io/mkandes/ubuntu:22.04-amd64
+
+# Add OCI annotations
+LABEL org.opencontainers.image.ref.name='docker.io/mkandes/cuda:12.1-ubuntu-22.04-amd64'
+LABEL org.opencontainers.image.base.name='docker.io/mkandes/ubuntu:22.04-amd64'
+LABEL org.opencontainers.image.base.digest='sha256:6028e17f16fe1fa905d351656690676eb2bb457ba84e4100adcc56ed92e61ec2'
+LABEL org.opencontainers.image.title='cuda'
+LABEL org.opencontainers.image.description ='NVIDIA CUDA is a parallel computing platform and programming model for creating high performance GPU-accelerated applications'
+LABEL org.opencontainers.image.url='https://developer.nvidia.com/cuda-toolkit'
+LABEL org.opencontainers.image.documentation='https://docs.nvidia.com/cuda/archive/12.1.1'
+LABEL org.opencontainers.image.source='https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-12-1_12.1.1-1_amd64.deb'
+LABEL org.opencontainers.image.vendor='NVIDIA Corporation (https://www.nvidia.com)'
+LABEL org.opencontainers.image.licenses='https://docs.nvidia.com/cuda/archive/12.1.1/eula/index.html'
+LABEL org.opencontainers.image.version='12.1.1'
+LABEL org.opencontainers.image.revision=''
+LABEL org.opencontainers.image.authors='Marty Kandes (mkandes@sdsc.edu)'
+
+# Set the default shell for the image
+SHELL ["/bin/bash", "-c"]
+
+# Set operating system mirror URL
+ENV MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+# Set operating system version
+ENV OSVERSION='jammy'
+
+# Set system locale
+ENV LC_ALL=C
+
+# Set debian frontend interface
+ENV DEBIAN_FRONTEND='noninteractive'
+
+# Set NVIDIA driver version
+ENV NV_DRIVER_MAJ='525'
+ENV NV_DRIVER_MIN='85'
+ENV NV_DRIVER_REV='12'
+ENV NV_DRIVER_VER="${NV_DRIVER_MAJ}.${NV_DRIVER_MIN}.${NV_DRIVER_REV}"
+
+# Set CUDA version, operating system, and platform architecture
+# https://docs.nvidia.com/cuda/archive/12.1.1
+ENV CUDA_MAJ='12'
+ENV CUDA_MIN='1'
+ENV CUDA_REV='1'
+ENV CUDA_VER="${CUDA_MAJ}.${CUDA_MIN}.${CUDA_REV}"
+ENV CUDA_OS='ubuntu2204'
+ENV CUDA_ARCH='x86_64'
+
+# Set cuDNN version
+# https://docs.nvidia.com/deeplearning/cudnn/archives/cudnn-890
+ENV CUDNN_MAJ='8'
+ENV CUDNN_MIN='9'
+ENV CUDNN_REV='0.131'
+ENV CUDNN_VER="${CUDNN_MAJ}.${CUDNN_MIN}.${CUDNN_REV}"
+
+# Set NCCL version
+# https://docs.nvidia.com/deeplearning/nccl/archives/nccl_2183/user-guide/docs/index.html
+ENV NCCL_MAJ='2'
+ENV NCCL_MIN='18'
+ENV NCCL_REV='3'
+ENV NCCL_VER="${NCCL_MAJ}.${NCCL_MIN}.${NCCL_REV}"
+
+# Set TensorRT version
+# https://docs.nvidia.com/deeplearning/tensorrt/archives/tensorrt-861
+ENV TENSORRT_MAJ='8'
+ENV TENSORRT_MIN='6'
+ENV TENSORRT_REV='1.6'
+ENV TENSORRT_VER="${TENSORRT_MAJ}.${TENSORRT_MIN}.${TENSORRT_REV}"
+
+# Set cuTENSOR version
+# https://docs.nvidia.com/cuda/cutensor/2.0.0
+ENV CUTENSOR_MAJ='2'
+ENV CUTENSOR_MIN='0'
+ENV CUTENSOR_REV='0.7'
+ENV CUTENSOR_VER="${CUTENSOR_MAJ}.${CUTENSOR_MIN}.${CUTENSOR_REV}"
+
+# Set cuSPARSELt version
+# https://docs.nvidia.com/cuda/cusparselt/index.html
+ENV CUSPARSELT_MAJ='0'
+ENV CUSPARSELT_MIN='5'
+ENV CUSPARSELT_REV='2.1'
+ENV CUSPARSELT_VER="${CUSPARSELT_MAJ}.${CUSPARSELT_MIN}.${CUSPARSELT_REV}"
+
+# Set paths to CUDA binaries and libraries
+ENV CUDA_HOME="/usr/local/cuda-${CUDA_MAJ}.${CUDA_MIN}"
+ENV CUDNN_INCLUDE_DIR='/usr/include'
+ENV CUDNN_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+ENV NCCL_INCLUDE_DIR='/usr/include'
+ENV NCCL_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+ENV TENSORRT_INCLUDE_DIR='/usr/include'
+ENV TENSORRT_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+ENV CUTENSOR_INCLUDE_DIR='/usr/include'
+ENV CUTENSOR_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+ENV CUSPARSELT_INCLUDE_DIR='/usr/include'
+ENV CUSPARSELT_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+ENV PATH="${CUDA_HOME}/bin${PATH:+:${PATH}}"
+ENV LD_LIBRARY_PATH="${CUDA_HOME}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+ENV LD_LIBRARY_PATH="${CUDNN_LIB_DIR}:${LD_LIBRARY_PATH}"
+ENV LD_LIBRARY_PATH="${NCCL_LIB_DIR}:${LD_LIBRARY_PATH}"
+ENV LD_LIBRARY_PATH="${TENSORRT_LIB_DIR}:${LD_LIBRARY_PATH}"
+ENV LD_LIBRARY_PATH="${CUTENSOR_LIB_DIR}:${LD_LIBRARY_PATH}"
+ENV LD_LIBRARY_PATH="${CUSPARSELT_LIB_DIR}:${LD_LIBRARY_PATH}"
+
+# Set CUDA repository information
+ENV CUDA_REPO_URL="http://developer.download.nvidia.com/compute/cuda/repos/${CUDA_OS}/${CUDA_ARCH}"
+ENV CUDA_KEYRING_PKG='cuda-keyring_1.1-1_all.deb'
+
+# Change working directory
+WORKDIR /tmp
+
+# Install the new cuda-keyring package
+# https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#network-repo-installation-for-ubuntu
+RUN wget "${CUDA_REPO_URL}/${CUDA_KEYRING_PKG}" \
+ && dpkg -i "${CUDA_KEYRING_PKG}" \
+ && rm "${CUDA_KEYRING_PKG}"
+
+# Upgrade all software packages to their latest versions
+RUN apt-get -y clean \
+ && apt-get -y update \
+ && apt-get -y upgrade
+
+# Install NVIDIA libcompute package
+# This package provides a set of libraries which enable the NVIDIA
+# driver to use GPUs for parallel general purpose computation through CUDA and
+# OpenCL. Also REQUIRED by MLNX_OFED ucx-cuda package.
+RUN apt-get -y install "libnvidia-compute-${NV_DRIVER_MAJ}=${NV_DRIVER_VER}-0ubuntu1"
+
+# Install CUDA toolkit meta-package - https://developer.nvidia.com/cuda-toolkit
+RUN apt-get -y install "cuda-toolkit-${CUDA_MAJ}-${CUDA_MIN}=${CUDA_VER}-1"
+
+# Install the cuDNN library - https://developer.nvidia.com/cudnn
+RUN apt-get -y install "libcudnn${CUDNN_MAJ}=${CUDNN_VER}-1+cuda${CUDA_MAJ}.${CUDA_MIN}" \
+ && apt-get -y install "libcudnn${CUDNN_MAJ}-dev=${CUDNN_VER}-1+cuda${CUDA_MAJ}.${CUDA_MIN}"
+
+# Install NCCL - https://developer.nvidia.com/nccl
+RUN apt-get -y install "libnccl${NCCL_MAJ}=${NCCL_VER}-1+cuda${CUDA_MAJ}.${CUDA_MIN}" \
+ && apt-get -y install "libnccl-dev=${NCCL_VER}-1+cuda${CUDA_MAJ}.${CUDA_MIN}"
+
+#Removing intermediate container 71b083822abf
+# ---> e8586269d080
+#Step 77/83 : ENV CUDA_MIN='0'
+# ---> Running in dd376c3acc66
+#Removing intermediate container dd376c3acc66
+# ---> 7c6fb192dcb7
+#Step 78/83 : RUN apt-get -y install "tensorrt=${TENSORRT_VER}-1+cuda${CUDA_MAJ}.${CUDA_MIN}"  && apt-get -y install "tensorrt-dev=${TENSORRT_VER}-1+cuda${CUDA_MAJ}.${CUDA_MIN}"  && apt-get -y install "tensorrt-libs=${TENSORRT_VER}-1+cuda${CUDA_MAJ}.${CUDA_MIN}"
+# ---> Running in fcefc566965b
+#Reading package lists...
+#Building dependency tree...
+#Reading state information...
+#Some packages could not be installed. This may mean that you have
+#requested an impossible situation or if you are using the unstable
+#distribution that some required packages have not yet been created
+#or been moved out of Incoming.
+#The following information may help to resolve the situation:
+#
+#The following packages have unmet dependencies:
+# tensorrt : Depends: libnvinfer-bin (= 8.6.1.6-1+cuda12.0) but 10.2.0.19-1+cuda12.5 is to be installed
+#            Depends: libnvinfer-dev (= 8.6.1.6-1+cuda12.0) but 10.2.0.19-1+cuda12.5 is to be installed
+#            Depends: libnvinfer-lean-dev (= 8.6.1.6-1+cuda12.0) but 10.2.0.19-1+cuda12.5 is to be installed
+#            Depends: libnvinfer-plugin-dev (= 8.6.1.6-1+cuda12.0) but 10.2.0.19-1+cuda12.5 is to be installed
+#            Depends: libnvinfer-vc-plugin-dev (= 8.6.1.6-1+cuda12.0) but 10.2.0.19-1+cuda12.5 is to be installed
+#            Depends: libnvinfer-dispatch-dev (= 8.6.1.6-1+cuda12.0) but 10.2.0.19-1+cuda12.5 is to be installed
+#            Depends: libnvparsers-dev (= 8.6.1.6-1+cuda12.0) but it is not going to be installed
+#            Depends: libnvonnxparsers-dev (= 8.6.1.6-1+cuda12.0) but 10.2.0.19-1+cuda12.5 is to be installed
+#            Depends: libnvinfer-samples (= 8.6.1.6-1+cuda12.0) but 10.2.0.19-1+cuda12.5 is to be installed
+#E: Unable to correct problems, you have held broken packages.
+#The command '/bin/bash -c apt-get -y install "tensorrt=${TENSORRT_VER}-1+cuda${CUDA_MAJ}.${CUDA_MIN}"  && apt-get -y install "tensorrt-dev=${TENSORRT_VER}-1+cuda${CUDA_MAJ}.${CUDA_MIN}"  && apt-get -y install "tensorrt-libs=${TENSORRT_VER}-1+cuda${CUDA_MAJ}.${CUDA_MIN}"' returned a non-zero code: 100
+# Install TensorRT - https://docs.nvidia.com/deeplearning/tensorrt/index.html
+#ENV CUDA_MIN='0'
+#RUN apt-get -y install "tensorrt=${TENSORRT_VER}-1+cuda${CUDA_MAJ}.${CUDA_MIN}" \
+# && apt-get -y install "tensorrt-dev=${TENSORRT_VER}-1+cuda${CUDA_MAJ}.${CUDA_MIN}" \
+# && apt-get -y install "tensorrt-libs=${TENSORRT_VER}-1+cuda${CUDA_MAJ}.${CUDA_MIN}"
+
+# Install cuTensor - https://developer.nvidia.com/cutensor
+RUN apt-get -y install "libcutensor${CUTENSOR_MAJ}=${CUTENSOR_VER}-1" \
+ && apt-get -y install "libcutensor-dev=${CUTENSOR_VER}-1"
+
+# Install cuSPARSELt - https://docs.nvidia.com/cuda/cusparselt
+RUN apt-get -y install "libcusparselt${CUSPARSELT_MAJ}=${CUSPARSELT_VER}-1" \
+ && apt-get -y install "libcusparselt-dev=${CUSPARSELT_VER}-1"
+
+# Store information about the container image build system
+RUN mkdir -p /opt/.nxis \
+ && cd /opt/.nxis \
+ && df -ahPT > df.default \
+ && fdisk --list > fdisk.default \
+ && lsblk --output-all > lsblk.default \
+ && lsblk --output-all --json > lsblk.json \
+ && lscpu --output-all > lscpu.default \
+ && lscpu --output-all --json > lscpu.json \
+ && lshw > lshw.default \
+ && lshw -json > lshw.json \
+ && lshw -short > lshw.short \
+ && lspci > lspci.default \
+ && lspci -vvv > lspci.verbose \
+ && free -h > free.default \
+ && cat /proc/meminfo > meminfo.default 
+
+# Cleanup
+RUN apt-get -y autoremove --purge \
+ && apt-get -y clean \
+ && rm -rf /var/lib/apt/lists/*
+
+# Update database for mlocate
+RUN updatedb
