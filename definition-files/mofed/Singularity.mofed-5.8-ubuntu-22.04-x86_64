@@ -10,7 +10,7 @@ From: ghcr.io/mkandes/ubuntu:22.04-x86_64
 
     org.opencontainers.image.title mofed 
     org.opencontainers.image.description NVIDIA OpenFabrics Enterprise Distribution for Linux
-    org.opencontainers.image.url https://network.nvidia.com/products/infiniband-drivers/linux/mlnx_ofed/
+    org.opencontainers.image.url https://network.nvidia.com/products/infiniband-drivers/linux/mlnx_ofed
     org.opencontainers.image.documentation https://docs.nvidia.com/networking/display/mlnxofedv584150lts
     org.opencontainers.image.source http://www.mellanox.com/downloads/ofed/MLNX_OFED-5.8-2.0.3.0/MLNX_OFED_LINUX-5.8-2.0.3.0-ubuntu22.04-x86_64.tgz
     org.opencontainers.image.vendor NVIDIA Corporation (https://www.nvidia.com)

@@ -5,8 +5,10 @@ FROM --platform="${OS_ARCH}" "${OS_DISTRO}:${OS_VERSION}"
 
 # Add OCI annotations
 LABEL org.opencontainers.image.ref.name='docker.io/mkandes/ubuntu:22.04-amd64'
+
 LABEL org.opencontainers.image.base.name=''
 LABEL org.opencontainers.image.base.digest=''
+
 LABEL org.opencontainers.image.title='ubuntu'
 LABEL org.opencontainers.image.description='Ubuntu is a Debian-based Linux operating system based on free software'
 LABEL org.opencontainers.image.url='https://ubuntu.com'
@@ -16,6 +18,7 @@ LABEL org.opencontainers.image.vendor='Canonical Ltd. https://canonical.com'
 LABEL org.opencontainers.image.licenses='https://ubuntu.com/legal/intellectual-property-policy'
 LABEL org.opencontainers.image.version='22.04'
 LABEL org.opencontainers.image.revision='4'
+
 LABEL org.opencontainers.image.authors='Marty Kandes (mkandes@sdsc.edu)'
 
 # Set the default shell for the image

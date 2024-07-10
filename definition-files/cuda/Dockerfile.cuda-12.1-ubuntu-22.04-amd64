@@ -2,8 +2,10 @@ FROM docker.io/mkandes/ubuntu:22.04-amd64
 
 # Add OCI annotations
 LABEL org.opencontainers.image.ref.name='docker.io/mkandes/cuda:12.1-ubuntu-22.04-amd64'
+
 LABEL org.opencontainers.image.base.name='docker.io/mkandes/ubuntu:22.04-amd64'
 LABEL org.opencontainers.image.base.digest='sha256:6028e17f16fe1fa905d351656690676eb2bb457ba84e4100adcc56ed92e61ec2'
+
 LABEL org.opencontainers.image.title='cuda'
 LABEL org.opencontainers.image.description ='NVIDIA CUDA is a parallel computing platform and programming model for creating high performance GPU-accelerated applications'
 LABEL org.opencontainers.image.url='https://developer.nvidia.com/cuda-toolkit'
@@ -13,6 +15,7 @@ LABEL org.opencontainers.image.vendor='NVIDIA Corporation (https://www.nvidia.co
 LABEL org.opencontainers.image.licenses='https://docs.nvidia.com/cuda/archive/12.1.1/eula/index.html'
 LABEL org.opencontainers.image.version='12.1.1'
 LABEL org.opencontainers.image.revision=''
+
 LABEL org.opencontainers.image.authors='Marty Kandes (mkandes@sdsc.edu)'
 
 # Set the default shell for the image
@@ -114,8 +117,7 @@ RUN wget "${CUDA_REPO_URL}/${CUDA_KEYRING_PKG}" \
  && rm "${CUDA_KEYRING_PKG}"
 
 # Upgrade all software packages to their latest versions
-RUN apt-get -y clean \
- && apt-get -y update \
+RUN apt-get -y update \
  && apt-get -y upgrade
 
 # Install NVIDIA libcompute package
