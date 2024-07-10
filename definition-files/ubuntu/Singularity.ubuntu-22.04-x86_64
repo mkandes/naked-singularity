@@ -81,7 +81,7 @@ OSVersion: jammy
     # Upgrade all software packages to their latest versions
     apt-get -y update && apt-get -y upgrade
 
-    # Install common packages
+    # Install additional software packages not included in system metapackages
     apt-get -y install apt-utils
     apt-get -y install aria2
     apt-get -y install autoconf
@@ -99,17 +99,6 @@ OSVersion: jammy
     apt-get -y install rclone
     apt-get -y install wget
     apt-get -y install zip
-
-    cd /tmp
-
-    # Download, build, and install wget2
-    #wget https://gnuwget.gitlab.io/wget2/wget2-latest.tar.gz
-    #tar -xf wget2-latest.tar.gz
-    #cd wget2-2.1.0
-    #./configure --prefix='/opt/wget2'
-    #make
-    #make check
-    #make install
 
     # Store information about the container image build system
     mkdir -p /opt/.nxis
