@@ -1,0 +1,99 @@
+FROM docker.io/mkandes/ubuntu:22.04-amd64
+
+# Add OCI annotations
+LABEL org.opencontainers.image.ref.name='docker.io/mkandes/stream:5.10-ubuntu-22.04-amd64'
+
+LABEL org.opencontainers.image.base.name='docker.io/mkandes/ubuntu-22.04-amd64'
+LABEL org.opencontainers.image.base.digest='sha256:6028e17f16fe1fa905d351656690676eb2bb457ba84e4100adcc56ed92e61ec2'
+
+LABEL org.opencontainers.image.title='stream'
+LABEL org.opencontainers.image.description='STREAM is a benchmark that measures sustainable memory bandwidth (in MB/s) and the corresponding computation rate for simple vector kernels.'
+LABEL org.opencontainers.image.url='https://www.cs.virginia.edu/stream'
+LABEL org.opencontainers.image.documentation='https://www.cs.virginia.edu/stream/ref.html'
+LABEL org.opencontainers.image.source='https://www.cs.virginia.edu/stream/FTP/Code'
+LABEL org.opencontainers.image.vendor='John D. McCalpin, Department of Computer Science, School of Engineering and Applied Science, University of Virginia, Charlottesville'
+LABEL org.opencontainers.image.licenses='https://www.cs.virginia.edu/stream/FTP/Code/LICENSE.txt'
+LABEL org.opencontainers.image.version='5.10'
+LABEL org.opencontainers.image.revision=''
+
+LABEL org.opencontainers.image.authors='Marty Kandes (mkandes@sdsc.edu)'
+
+# Set the default shell for the image
+SHELL ["/bin/bash", "-c"]
+
+# Set operating system mirror URL
+ENV MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+# Set operating system version
+ENV OSVERSION='jammy'
+
+# Set system locale
+ENV LC_ALL=C
+
+# Set debian frontend interface
+ENV DEBIAN_FRONTEND='noninteractive'
+
+# Set STREAM version number, root and installation directories
+ENV STREAM_MAJ='5'
+ENV STREAM_MIN='10'
+ENV STREAM_REV=''
+ENV STREAM_VER="${STREAM_MAJ}.${STREAM_MIN}"
+ENV STREAM_ROOT_DIR='/opt/stream'
+ENV STREAM_INSTALL_DIR="${STREAM_ROOT_DIR}/${STREAM_VER}"
+
+# Set path to stream binary
+ENV PATH="${STREAM_INSTALL_DIR}/bin:${PATH}"
+
+# Upgrade all software packages to their latest versions
+RUN apt-get -y update \
+ && apt-get -y upgrade
+
+# Change working directory
+WORKDIR /opt
+
+# Download, build, and install STREAM
+RUN mkdir -p "${STREAM_INSTALL_DIR}/bin" \
+ && cd "${STREAM_INSTALL_DIR}" \
+ && wget -r -np -nH --cut-dirs=1 --reject "index.html*" "http://www.cs.virginia.edu/stream/FTP/Code/" \
+ && mv FTP/Code/* ./ \
+ && rm -rf FTP
+
+RUN STREAM_ARRAY_SIZE_EXPONENT_BEGIN=13 \
+ && STREAM_ARRAY_SIZE_EXPONENT_END=36 \
+ && for (( n = "${STREAM_ARRAY_SIZE_EXPONENT_BEGIN}"; n <= "${STREAM_ARRAY_SIZE_EXPONENT_END}"; n++ )); do \
+ &&   STREAM_ARRAY_SIZES+=("$((2**${n}))") \
+ && done
+
+RUN STREAM_NTIMES=100 \
+ && STREAM_OFFSET=0
+
+RUN for STREAM_ARRAY_SIZE in "${STREAM_ARRAY_SIZES[@]}"; do \
+ &&   gcc -Ofast -march=native -fopenmp -mcmodel=large -DSTREAM_ARRAY_SIZE="${STREAM_ARRAY_SIZE}" -DNTIMES="${STREAM_NTIMES}" -DOFFSET="${STREAM_OFFSET}" -o stream_omp."${STREAM_ARRAY_SIZE}.x" stream.c \
+ && done
+
+RUN mv *.x "${STREAM_INSTALL_DIR}/bin"
+
+# Store information about the container image build system
+RUN mkdir -p /opt/.nxis \
+ && cd /opt/.nxis \
+ && df -ahPT > df.default \
+ && fdisk --list > fdisk.default \
+ && lsblk --output-all > lsblk.default \
+ && lsblk --output-all --json > lsblk.json \
+ && lscpu --output-all > lscpu.default \
+ && lscpu --output-all --json > lscpu.json \
+ && lshw > lshw.default \
+ && lshw -json > lshw.json \
+ && lshw -short > lshw.short \
+ && lspci > lspci.default \
+ && lspci -vvv > lspci.verbose \
+ && free -h > free.default \
+ && cat /proc/meminfo > meminfo.default 
+
+# Cleanup
+RUN apt-get -y autoremove --purge \
+ && apt-get -y clean \
+ && rm -rf /var/lib/apt/lists/*
+
+# Update database for mlocate
+RUN updatedb
