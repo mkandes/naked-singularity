@@ -1,0 +1,99 @@
+FROM docker.io/mkandes/openblas:0.3-ubuntu-22.04-amd64
+
+# Add OCI annotations
+LABEL org.opencontainers.image.ref.name='docker.io/mkandes/mofed:5.8-openblas-0.3-ubuntu-22.04-amd64'
+
+LABEL org.opencontainers.image.base.name='docker.io/mkandes/openblas:0.3-ubuntu-22.04-amd64'
+LABEL org.opencontainers.image.base.digest='sha256:2cc9a48569b2364223377658dcfcae76ddf11b621a6c1bce8c85a8a2ea96a7b6'
+
+LABEL org.opencontainers.image.title='mofed'
+LABEL org.opencontainers.image.description='NVIDIA OpenFabrics Enterprise Distribution for Linux'
+LABEL org.opencontainers.image.url='https://network.nvidia.com/products/infiniband-drivers/linux/mlnx_ofed'
+LABEL org.opencontainers.image.documentation='https://docs.nvidia.com/networking/display/mlnxofedv584150lts'
+LABEL org.opencontainers.image.source='http://www.mellanox.com/downloads/ofed/MLNX_OFED-5.8-2.0.3.0/MLNX_OFED_LINUX-5.8-2.0.3.0-ubuntu22.04-x86_64.tgz'
+LABEL org.opencontainers.image.vendor='NVIDIA Corporation (https://www.nvidia.com)'
+LABEL org.opencontainers.image.licenses='https://docs.nvidia.com/networking/display/mlnxofedv584150lts/legal+notices+and+3rd+party+licenses'
+LABEL org.opencontainers.image.version='5.8-2.0.3.0'
+LABEL org.opencontainers.image.revision='6ec0e1b6a8de6fbcc6d6bceaedf853f801003b0ee854f3b660e53bd2f73ef79a'
+
+LABEL org.opencontainers.image.authors='Marty Kandes (mkandes@sdsc.edu)'
+
+# Set the default shell for the image
+SHELL ["/bin/bash", "-c"]
+
+# Set operating system mirror URL
+ENV MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+# Set operating system version
+ENV OSVERSION='jammy'
+
+# Set system locale
+ENV LC_ALL=C
+
+# Set debian frontend interface
+ENV DEBIAN_FRONTEND='noninteractive'
+
+# Set Mellanox OFED version, operating system, and platform architecture
+ENV MOFED_MAJ='5'
+ENV MOFED_MIN='8'
+ENV MOFED_REV='2.0.3.0'
+ENV MOFED_VER="${MOFED_MAJ}.${MOFED_MIN}-${MOFED_REV}"
+ENV MOFED_OS='ubuntu22.04'
+ENV MOFED_ARCH='x86_64'
+
+# Set paths to additional Mellanox OFED binaries and libraries
+ENV PATH="/opt/mellanox/hcoll/bin:${PATH}"
+ENV LD_LIBRARY_PATH="/opt/mellanox/hcoll/lib:${LD_LIBRARY_PATH}"
+ENV PATH="/opt/mellanox/sharp/bin:${PATH}"
+ENV LD_LIBRARY_PATH="/opt/mellanox/sharp/lib:${LD_LIBRARY_PATH}"
+
+# Upgrade all software packages to their latest versions
+RUN apt-get -y update \
+ && apt-get -y upgrade
+
+# Change working directory
+WORKDIR /tmp
+
+# Download and install Mellanox OFED drivers and supporting
+# libraries for user space access to Ethernet, RDMA, and Infiniband.
+# https://docs.mellanox.com/pages/releaseview.action?pageId=15049785
+RUN wget "http://www.mellanox.com/downloads/ofed/MLNX_OFED-${MOFED_VER}/MLNX_OFED_LINUX-${MOFED_VER}-${MOFED_OS}-${MOFED_ARCH}.tgz" \
+ && tar -xf "MLNX_OFED_LINUX-${MOFED_VER}-${MOFED_OS}-${MOFED_ARCH}.tgz" \
+ && cd "MLNX_OFED_LINUX-${MOFED_VER}-${MOFED_OS}-${MOFED_ARCH}" \
+ && ./mlnxofedinstall --user-space-only --without-fw-update --force
+
+# Change working directory
+WORKDIR /tmp
+
+# Remove Mellanox OFED archive directory and tarball
+RUN rm -rf "MLNX_OFED_LINUX-${MOFED_VER}-${MOFED_OS}-${MOFED_ARCH}" \
+ && rm "MLNX_OFED_LINUX-${MOFED_VER}-${MOFED_OS}-${MOFED_ARCH}.tgz"
+
+# Install additional tools
+RUN apt-get -y install numactl \
+ && apt-get -y install libnuma-dev
+
+# Store information about the container image build system
+RUN mkdir -p /opt/.nxis \
+ && cd /opt/.nxis \
+ && df -ahPT > df.default \
+ && fdisk --list > fdisk.default \
+ && lsblk --output-all > lsblk.default \
+ && lsblk --output-all --json > lsblk.json \
+ && lscpu --output-all > lscpu.default \
+ && lscpu --output-all --json > lscpu.json \
+ && lshw > lshw.default \
+ && lshw -json > lshw.json \
+ && lshw -short > lshw.short \
+ && lspci > lspci.default \
+ && lspci -vvv > lspci.verbose \
+ && free -h > free.default \
+ && cat /proc/meminfo > meminfo.default 
+
+# Cleanup
+RUN apt-get -y autoremove --purge \
+ && apt-get -y clean \
+ && rm -rf /var/lib/apt/lists/*
+
+# Update database for mlocate
+RUN updatedb
