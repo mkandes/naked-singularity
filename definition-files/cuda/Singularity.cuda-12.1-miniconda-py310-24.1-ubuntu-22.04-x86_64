@@ -3,7 +3,7 @@ From: ghcr.io/mkandes/miniconda:py310-24.1-ubuntu-22.04-x86_64
 
 %labels
 
-    org.opencontainers.image.ref.name ghcr.io/mkandes/cuda:12.1-ubuntu-22.04-x86_64
+    org.opencontainers.image.ref.name ghcr.io/mkandes/cuda:12.1-miniconda-py310-24.1-ubuntu-22.04-x86_64
 
     org.opencontainers.image.base.name ghcr.io/mkandes/miniconda:py310-24.1-ubuntu-22.04-x86_64
     org.opencontainers.image.base.digest sha256:2556bd8eef7df93bee2d5c9f534ac262461f0888235f7025f46472a415d4de0f
