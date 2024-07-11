@@ -1,7 +1,7 @@
 FROM docker.io/mkandes/ubuntu:22.04-amd64
 
 # Add OCI annotations
-LABEL org.opencontainers.image.ref.name='docker.io/mkandes/cuda:12.1-ubuntu-22.04-amd64'
+LABEL org.opencontainers.image.ref.name='docker.io/mkandes/mofed:5.8-ubuntu-22.04-amd64'
 
 LABEL org.opencontainers.image.base.name='docker.io/mkandes/ubuntu:22.04-amd64'
 LABEL org.opencontainers.image.base.digest='sha256:6028e17f16fe1fa905d351656690676eb2bb457ba84e4100adcc56ed92e61ec2'
