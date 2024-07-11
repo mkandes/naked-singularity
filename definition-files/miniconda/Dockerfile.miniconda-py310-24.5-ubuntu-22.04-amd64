@@ -1,0 +1,97 @@
+FROM docker.io/mkandes/ubuntu:22.04-amd64
+
+# Add OCI annotations
+LABEL org.opencontainers.image.ref.name='docker.io/mkandes/miniconda:py310-24.5-ubuntu-22.04-amd64'
+
+LABEL org.opencontainers.image.base.name='docker.io/mkandes/ubuntu:22.04-amd64'
+LABEL org.opencontainers.image.base.digest='sha256:6028e17f16fe1fa905d351656690676eb2bb457ba84e4100adcc56ed92e61ec2'
+
+LABEL org.opencontainers.image.title='miniconda'
+LABEL org.opencontainers.image.description ='Miniconda is a free minimal installer for conda'
+LABEL org.opencontainers.image.url='https://www.anaconda.com'
+LABEL org.opencontainers.image.documentation='https://docs.anaconda.com/free/miniconda/index.html'
+LABEL org.opencontainers.image.source='https://repo.anaconda.com/miniconda/Miniconda3-py310_24.5.0-0-Linux-x86_64.sh'
+LABEL org.opencontainers.image.vendor='Anaconda Inc.'
+LABEL org.opencontainers.image.licenses='BSD-3-Clause (https://docs.conda.io/en/latest/license.html)'
+LABEL org.opencontainers.image.version='py310_24.5.0-0'
+LABEL org.opencontainers.image.revision='b3d73db6a05069fbdf20dc33fc9b6a29fa7198578f0d090c639f5ca0e84102bd'
+
+LABEL org.opencontainers.image.authors='Marty Kandes (mkandes@sdsc.edu)'
+
+# Set the default shell for the image
+SHELL ["/bin/bash", "-c"]
+
+# Set operating system mirror URL
+ENV MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+# Set operating system version
+ENV OSVERSION='jammy'
+
+# Set system locale
+ENV LC_ALL=C
+
+# Set debian frontend interface
+ENV DEBIAN_FRONTEND='noninteractive'
+
+# Set conda version(s), operating system, and system architecture
+ENV CONDA_PYTHON_VER='py310'
+ENV CONDA_MAJ='24'
+ENV CONDA_MIN='5'
+ENV CONDA_REV='0-0'
+ENV CONDA_VER="${CONDA_MAJ}.${CONDA_MIN}.${CONDA_REV}"
+ENV CONDA_OS='Linux'
+ENV CONDA_ARCH='x86_64'
+ENV CONDA_DISTRO="Miniconda3-${CONDA_PYTHON_VER}_${CONDA_VER}-${CONDA_OS}-${CONDA_ARCH}"
+ENV CONDA_SHA256='b3d73db6a05069fbdf20dc33fc9b6a29fa7198578f0d090c639f5ca0e84102bd'
+
+# Set paths to conda binaries and libraries
+ENV PATH="/opt/${CONDA_DISTRO}/bin:${PATH}"
+ENV LD_LIBRARY_PATH="/opt/${CONDA_DISTRO}/lib:${LD_LIBRARY_PATH}"
+
+# Upgrade all software packages to their latest versions
+RUN apt-get -y update \
+ && apt-get -y upgrade
+
+# Change working directory
+WORKDIR /tmp
+
+# Download and install conda
+RUN wget "https://repo.anaconda.com/miniconda/${CONDA_DISTRO}.sh" \
+ && chmod +x "${CONDA_DISTRO}.sh" \
+ && "./${CONDA_DISTRO}.sh" -b -p "/opt/${CONDA_DISTRO}"
+
+# Install common python packages
+RUN conda install -y numpy \
+ && conda install -y pandas \
+ && conda install -y scipy \
+ && conda install -y scikit-learn \
+ && conda install -y matplotlib \
+ && conda install -y jupyterlab
+
+# Remove conda installer script
+RUN rm "${CONDA_DISTRO}.sh"
+
+# Store information about the container image build system
+RUN mkdir -p /opt/.nxis \
+ && cd /opt/.nxis \
+ && df -ahPT > df.default \
+ && fdisk --list > fdisk.default \
+ && lsblk --output-all > lsblk.default \
+ && lsblk --output-all --json > lsblk.json \
+ && lscpu --output-all > lscpu.default \
+ && lscpu --output-all --json > lscpu.json \
+ && lshw > lshw.default \
+ && lshw -json > lshw.json \
+ && lshw -short > lshw.short \
+ && lspci > lspci.default \
+ && lspci -vvv > lspci.verbose \
+ && free -h > free.default \
+ && cat /proc/meminfo > meminfo.default 
+
+# Cleanup
+RUN apt-get -y autoremove --purge \
+ && apt-get -y clean \
+ && rm -rf /var/lib/apt/lists/*
+
+# Update database for mlocate
+RUN updatedb
