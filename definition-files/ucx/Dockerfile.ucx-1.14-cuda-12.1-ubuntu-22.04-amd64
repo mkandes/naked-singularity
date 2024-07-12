@@ -1,0 +1,94 @@
+FROM docker.io/mkandes/cuda:12.1-ubuntu-22.04-amd64
+
+# Add OCI annotations
+LABEL org.opencontainers.image.ref.name='docker.io/mkandes/ucx:1.14-cuda-12.1-ubuntu-22.04-amd64'
+
+LABEL org.opencontainers.image.base.name='docker.io/mkandes/cuda:12.1-ubuntu-22.04-amd64'
+LABEL org.opencontainers.image.base.digest='sha256:c5957db488e8b8bb5fcd05de95ce60f1cf38be055a3118811d1375b0197848af'
+
+LABEL org.opencontainers.image.title='ucx'
+LABEL org.opencontainers.image.description='Unified Communication X (UCX) is a communication framework for high-bandwidth and low-latency networks'
+LABEL org.opencontainers.image.url='https://openucx.org'
+LABEL org.opencontainers.image.documentation='https://openucx.org/documentation'
+LABEL org.opencontainers.image.source='https://github.com/openucx/ucx.git'
+LABEL org.opencontainers.image.vendor='Unified Communication X'
+LABEL org.opencontainers.image.licenses='BSD 3-Clause License (https://openucx.org/license)'
+LABEL org.opencontainers.image.version='1.14.1'
+LABEL org.opencontainers.image.revision='04897a079ac88713842f7209c5e82430d095444e'
+
+LABEL org.opencontainers.image.authors='Marty Kandes (mkandes@sdsc.edu)'
+
+# Set the default shell for the image
+SHELL ["/bin/bash", "-c"]
+
+# Set operating system mirror URL
+ENV MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+# Set operating system version
+ENV OSVERSION='jammy'
+
+# Set system locale
+ENV LC_ALL=C
+
+# Set debian frontend interface
+ENV DEBIAN_FRONTEND='noninteractive'
+
+# Set UCX version and install path
+ENV UCX_MAJ='1'
+ENV UCX_MIN='14'
+ENV UCX_REV='1'
+ENV UCX_VER="${UCX_MAJ}.${UCX_MIN}.${UCX_REV}"
+ENV UCX_ROOT_DIR='/opt/ucx'
+ENV UCX_INSTALL_DIR="${UCX_ROOT_DIR}/${UCX_VER}"
+
+# Set paths to UCX binaries and libraries
+ENV PATH="${UCX_INSTALL_DIR}/bin:${PATH}"
+ENV LD_LIBRARY_PATH="${UCX_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+# Update software package index, but DO NOT upgrade all installed
+# packages to their latest versions. This is done primarily to
+# prevent the upgrade of NVIDIA CUDA to a newer version.
+RUN apt-get -y update #&& apt-get -y upgrade
+
+# Change working directory
+WORKDIR /tmp
+
+# Download, build, and install UCX
+RUN git clone https://github.com/openucx/ucx.git \
+ && cd ucx \
+ && git checkout "v${UCX_VER}" \
+ && ./autogen.sh \
+ && ./contrib/configure-release --prefix="${UCX_INSTALL_DIR}" \
+ && make -j 4 \
+ && make install
+
+# Change working directory
+WORKDIR /tmp
+
+# Remove UCX build directory and source repository
+RUN rm -rf ucx
+
+# Store information about the container image build system
+RUN mkdir -p /opt/.nxis \
+ && cd /opt/.nxis \
+ && df -ahPT > df.default \
+ && fdisk --list > fdisk.default \
+ && lsblk --output-all > lsblk.default \
+ && lsblk --output-all --json > lsblk.json \
+ && lscpu --output-all > lscpu.default \
+ && lscpu --output-all --json > lscpu.json \
+ && lshw > lshw.default \
+ && lshw -json > lshw.json \
+ && lshw -short > lshw.short \
+ && lspci > lspci.default \
+ && lspci -vvv > lspci.verbose \
+ && free -h > free.default \
+ && cat /proc/meminfo > meminfo.default 
+
+# Cleanup
+RUN apt-get -y autoremove --purge \
+ && apt-get -y clean \
+ && rm -rf /var/lib/apt/lists/*
+
+# Update database for mlocate
+RUN updatedb
