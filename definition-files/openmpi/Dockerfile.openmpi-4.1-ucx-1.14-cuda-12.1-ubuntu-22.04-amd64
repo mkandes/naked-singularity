@@ -1,0 +1,94 @@
+FROM docker.io/mkandes/ucx:1.14-cuda-12.1-ubuntu-22.04-amd64
+
+# Add OCI annotations
+LABEL org.opencontainers.image.ref.name='docker.io/mkandes/openmpi:4.1-ucx-1.14-cuda-12.1-ubuntu-22.04-amd64'
+
+LABEL org.opencontainers.image.base.name='docker.io/mkandes/ucx:1.14-cuda-12.1-ubuntu-22.04-amd64'
+LABEL org.opencontainers.image.base.digest='sha256:990774ebbb2564d1eece1f70cd68764a21ad49dc0adf07febaad39de2bc12bc9'
+
+LABEL org.opencontainers.image.title='openmpi'
+LABEL org.opencontainers.image.description='Open MPI is an open source Message Passing Interface (MPI) implementation'
+LABEL org.opencontainers.image.url='https://www.open-mpi.org'
+LABEL org.opencontainers.image.documentation='https://www-lb.open-mpi.org/doc/v4.1'
+LABEL org.opencontainers.image.source='https://github.com/open-mpi/ompi.git'
+LABEL org.opencontainers.image.vendor='The Open MPI Project'
+LABEL org.opencontainers.image.licenses='BSD-3-Clause-Open-MPI'
+LABEL org.opencontainers.image.version='4.1.6'
+LABEL org.opencontainers.image.revision='439b23db6288f0370f6fcc80c8c0a06ad86d6873'
+
+LABEL org.opencontainers.image.authors='Marty Kandes (mkandes@sdsc.edu)'
+
+# Set the default shell for the image
+SHELL ["/bin/bash", "-c"]
+
+# Set operating system mirror URL
+ENV MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+# Set operating system version
+ENV OSVERSION='jammy'
+
+# Set system locale
+ENV LC_ALL=C
+
+# Set debian frontend interface
+ENV DEBIAN_FRONTEND='noninteractive'
+
+# Set OpenMPI version and install path
+ENV OPENMPI_MAJ='4'
+ENV OPENMPI_MIN='1'
+ENV OPENMPI_REV='6'
+ENV OPENMPI_VER="${OPENMPI_MAJ}.${OPENMPI_MIN}.${OPENMPI_REV}"
+ENV OPENMPI_ROOT_DIR='/opt/openmpi'
+ENV OPENMPI_INSTALL_DIR="${OPENMPI_ROOT_DIR}/${OPENMPI_VER}"
+
+# Set paths to OpenMPI binaries and libraries
+ENV PATH="${OPENMPI_INSTALL_DIR}/bin:${PATH}"
+ENV LD_LIBRARY_PATH="${OPENMPI_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+# Update software package index, but DO NOT upgrade all installed
+# packages to their latest versions. This is done primarily to
+# prevent the upgrade of NVIDIA CUDA to a newer version.
+RUN apt-get -y update #&& apt-get -y upgrade
+
+# Change working directory
+WORKDIR /tmp
+
+# Download, build, and install OpenMPI with UCX support
+RUN wget "https://download.open-mpi.org/release/open-mpi/v${OPENMPI_MAJ}.${OPENMPI_MIN}/openmpi-${OPENMPI_VER}.tar.gz" \
+ && tar -xf "openmpi-${OPENMPI_VER}.tar.gz" \
+ && cd "openmpi-${OPENMPI_VER}" \
+ && ./configure --prefix="${OPENMPI_INSTALL_DIR}" --enable-shared --enable-static --with-cma --with-cuda="${CUDA_HOME}" --without-hcoll --without-knem --without-pmi --with-pmix --without-ucc --with-ucx="${UCX_INSTALL_DIR}" --without-xpmem \
+ && make -j 4 \
+ && make install
+
+# Change working directory
+WORKDIR /tmp
+
+# Remove OpenMPI build directory and source tarball
+RUN rm -rf "openmpi-${OPENMPI_VER}" \
+ && rm "openmpi-${OPENMPI_VER}.tar.gz"
+
+# Store information about the container image build system
+RUN mkdir -p /opt/.nxis \
+ && cd /opt/.nxis \
+ && df -ahPT > df.default \
+ && fdisk --list > fdisk.default \
+ && lsblk --output-all > lsblk.default \
+ && lsblk --output-all --json > lsblk.json \
+ && lscpu --output-all > lscpu.default \
+ && lscpu --output-all --json > lscpu.json \
+ && lshw > lshw.default \
+ && lshw -json > lshw.json \
+ && lshw -short > lshw.short \
+ && lspci > lspci.default \
+ && lspci -vvv > lspci.verbose \
+ && free -h > free.default \
+ && cat /proc/meminfo > meminfo.default 
+
+# Cleanup
+RUN apt-get -y autoremove --purge \
+ && apt-get -y clean \
+ && rm -rf /var/lib/apt/lists/*
+
+# Update database for mlocate
+RUN updatedb
