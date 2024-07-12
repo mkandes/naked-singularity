@@ -68,7 +68,7 @@ From: ghcr.io/mkandes/ubuntu:22.04-x86_64
     # Download, build, and install UCX
     git clone https://github.com/openucx/ucx.git
     cd ucx
-    git checkout "v${UCX_VERSION}"
+    git checkout "v${UCX_VER}"
     ./autogen.sh
     ./contrib/configure-release \
       --prefix="${UCX_INSTALL_DIR}"
