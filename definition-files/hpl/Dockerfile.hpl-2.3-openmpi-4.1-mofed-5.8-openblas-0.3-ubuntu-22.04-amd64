@@ -1,0 +1,109 @@
+FROM docker.io/mkandes/openmpi:4.1-mofed-5.8-openblas-0.3-ubuntu-22.04-amd64
+
+# Add OCI annotations
+LABEL org.opencontainers.image.ref.name='docker.io/mkandes/hpl:2.3-openmpi-4.1-mofed-5.8-openblas-0.3-ubuntu-22.04-amd64'
+
+LABEL org.opencontainers.image.base.name='docker.io/mkandes/openmpi:4.1-mofed-5.8-openblas-0.3-ubuntu-22.04-amd64'
+LABEL org.opencontainers.image.base.digest='sha256:2371724706c5594a243dbf10d567ed3ad2284b6b3a366c47b3be72af16ae4a27'
+
+LABEL org.opencontainers.image.title='hpl'
+LABEL org.opencontainers.image.description='High-Performance Linpack (HPL) Benchmark for Distributed-Memory Computers'
+LABEL org.opencontainers.image.url='https://www.netlib.org/benchmark/hpl'
+LABEL org.opencontainers.image.documentation='https://www.netlib.org/benchmark/hpl/documentation.html'
+LABEL org.opencontainers.image.source='https://www.netlib.org/benchmark/hpl/hpl-2.3.tar.gz'
+LABEL org.opencontainers.image.vendor='Innovative Computing Laboratory, University of Tennessee (https://icl.utk.edu)'
+LABEL org.opencontainers.image.licenses='https://www.netlib.org/benchmark/hpl/copyright.html'
+LABEL org.opencontainers.image.version='2.3'
+LABEL org.opencontainers.image.revision='32c5c17d22330e6f2337b681aded51637fb6008d3f0eb7c277b163fadd612830'
+
+LABEL org.opencontainers.image.authors='Marty Kandes (mkandes@sdsc.edu)'
+
+# Set the default shell for the image
+SHELL ["/bin/bash", "-c"]
+
+# Set operating system mirror URL
+ENV MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+# Set operating system version
+ENV OSVERSION='jammy'
+
+# Set system locale
+ENV LC_ALL=C
+
+# Set debian frontend interface
+ENV DEBIAN_FRONTEND='noninteractive'
+
+# Set HPL version and install path
+ENV HPL_MAJ='2'
+ENV HPL_MIN='3'
+ENV HPL_REV=''
+ENV HPL_VER="${HPL_MAJ}.${HPL_MIN}"
+ENV HPL_ARCH='linux64'
+ENV HPL_ROOT_DIR='/opt/hpl'
+ENV HPL_INSTALL_DIR="${HPL_ROOT_DIR}/${HPL_VER}"
+
+# Set path to HPL binary and library
+ENV PATH="${HPL_INSTALL_DIR}/bin:${PATH}"
+ENV LD_LIBRARY_PATH="${HPL_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}"
+
+# Upgrade all software packages to their latest versions
+RUN apt-get -y update \
+ && apt-get -y upgrade
+
+# Change working directory
+WORKDIR /tmp
+
+# Download, build, and install HPL
+RUN wget "http://www.netlib.org/benchmark/hpl/hpl-${HPL_VER}.tar.gz" \
+ && tar -xf "hpl-${HPL_VER}.tar.gz" \
+ && cd "hpl-${HPL_VER}/setup" \
+ && source make_generic \
+ && mv Make.UNKNOWN Make.linux64 \
+ && sed -i 's/ARCH         = UNKNOWN/ARCH         = linux64/' Make.linux64 \
+ && sed -i 's/TOPdir       = $(HOME)\/hpl/TOPdir       =/' Make.linux64 \
+ && sed -i "s/TOPdir       =/TOPdir       = \/opt\/hpl\/${HPL_VER}/" Make.linux64 \
+ && sed -i 's/MPdir        = /MPdir        = \/opt\/openmpi\/4.1.6/' Make.linux64 \
+ && sed -i 's/MPinc        = /MPinc        = -I$(MPdir)\/include/' Make.linux64 \
+ && sed -i 's/MPlib        = /MPlib        = $(MPdir)\/lib\/libmpi.so/' Make.linux64 \
+ && sed -i "s/LAdir        = /LAdir        = \/opt\/openblas\/${OPENBLAS_VERSION}/" Make.linux64 \
+ && sed -i 's/LAinc        = /LAinc        = -I$(LAdir)\/include/' Make.linux64 \
+ && sed -i 's/LAlib        = -lblas/LAlib        = $(LAdir)\/lib\/libopenblas.a/' Make.linux64 \
+ && sed -i 's/LINKER       = mpif77/LINKER       = mpicc/' Make.linux64 \
+ && cp Make.linux64 ../ \
+ && cd ../ \
+ && export LDFLAGS="-L${OPENBLAS_INSTALL_DIR}/lib" \
+ && ./configure --prefix="${HPL_INSTALL_DIR}" \
+ && make arch='linux64' \
+ && make install
+
+# Change working directory
+WORKDIR /tmp
+
+# Remove HPL build directory and source tarball
+RUN rm -rf "hpl-${HPL_VER}" \
+ && rm "hpl-${HPL_VER}.tar.gz"
+
+# Store information about the container image build system
+RUN mkdir -p /opt/.nxis \
+ && cd /opt/.nxis \
+ && df -ahPT > df.default \
+ && fdisk --list > fdisk.default \
+ && lsblk --output-all > lsblk.default \
+ && lsblk --output-all --json > lsblk.json \
+ && lscpu --output-all > lscpu.default \
+ && lscpu --output-all --json > lscpu.json \
+ && lshw > lshw.default \
+ && lshw -json > lshw.json \
+ && lshw -short > lshw.short \
+ && lspci > lspci.default \
+ && lspci -vvv > lspci.verbose \
+ && free -h > free.default \
+ && cat /proc/meminfo > meminfo.default 
+
+# Cleanup
+RUN apt-get -y autoremove --purge \
+ && apt-get -y clean \
+ && rm -rf /var/lib/apt/lists/*
+
+# Update database for mlocate
+RUN updatedb
