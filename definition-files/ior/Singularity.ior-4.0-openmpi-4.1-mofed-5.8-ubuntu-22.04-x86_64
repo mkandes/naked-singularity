@@ -94,7 +94,7 @@ From: ghcr.io/mkandes/openmpi:4.1-mofed-5.8-ubuntu-22.04-x86_64
     # Download, build, and install IOR
     git clone https://github.com/hpc/ior.git
     cd ior
-    git checkout "${IOR_VERSION}"
+    git checkout "${IOR_VER}"
     ./bootstrap
     ./configure --prefix="${IOR_INSTALL_DIR}"
     make
