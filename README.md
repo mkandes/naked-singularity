@@ -19,7 +19,7 @@ Build a Singularity container from one of the definition files available
 in this repository.
 
 ```bash
-sudo singularity build ubuntu-20.04.sif definition-files/ubuntu/Singularity.ubuntu-20.04
+sudo singularity build ubuntu_22.04-x86_64.sif definition-files/ubuntu/Singularity.ubuntu-22.04-x86_64
 ```
 
 ## Download an existing Singularity container
@@ -28,11 +28,11 @@ A number of Singularity containers built from definition files in this
 repository are now registered and distributed via the [GitHub Container Registry (GHCR)](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry). 
 
 ```bash
-singularity pull oras://ghcr.io/mkandes/naked-singularity:ubuntu-20.04
+singularity pull oras://ghcr.io/mkandes/ubuntu:22.04-amd64
 ```
 
 You can find a complete list of the Singularity containers available on
-the GHCR [here](https://github.com/users/mkandes/packages/container/naked-singularity/versions). 
+the GHCR [here](https://github.com/mkandes?tab=packages). 
 Each tag listed in this GitHub package corresponds to an individual 
 Singularity container built from its matching naked-singularity 
 (Singularity.tag) definition file. Note, however, since these containers 
@@ -65,16 +65,17 @@ an existing container definition, then please submit a pull request.
 ## Author
 
 Marty Kandes, Ph.D.  
-Computational & Data Science Research Specialist  
+Senior Computational & Data Science Research Specialist  
 High-Performance Computing User Services Group  
 Data-Enabled Scientific Computing Division  
 San Diego Supercomputer Center  
+School of Computing, Information, and Data Sciences
 University of California, San Diego
 
 ## Version
 
-4.4.5
+4.4.6
 
 ## Last Updated
 
-Sunday, July 14th, 2024
+Wednesday, May 7th, 2025

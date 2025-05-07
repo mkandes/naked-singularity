@@ -1,0 +1,247 @@
+Bootstrap: docker
+From: nvcr.io/nvidia/cuda:12.6.3-base-ubuntu22.04
+
+%labels
+
+    org.opencontainers.image.ref.name ghcr.io/mkandes/alphafold:3.0-cuda-12.6-ubuntu-22.04-x86_64
+
+    org.opencontainers.image.base.name nvcr.io/nvidia/cuda:12.6.3-base-ubuntu22.04
+    org.opencontainers.image.base.digest sha256:6b3201183858bad08441837f5a5efc2c75290135cc25fcc87d9ff763190cfd09
+
+    org.opencontainers.image.description AlphaFold 3 performs accurate structure prediction of biomolecular interactions
+    org.opencontainers.image.url https://deepmind.google/technologies/alphafold
+    org.opencontainers.image.documentation https://github.com/google-deepmind/alphafold3/blob/main/README.md
+    org.opencontainers.image.source https://github.com/google-deepmind/alphafold3
+    org.opencontainers.image.vendor Google DeepMind (https://deepmind.google)
+    org.opencontainers.image.licenses Creative Commons Attribution Non Commercial Share Alike 4.0 International (CC-BY-NC-SA-4.0)
+    org.opencontainers.image.version 3.0.1
+    org.opencontainers.image.revision
+
+    org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
+
+%setup
+
+%files
+
+%environment
+
+    # Set HMMER version
+    export HMMER_MAJ='3'
+    export HMMER_MIN='4'
+    export HMMER_REV=''
+    export HMMER_VER="${HMMER_MAJ}.${HMMER_MIN}"
+
+    # Set path to HMMER binaries
+    export PATH="/opt/hmmer/${HMMER_VER}/bin:${PATH}"
+
+    # Set AlphaFold version
+    export ALPHAFOLD_MAJ='3'
+    export ALPHAFOLD_MIN='0'
+    export ALPHAFOLD_REV='1'
+    export ALPHAFOLD_VER="${ALPHAFOLD_MAJ}.${ALPHAFOLD_MIN}.${ALPHAFOLD_REV}"
+
+    # Set paths to AlphaFold binaries and libraries
+    export PATH="/opt/venv/alphafold/${ALPHAFOLD_VER}/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/venv/alphafold/${ALPHAFOLD_VER}/lib:${LD_LIBRARY_PATH}"
+
+    # To work around a known XLA issue causing the compilation time to greatly
+    # increase, the following environment variable setting XLA flags must be enabled
+    # when running AlphaFold 3. Note that if using CUDA capability 7 GPUs, it is
+    # necessary to set the following XLA_FLAGS value instead:
+    # export XLA_FLAGS='--xla_disable_hlo_passes=custom-kernel-fusion-rewriter'
+    # (no need to disable gemm in that case as it is not supported for such GPU).
+    export XLA_FLAGS='--xla_gpu_enable_triton_gemm=false'
+
+    # Memory settings used for folding up to 5,120 tokens on A100 80 GB.
+    export XLA_PYTHON_CLIENT_PREALLOCATE='true'
+    export XLA_CLIENT_MEM_FRACTION='0.95'
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='jammy'
+
+    # Set system locale
+    export LC_ALL=C
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Set NVIDIA driver version
+    #export NV_DRIVER_MAJ='560'
+    #export NV_DRIVER_MIN='35'
+    #export NV_DRIVER_REV='03'
+    #export NV_DRIVER_VER="${NV_DRIVER_MAJ}.${NV_DRIVER_MIN}.${NV_DRIVER_REV}"
+
+    # Set CUDA version, operating system, and platform architecture
+    # https://docs.nvidia.com/cuda/archive/12.6.3
+    #export CUDA_MAJ='12'
+    #export CUDA_MIN='6'
+    #export CUDA_REV='3'
+    #export CUDA_VER="${CUDA_MAJ}.${CUDA_MIN}.${CUDA_REV}"
+    #export CUDA_OS='ubuntu2204'
+    #export CUDA_ARCH='x86_64'
+
+    # Set cuDNN version
+    # https://docs.nvidia.com/deeplearning/cudnn/backend/latest/release-notes.html#cudnn-9-6-0
+    #export CUDNN_MAJ='9'
+    #export CUDNN_MIN='6'
+    #export CUDNN_REV='0.74'
+    #export CUDNN_VER="${CUDNN_MAJ}.${CUDNN_MIN}.${CUDNN_REV}"
+
+    # Set NCCL version
+    # https://docs.nvidia.com/deeplearning/nccl/archives/nccl_2243/user-guide/docs/index.html
+    #export NCCL_MAJ='2'
+    #export NCCL_MIN='24'
+    #export NCCL_REV='3'
+    #export NCCL_VER="${NCCL_MAJ}.${NCCL_MIN}.${NCCL_REV}"
+
+    # Set TensorRT version
+    # https://docs.nvidia.com/deeplearning/tensorrt/archives/tensorrt-1070/index.html
+    #export TENSORRT_MAJ='10'
+    #export TENSORRT_MIN='7'
+    #export TENSORRT_REV='0.23'
+    #export TENSORRT_VER="${TENSORRT_MAJ}.${TENSORRT_MIN}.${TENSORRT_REV}"
+
+    # Set cuTENSOR version
+    # https://docs.nvidia.com/cuda/cutensor/2.1.0
+    #export CUTENSOR_MAJ='2'
+    #export CUTENSOR_MIN='1'
+    #export CUTENSOR_REV='0.9'
+    #export CUTENSOR_VER="${CUTENSOR_MAJ}.${CUTENSOR_MIN}.${CUTENSOR_REV}"
+
+    # Set cuSPARSELt version
+    # https://docs.nvidia.com/cuda/cusparselt/index.html
+    #export CUSPARSELT_MAJ='0'
+    #export CUSPARSELT_MIN='7'
+    #export CUSPARSELT_REV='0.0'
+    #export CUSPARSELT_VER="${CUSPARSELT_MAJ}.${CUSPARSELT_MIN}.${CUSPARSELT_REV}"
+
+    # Set paths to CUDA binaries and libraries
+    #export CUDA_HOME="/usr/local/cuda-${CUDA_MAJ}.${CUDA_MIN}"
+    #export CUDNN_INCLUDE_DIR='/usr/include'
+    #export CUDNN_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+    #export NCCL_INCLUDE_DIR='/usr/include'
+    #export NCCL_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+    #export TENSORRT_INCLUDE_DIR='/usr/include'
+    #export TENSORRT_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+    #export CUTENSOR_INCLUDE_DIR='/usr/include'
+    #export CUTENSOR_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+    #export CUSPARSELT_INCLUDE_DIR='/usr/include'
+    #export CUSPARSELT_LIB_DIR='/usr/lib/x86_64-linux-gnu'
+    #export PATH="${CUDA_HOME}/bin${PATH:+:${PATH}}"
+    #export LD_LIBRARY_PATH="${CUDA_HOME}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+    #export LD_LIBRARY_PATH="${CUDNN_LIB_DIR}:${LD_LIBRARY_PATH}"
+    #export LD_LIBRARY_PATH="${NCCL_LIB_DIR}:${LD_LIBRARY_PATH}"
+    #export LD_LIBRARY_PATH="${TENSORRT_LIB_DIR}:${LD_LIBRARY_PATH}"
+    #export LD_LIBRARY_PATH="${CUTENSOR_LIB_DIR}:${LD_LIBRARY_PATH}"
+    #export LD_LIBRARY_PATH="${CUSPARSELT_LIB_DIR}:${LD_LIBRARY_PATH}"
+
+    # Update software package index, but DO NOT upgrade all installed
+    # packages to their latest versions. This is done primarily to
+    # prevent the upgrade of NVIDIA CUDA to a newer version.
+    apt-get -y update #&& apt-get -y upgrade
+
+    # Set AlphaFold version
+    export ALPHAFOLD_MAJ='3'
+    export ALPHAFOLD_MIN='0'
+    export ALPHAFOLD_REV='1'
+    export ALPHAFOLD_VER="${ALPHAFOLD_MAJ}.${ALPHAFOLD_MIN}.${ALPHAFOLD_REV}"
+
+    # Install AlphaFold dependencies and prerequisites
+    apt-get -y install software-properties-common
+    apt-get -y install git
+    apt-get -y install wget
+    apt-get -y install gcc 
+    apt-get -y install g++
+    apt-get -y install make
+    apt-get -y install zlib1g-dev
+    apt-get -y install zstd
+
+    # Add PPA repository to install a specific Python version, then install it
+    # https://github.com/deadsnakes
+    add-apt-repository -y ppa:deadsnakes/ppa
+    apt-get -y install python3.11
+    apt-get -y install python3.11-dev
+    apt-get -y install python3-pip 
+    apt-get -y install python3.11-venv
+
+    # Create a virtual environment for AlphaFold
+    python3.11 -m venv "/opt/venv/alphafold/${ALPHAFOLD_VER}"
+
+    # Set paths to AlphaFold binaries and libraries
+    export PATH="/opt/venv/alphafold/${ALPHAFOLD_VER}/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/venv/alphafold/${ALPHAFOLD_VER}/lib:${LD_LIBRARY_PATH}"
+
+    # Update pip to the latest version
+    python3.11 -m pip install --upgrade pip
+
+    cd /tmp
+
+    # Set HMMER version
+    export HMMER_MAJ='3'
+    export HMMER_MIN='4'
+    export HMMER_REV=''
+    export HMMER_VER="${HMMER_MAJ}.${HMMER_MIN}"
+
+    # Install HMMER
+    wget "http://eddylab.org/software/hmmer/hmmer-${HMMER_VER}.tar.gz"
+    tar -xf "hmmer-${HMMER_VER}.tar.gz"
+    cd "hmmer-${HMMER_VER}/"
+    ./configure --prefix "/opt/hmmer/${HMMER_VER}"
+    make -j 4
+    make install
+    cd easel/
+    make install
+
+    cd ../../
+
+    # Remove HMMER build directory and tarball
+    rm -rf "hmmer-${HMMER_VER}/"
+    rm "hmmer-${HMMER_VER}.tar.gz"
+
+    # Set path to HMMER binaries
+    export PATH="/opt/hmmer/${HMMER_VER}/bin:${PATH}"
+
+    # Download, build, and install Alphafold and its other dependencies
+    mkdir -p /opt/alphafold
+    cd /opt/alphafold
+    git clone https://github.com/google-deepmind/alphafold3.git
+    mv alphafold3/ "${ALPHAFOLD_VER}/"
+    cd "${ALPHAFOLD_VER}/"
+    python3.11 -m pip install -r dev-requirements.txt
+    python3.11 -m pip install --no-deps .
+    build_data
+
+    # Store information about the container image build system
+    #mkdir -p /opt/.nxis
+    #cd /opt/.nxis
+    #dmidecode > dmidecode.default
+    #df -ahPT > df.default
+    #fdisk --list > fdisk.default
+    #lsblk --output-all > lsblk.default
+    #lsblk --output-all --json > lsblk.json
+    #lscpu --output-all > lscpu.default
+    #lscpu --output-all --json > lscpu.json
+    #lshw > lshw.default
+    #lshw -json > lshw.json
+    #lshw -short > lshw.short
+    #lspci > lspci.default
+    #lspci -vvv > lspci.verbose
+    #free -h > free.default
+    #cat /proc/meminfo > meminfo.default
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+    rm -rf /var/lib/apt/lists/*
+
+    # Update database for mlocate
+    #updatedb
+
+%runscript
+
+%test
