@@ -77,7 +77,7 @@ RUN apt-get -y install apt-utils \
  && apt-get -y install lbzip2 \
  && apt-get -y install lftp \
  && apt-get -y install libtool \
- && apt-get -y install mlocate \
+ && apt-get -y install plocate \
  && apt-get -y install pigz \
  && apt-get -y install pipx \
  && apt-get -y install pkg-config \
