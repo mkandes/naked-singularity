@@ -37,9 +37,9 @@ ENV LC_ALL=C
 ENV DEBIAN_FRONTEND='noninteractive'
 
 # Install system metapackages
-RUN apt-get -y update \
- && apt-get -y install ubuntu-standard \
- && apt-get -y install ubuntu-server
+RUN apt-get -y update
+# && apt-get -y install ubuntu-standard \
+# && apt-get -y install ubuntu-server
 
 # Add repositories
 RUN add-apt-repository -y "deb ${MIRRORURL} ${OSVERSION} main" \
@@ -67,23 +67,23 @@ RUN apt-get -y update \
  && apt-get -y upgrade
 
 # Install additional software packages not included in system metapackages
-RUN apt-get -y install apt-utils \
- && apt-get -y install aria2 \
- && apt-get -y install autoconf \
- && apt-get -y install automake \
- && apt-get -y install build-essential \
- && apt-get -y install cmake \
- && apt-get -y install gfortran \
- && apt-get -y install lbzip2 \
- && apt-get -y install lftp \
- && apt-get -y install libtool \
- && apt-get -y install plocate \
- && apt-get -y install pigz \
- && apt-get -y install pipx \
- && apt-get -y install pkg-config \
- && apt-get -y install rclone \
- && apt-get -y install wget \
- && apt-get -y install zip
+RUN apt-get -y install apt-utils 
+# && apt-get -y install aria2 \
+# && apt-get -y install autoconf \
+# && apt-get -y install automake \
+# && apt-get -y install build-essential \
+# && apt-get -y install cmake \
+# && apt-get -y install gfortran \
+# && apt-get -y install lbzip2 \
+# && apt-get -y install lftp \
+# && apt-get -y install libtool \
+# && apt-get -y install plocate \
+# && apt-get -y install pigz \
+# && apt-get -y install pipx \
+# && apt-get -y install pkg-config \
+# && apt-get -y install rclone \
+# && apt-get -y install wget \
+# && apt-get -y install zip
 
 # Store information about the container image build system
 RUN mkdir -p /opt/.nxis \
