@@ -18,7 +18,7 @@
 #
 # LAST UPDATED
 #
-#   Wednesday, December 13th, 2023
+#   Tuesday, October 14th, 2025
 #
 # ----------------------------------------------------------------------
 
@@ -46,9 +46,9 @@ source log.sh
 
 naked::install() {
 
-  local singularity_version='3.9.9'
-  local apptainer_version='1.0.1'
-  local go_version='1.17.13'
+  local singularity_version='3.11.5'
+  local apptainer_version='1.x.y'
+  local go_version='1.20.4'
   local use_rpm='false'
   local rpm_repo='epel'
 
@@ -137,10 +137,12 @@ naked::install() {
     yum -y install openssl-devel
     yum -y install libuuid-devel
     yum -y install libseccomp-devel
+    yum -y install glib2-devel
     yum -y install wget
     yum -y install squashfs-tools
     yum -y install cryptsetup
     yum -y install debootstrap
+    yum -y install runc
 
   elif [[ "${os_release_id}" = 'ubuntu' ]]; then
 
@@ -159,8 +161,8 @@ naked::install() {
     apt-get -y install pkg-config
     apt-get -y install git
     apt-get -y install cryptsetup
-    apt-get -y install runc
     apt-get -y install debootstrap
+    apt-get -y install runc
 
     # No longer available after Ubuntu 18.04; used previously to build 
     # CentOS-based Singularity containers on Ubuntu-based hosts
@@ -205,6 +207,17 @@ naked::install() {
     ./make.bash
 
     export GOROOT_BOOTSTRAP='/tmp/go/1.4'
+
+    cd /tmp/go
+
+    export CGO_ENABLED=0
+    wget https://go.dev/dl/go1.17.13.src.tar.gz
+    tar -xf go1.17.13.src.tar.gz
+    mv go 1.17.13
+    cd 1.17.13/src
+    ./make.bash
+
+    export GOROOT_BOOTSTRAP='/tmp/go/1.17.13'
 
     cd /tmp/go
 
