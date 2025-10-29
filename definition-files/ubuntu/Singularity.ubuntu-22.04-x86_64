@@ -1,5 +1,5 @@
 Bootstrap: debootstrap
-MirrorURL: http://us.archive.ubuntu.com/ubuntu
+MirrorURL: https://us.archive.ubuntu.com/ubuntu
 OSVersion: jammy
 
 %labels
@@ -17,7 +17,7 @@ OSVersion: jammy
     org.opencontainers.image.vendor Canonical Ltd. (https://canonical.com)
     org.opencontainers.image.licenses https://ubuntu.com/legal/intellectual-property-policy
     org.opencontainers.image.version 22.04
-    org.opencontainers.image.revision 4
+    org.opencontainers.image.revision 5
 
     org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
 
@@ -28,13 +28,16 @@ OSVersion: jammy
 %environment
  
     # Set operating system mirror URL
-    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+    export MIRRORURL='https://us.archive.ubuntu.com/ubuntu'
 
     # Set operating system version
     export OSVERSION='jammy'
 
+    # Set system architecture
+    export ARCH='amd64'
+
     # Set system locale
-    export LC_ALL='C'
+    export LC_ALL='C' 
 
     # Set debian frontend interface
     export DEBIAN_FRONTEND='noninteractive'
@@ -42,19 +45,21 @@ OSVersion: jammy
 %post -c /bin/bash
 
     # Set operating system mirror URL
-    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+    export MIRRORURL='https://us.archive.ubuntu.com/ubuntu'
 
     # Set operating system version
     export OSVERSION='jammy'
 
+    # Set system architecture
+    export ARCH='amd64'
+
     # Set system locale
-    export LC_ALL=C
+    export LC_ALL='C'
 
     # Set debian frontend interface
     export DEBIAN_FRONTEND='noninteractive'
 
     # Install system metapackages
-    apt-get -y install ubuntu-standard
     apt-get -y install ubuntu-server
 
     # Add repositories
@@ -81,49 +86,39 @@ OSVersion: jammy
     # Upgrade all software packages to their latest versions
     apt-get -y update && apt-get -y upgrade
 
-    # Install additional software packages not included in system metapackages
+    # Install additional software packages
     apt-get -y install apt-utils
-    apt-get -y install aria2
     apt-get -y install autoconf
     apt-get -y install automake
     apt-get -y install build-essential
+    apt-get -y install bzip2
     apt-get -y install cmake
+    apt-get -y install curl
     apt-get -y install gfortran
-    apt-get -y install lbzip2
-    apt-get -y install lftp
-    apt-get -y install libtool
-    apt-get -y install mlocate
+    apt-get -y install jq
+    apt-get -y install locales
+    apt-get -y install nano
     apt-get -y install pigz
-    apt-get -y install pipx
     apt-get -y install pkg-config
-    apt-get -y install rclone
+    apt-get -y install plocate
+    apt-get -y install vim
     apt-get -y install wget
     apt-get -y install zip
 
-    # Store information about the container image build system
-    mkdir -p /opt/.nxis
-    cd /opt/.nxis
-    dmidecode > dmidecode.default
-    df -ahPT > df.default
-    fdisk --list > fdisk.default
-    lsblk --output-all > lsblk.default
-    lsblk --output-all --json > lsblk.json
-    lscpu --output-all > lscpu.default
-    lscpu --output-all --json > lscpu.json
-    lshw > lshw.default
-    lshw -json > lshw.json
-    lshw -short > lshw.short
-    lspci > lspci.default
-    lspci -vvv > lspci.verbose
-    free -h > free.default
-    cat /proc/meminfo > meminfo.default
-    
+    # Generate and reconfigure system locale
+    export LANG='en_US.UTF-8'
+    export LANGUAGE='en_US:en'
+    sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
+    echo "LANG=${LANG}" > /etc/locale.conf
+    echo "LANG=${LANG}" > /etc/default/locale
+    locale-gen
+
     # Cleanup
     apt-get -y autoremove --purge
     apt-get -y clean
     rm -rf /var/lib/apt/lists/*
 
-    # Update database for mlocate
+    # Update database for plocate
     updatedb
 
 %runscript

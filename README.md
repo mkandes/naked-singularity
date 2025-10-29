@@ -71,8 +71,8 @@ University of California, San Diego
 
 ## Version
 
-4.5.2
+4.5.3
 
 ## Last Updated
 
-Tuesday, October 14th, 2025
+Tuesday, October 21st, 2025
