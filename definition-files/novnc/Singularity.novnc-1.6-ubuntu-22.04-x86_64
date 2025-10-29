@@ -1,0 +1,197 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/ubuntu:22.04-x86_64
+
+%labels
+
+    org.opencontainers.image.ref.name ghcr.io/mkandes/novnc:1.6-ubuntu-22.04-x86_64
+
+    org.opencontainers.image.base.name ghcr.io/mkandes/ubuntu:22.04-x86_64
+    org.opencontainers.image.base.digest sha256:0629fd1cec548f1a44f84a1a88000a73e3ade4fde79de436ff7a0c28833ef16b
+
+    org.opencontainers.image.title novnc
+    org.opencontainers.image.description the open-source VNC browser client
+    org.opencontainers.image.url https://novnc.com
+    org.opencontainers.image.documentation
+    org.opencontainers.image.source https://github.com/novnc/noVNC.git
+    org.opencontainers.image.vendor
+    org.opencontainers.image.licenses MPL-2.0 (https://www.mozilla.org/en-US/MPL/2.0)
+    org.opencontainers.image.version 1.6.0
+    org.opencontainers.image.revision a8dfd6a3ea3c74244f5ebdaa5a7f1023007a7820
+
+    org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
+
+%setup
+
+%files
+
+%environment
+
+    # Set noVNC version
+    export NOVNC_MAJ='1'
+    export NOVNC_MIN='6'
+    export NOVNC_REV='0'
+    export NOVNC_VER="${NOVNC_MAJ}.${NOVNC_MIN}.${NOVNC_REV}"
+    export NOVNC_ROOT_DIR='/opt/novnc'
+    export NOVNC_INSTALL_DIR="${NOVNC_ROOT_DIR}/${NOVNC_VER}"
+
+    # Set TigerVNC version
+    export TIGERVNC_MAJ='1'
+    export TIGERVNC_MIN='15'
+    export TIGERVNC_REV='0'
+    export TIGERVNC_VER="${TIGERVNC_MAJ}.{TIGERVNC_MIN}.${TIGERVNC_REV}"
+
+    # Set system locale
+    export LANG='en_US.UTF-8' 
+    export LANGUAGE='en_US:en'
+    export LC_ALL='en_US.UTF-8'
+
+    # Set default VNC configuration
+    export DISPLAY'=:1'
+    export NO_VNC_PORT=6901
+    export VNC_PORT=5901
+    export VNC_COL_DEPTH=24
+    export VNC_RESOLUTION='1900x1200'
+    export VNC_VIEW_ONLY='false'
+    export VNC_PW='headless'
+
+    # Set LD_PRELOAD
+    #export LD_PRELOAD='/usr/lib/x86_64-linux-gnu/libnss_wrapper.so'
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='https://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='jammy'
+
+    # Set system architecture 
+    export ARCH='amd64'
+
+    # Set system locale
+    export LANG='en_US.UTF-8'
+    export LANGUAGE='en_US:en'
+    export LC_ALL='en_US.UTF-8'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    # Install Python environment required for websockify
+    apt-get -y install python3-dev
+    apt-get -y install python-is-python3
+    apt-get -y install python3-numpy
+
+    # Install custom fonts
+    # apt-get -y install ttf-wqy-zenhei
+
+    cd /tmp
+
+    # Set TigerVNC version
+    export TIGERVNC_MAJ='1'
+    export TIGERVNC_MIN='15'
+    export TIGERVNC_REV='0'
+    export TIGERVNC_VER="${TIGERVNC_MAJ}.${TIGERVNC_MIN}.${TIGERVNC_REV}"
+
+    # Download, install, and configure TigerVNC server
+    wget "https://sourceforge.net/projects/tigervnc/files/stable/${TIGERVNC_VER}/ubuntu-$(lsb_release -rs)LTS/${ARCH}/tigervncserver_${TIGERVNC_VER}-1ubuntu1_${ARCH}.deb"
+    apt-get -y install "./tigervncserver_${TIGERVNC_VER}-1ubuntu1_${ARCH}.deb"
+    echo '$localhost = "no";' >> /etc/tigervnc/vncserver-config-defaults
+    echo '1;' >> /etc/tigervnc/vncserver-config-defaults
+
+    cd /tmp
+
+    # Set noVNC version and install dir
+    export NOVNC_MAJ='1'
+    export NOVNC_MIN='6'
+    export NOVNC_REV='0'
+    export NOVNC_VER="${NOVNC_MAJ}.${NOVNC_MIN}.${NOVNC_REV}"
+    export NOVNC_ROOT_DIR='/opt/novnc'
+    export NOVNC_INSTALL_DIR="${NOVNC_ROOT_DIR}/${NOVNC_VER}"
+
+    # Download, install, and configure noVNC - HTML5 based VNC viewer
+    mkdir -p "${NOVNC_INSTALL_DIR}"
+    wget "https://github.com/novnc/noVNC/archive/refs/tags/v${NOVNC_VER}.tar.gz"
+    tar -xf "v${NOVNC_VER}.tar.gz" --strip-components=1 --directory="${NOVNC_INSTALL_DIR}"
+    ln -s "${NOVNC_INSTALL_DIR}/vnc_lite.html" "${NOVNC_INSTALL_DIR}/index.html"
+
+    cd /tmp
+
+    # Set websockify version and install dir
+    export WEBSOCKIFY_MAJ='0'
+    export WEBSOCKIFY_MIN='13'
+    export WEBSOCKIFY_REV='0'
+    export WEBSOCKIFY_VER="${WEBSOCKIFY_MAJ}.${WEBSOCKIFY_MIN}.${WEBSOCKIFY_REV}"
+    export WEBSOCKIFY_INSTALL_DIR="${NOVNC_INSTALL_DIR}/utils/websockify"
+
+    # Download, install, and configure websockify 
+    mkdir -p "${WEBSOCKIFY_INSTALL_DIR}"
+    wget "https://github.com/novnc/websockify/archive/refs/tags/v${WEBSOCKIFY_VER}.tar.gz"
+    tar -xf "v${WEBSOCKIFY_VER}.tar.gz" --strip-components=1 --directory="${WEBSOCKIFY_INSTALL_DIR}"
+
+    cd /tmp
+ 
+    # Set Firefox version and install dir
+    export FIREFOX_MAJ='140'
+    export FIREFOX_MIN='4'
+    export FIREFOX_REV='0'
+    export FIREFOX_VER="${FIREFOX_MAJ}.${FIREFOX_MIN}.${FIREFOX_REV}" 
+
+    # Download, install, and configure Firefox
+    wget "https://releases.mozilla.org/pub/firefox/releases/${FIREFOX_VER}esr/linux-$(uname -m)/en-US/firefox-${FIREFOX_VER}esr.deb"
+    apt-get -y install "./firefox-${FIREFOX_VER}esr.deb"
+    mkdir -p /usr/lib/firefox-esr/defaults/profile
+    echo 'user_pref("app.update.auto", false);' > /usr/lib/firefox-esr/defaults/profile/user.js
+    echo 'user_pref("app.update.enabled", false);' >> /usr/lib/firefox-esr/defaults/profile/user.js
+    echo 'user_pref("app.update.lastUpdateTime.addon-background-update-timer", 0);' >> /usr/lib/firefox-esr/defaults/profile/user.js
+    echo 'user_pref("app.update.lastUpdateTime.browser-cleanup-thumbnails", 0);' >> /usr/lib/firefox-esr/defaults/profile/user.js
+    echo 'user_pref("app.update.lastUpdateTime.recipe-client-addon-run", 0);' >> /usr/lib/firefox-esr/defaults/profile/user.js
+    echo 'user_pref("app.update.lastUpdateTime.region-update-timer", 0);' >> /usr/lib/firefox-esr/defaults/profile/user.js
+    echo 'user_pref("app.update.lastUpdateTime.rs-experiment-loader-timer", 0);' >> /usr/lib/firefox-esr/defaults/profile/user.js
+    echo 'user_pref("app.update.lastUpdateTime.services-settings-poll-changes", 0);' >> /usr/lib/firefox-esr/defaults/profile/user.js
+    echo 'user_pref("app.update.lastUpdateTime.suggest-ingest", 0);' >> /usr/lib/firefox-esr/defaults/profile/user.js
+    echo 'user_pref("app.update.lastUpdateTime.telemetry_modules_ping", 0);' >> /usr/lib/firefox-esr/defaults/profile/user.js
+    echo 'user_pref("app.update.lastUpdateTime.xpi-signature-verification", 0);' >> /usr/lib/firefox-esr/defaults/profile/user.js
+
+    # Install Xfce and supporting components
+    apt-get -y install xfce4
+    apt-get -y install xfce4-terminal
+    apt-get -y install xterm
+    apt-get -y install supervisor
+    apt-get -y purge *screensaver*
+
+    # Install nss-wrapper to be able to execute image as non-root user
+    #apt-get -y install libnss-wrapper
+    #apt-get -y install gettext
+
+    # Store information about the container image build system
+    mkdir -p /opt/.nxis
+    cd /opt/.nxis
+    dmidecode > dmidecode.default
+    df -ahPT > df.default
+    fdisk --list > fdisk.default
+    lsblk --output-all > lsblk.default
+    lsblk --output-all --json > lsblk.json
+    lscpu --output-all > lscpu.default
+    lscpu --output-all --json > lscpu.json
+    lshw > lshw.default
+    lshw -json > lshw.json
+    lshw -short > lshw.short
+    lspci > lspci.default
+    lspci -vvv > lspci.verbose
+    free -h > free.default
+    cat /proc/meminfo > meminfo.default
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+    rm -rf /var/lib/apt/lists/*
+
+    # Update database for mlocate
+    updatedb
+
+%runscript
+
+%test
