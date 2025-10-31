@@ -1,0 +1,115 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/ubuntu:22.04-amd64
+
+%labels
+
+    org.opencontainers.image.ref.name ghcr.io/mkandes/tigervnc:1.12-ubuntu-22.04-amd64
+
+    org.opencontainers.image.base.name ghcr.io/mkandes/ubuntu:22.04-amd64
+    org.opencontainers.image.base.digest sha256:e169e07ef22d73e72e8926c84fc2f52a06fbdcfe1abe1aafede257bbe1c3013c
+
+    org.opencontainers.image.title tigervnc
+    org.opencontainers.image.description the open-source VNC browser client
+    org.opencontainers.image.url http://www.tigervnc.org
+    org.opencontainers.image.documentation https://github.com/TigerVNC/tigervnc/wiki
+    org.opencontainers.image.source https://github.com/TigerVNC/tigervnc
+    org.opencontainers.image.vendor
+    org.opencontainers.image.licenses GPL-2.0 (https://github.com/TigerVNC/tigervnc/blob/master/LICENCE.TXT)
+    org.opencontainers.image.version 1.12.0
+    org.opencontainers.image.revision f1f65c5904e6143cd242c0f1c53d7f8147dabd74
+
+    org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
+
+%setup
+
+%files
+
+%environment
+
+    # Set TigerVNC version
+    export TIGERVNC_MAJ='1'
+    export TIGERVNC_MIN='12'
+    export TIGERVNC_REV='0'
+    export TIGERVNC_VER="${TIGERVNC_MAJ}.{TIGERVNC_MIN}.${TIGERVNC_REV}"
+
+    # Set system locale
+    export LANG='en_US.UTF-8' 
+    export LANGUAGE='en_US:en'
+    export LC_ALL='en_US.UTF-8'
+
+    # Set default VNC configuration
+    export DISPLAY'=:1'
+    export NO_VNC_PORT=6901
+    export VNC_PORT=5901
+    export VNC_COL_DEPTH=24
+    export VNC_RESOLUTION='1900x1200'
+    export VNC_VIEW_ONLY='false'
+    export VNC_PW='dubhlachan'
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='https://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='jammy'
+
+    # Set system architecture 
+    export ARCH='amd64'
+
+    # Set system locale
+    export LANG='en_US.UTF-8'
+    export LANGUAGE='en_US:en'
+    export LC_ALL='en_US.UTF-8'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    # Set TigerVNC version
+    export TIGERVNC_MAJ='1'
+    export TIGERVNC_MIN='12'
+    export TIGERVNC_REV='0'
+    export TIGERVNC_VER="${TIGERVNC_MAJ}.${TIGERVNC_MIN}.${TIGERVNC_REV}"
+
+    # Install TigerVNC
+    apt-get -y install tigervnc-standalone-server
+
+    # Install Xfce and other supporting components
+    apt-get -y install xfce4
+    apt-get -y isntall xfce4-terminal
+    apt-get -y isntall xfce4-goodies
+    apt-get -y install xterm
+
+    # Store information about the container image build system
+    mkdir -p /opt/.nxis
+    cd /opt/.nxis
+    dmidecode > dmidecode.default
+    df -ahPT > df.default
+    fdisk --list > fdisk.default
+    lsblk --output-all > lsblk.default
+    lsblk --output-all --json > lsblk.json
+    lscpu --output-all > lscpu.default
+    lscpu --output-all --json > lscpu.json
+    lshw > lshw.default
+    lshw -json > lshw.json
+    lshw -short > lshw.short
+    lspci > lspci.default
+    lspci -vvv > lspci.verbose
+    free -h > free.default
+    cat /proc/meminfo > meminfo.default
+
+    # Cleanup
+    apt-get -y purge *screensaver*
+    apt-get -y autoremove --purge
+    apt-get -y clean
+    rm -rf /var/lib/apt/lists/*
+
+    # Update database for mlocate
+    updatedb
+
+%runscript
+
+%test
