@@ -1,0 +1,126 @@
+Bootstrap: oras
+From: ghcr.io/mkandes/ubuntu:22.04-amd64
+
+%labels
+
+    org.opencontainers.image.ref.name ghcr.io/mkandes/miniforge:py312-25.9-ubuntu-22.04-amd64
+
+    org.opencontainers.image.base.name ghcr.io/mkandes/ubuntu:22.04-amd64
+    org.opencontainers.image.base.digest sha256:e169e07ef22d73e72e8926c84fc2f52a06fbdcfe1abe1aafede257bbe1c3013c
+
+    org.opencontainers.image.title miniforge
+    org.opencontainers.image.description Miniforge is the preferred conda-forge installer and includes conda, mamba, and their dependencies
+    org.opencontainers.image.url https://conda-forge.org
+    org.opencontainers.image.documentation https://conda-forge.org/docs
+    org.opencontainers.image.source https://github.com/conda-forge/miniforge/releases/download/25.9.1-0/Miniforge3-25.9.1-0-Linux-x86_64.sh
+    org.opencontainers.image.vendor https://conda-forge.org
+    org.opencontainers.image.licenses BSD-3-Clause (https://github.com/conda-forge/miniforge/blob/main/LICENSE)
+    org.opencontainers.image.version 25.9.1-0
+    org.opencontainers.image.revision ef53e3e07a95371d8024c7eccc762d24f6f7d3fe
+
+    org.opencontainers.image.authors Marty Kandes (mkandes@sdsc.edu)
+
+%setup
+
+%files
+
+%environment
+
+    # Set conda version(s), operating system, and system architecture
+    export CONDA_PYTHON_VER='py312'
+    export CONDA_MAJ='25'
+    export CONDA_MIN='9'
+    export CONDA_REV='1-0'
+    export CONDA_VER="${CONDA_MAJ}.${CONDA_MIN}.${CONDA_REV}"
+    export CONDA_OS='Linux'
+    export CONDA_ARCH='x86_64'
+    export CONDA_DISTRO="Miniforge3-${CONDA_VER}-${CONDA_OS}-${CONDA_ARCH}"
+    export CONDA_SHA256='07f64c1d908ae036e9f6a81f97704899311c0ae677d83980d664b9781d4cc5fc'
+
+    # Set paths to conda binaries and libraries
+    export PATH="/opt/${CONDA_DISTRO}/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/${CONDA_DISTRO}/lib:${LD_LIBRARY_PATH}"
+
+%post -c /bin/bash
+
+    # Set operating system mirror URL
+    export MIRRORURL='http://us.archive.ubuntu.com/ubuntu'
+
+    # Set operating system version
+    export OSVERSION='jammy'
+
+    # Set system architecture
+    export ARCH='amd64'
+
+    # Set system locale
+    export LC_ALL='C'
+
+    # Set debian frontend interface
+    export DEBIAN_FRONTEND='noninteractive'
+
+    # Upgrade all software packages to their latest versions
+    apt-get -y update && apt-get -y upgrade
+
+    # Set conda version(s), operating system, and system architecture
+    export CONDA_PYTHON_VER='py312'
+    export CONDA_MAJ='25'
+    export CONDA_MIN='9'
+    export CONDA_REV='1-0'
+    export CONDA_VER="${CONDA_MAJ}.${CONDA_MIN}.${CONDA_REV}"
+    export CONDA_OS='Linux'
+    export CONDA_ARCH='x86_64'
+    export CONDA_DISTRO="Miniforge3-${CONDA_VER}-${CONDA_OS}-${CONDA_ARCH}"
+    export CONDA_SHA256='07f64c1d908ae036e9f6a81f97704899311c0ae677d83980d664b9781d4cc5fc'
+
+    cd /tmp
+
+    # Download and install conda
+    wget "https://github.com/conda-forge/miniforge/releases/download/${CONDA_VER}/${CONDA_DISTRO}.sh"
+    chmod +x "${CONDA_DISTRO}.sh"
+    "./${CONDA_DISTRO}.sh" -b -p "/opt/${CONDA_DISTRO}"
+
+    # Set paths to conda binaries and libraries
+    export PATH="/opt/${CONDA_DISTRO}/bin:${PATH}"
+    export LD_LIBRARY_PATH="/opt/${CONDA_DISTRO}/lib:${LD_LIBRARY_PATH}"
+
+    # Install common python packages
+    conda install -y conda-lock
+    conda install -y numpy
+    conda install -y pandas
+    conda install -y scipy
+    conda install -y scikit-learn
+    conda install -y matplotlib
+    conda install -y jupyterlab
+
+    # Remove conda installer script
+    rm "${CONDA_DISTRO}.sh"
+
+    # Store information about the container image build system
+    mkdir -p /opt/.nxis
+    cd /opt/.nxis
+    dmidecode > dmidecode.default
+    df -ahPT > df.default
+    fdisk --list > fdisk.default
+    lsblk --output-all > lsblk.default
+    lsblk --output-all --json > lsblk.json
+    lscpu --output-all > lscpu.default
+    lscpu --output-all --json > lscpu.json
+    lshw > lshw.default
+    lshw -json > lshw.json
+    lshw -short > lshw.short
+    lspci > lspci.default
+    lspci -vvv > lspci.verbose
+    free -h > free.default
+    cat /proc/meminfo > meminfo.default
+
+    # Cleanup
+    apt-get -y autoremove --purge
+    apt-get -y clean
+    rm -rf /var/lib/apt/lists/*
+
+    # Update database for plocate
+    updatedb
+
+%runscript
+
+%test
